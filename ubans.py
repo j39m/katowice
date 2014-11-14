@@ -1,4 +1,4 @@
-#! /usr/bin/python
+#! /usr/bin/env python
 
 ### USAGE: python -i <thisfilename> 
 # then do "ubans ('someword')" 
@@ -25,5 +25,6 @@ def nubas( remaining, currword = "" ):
       i += 1
   return 
 
+# this is the important function. 
 def ubans( scrambleme ) :
   return nubas(setarr(scrambleme))
