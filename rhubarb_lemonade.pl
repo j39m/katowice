@@ -29,6 +29,7 @@ open my $file, "<", $ARGV[0]
   or die "Couldn't open file \"$ARGV[0]\"\n"; 
 
 while (my $line = <$file>) { 
+  chomp($line); 
   my @wordtokens = split / |\.|,|\{|\}|\(|\)|\:|\;/, $line;
   if (defined $wordtokens[0]) { # if line has words
     for my $word (@wordtokens) { # for each word in the line
