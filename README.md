@@ -2,6 +2,10 @@
 
 ... is a potpourri of projects I cobble together in my spare time. They have no coherence, no point, no taste. What else could they be for but to stroke my ego? 
 
+## rhubarb_lemonade 
+
+... is a Perl script that counts word frequency in my quantum computing term paper. It takes one mandatory and one optional argument; a file and a discard threshold on frequency, respectively. So, for example, invoking `./rhubarb_lemonade klaus 5` tells you how often each word in the file `klaus` appears, sorted in descending numerical frequency. All words that appear five or fewer times in `klaus` are left out of the accounting. 
+
 ## ubans 
 
 ... is a Python script that permutes words. Specifically, running 
