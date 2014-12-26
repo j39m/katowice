@@ -2,6 +2,10 @@
 
 ... is a potpourri of projects I cobble together in my spare time. They have no coherence, no point, no taste. What else could they be for but to stroke my ego? 
 
+## raspberry_meatballs
+
+... is a Perl script that looks for the absence of "cover" files in my Music directory. It does not perform a serious recursive traversal: it goes exactly one level down into the subdirectories (of argument 1) and no further, looking for the absence of a file (specified by argument 2). My use is for seeking out albums in which I once encoded the album art into the FLAC files directly, which is behavior I now wish to revers. 
+
 ## rhubarb_lemonade 
 
 ... is a Perl script that counts word frequency in my quantum computing term paper. It takes one mandatory and one optional argument; a file and a discard threshold on frequency, respectively. So, for example, invoking `./rhubarb_lemonade klaus 5` tells you how often each word in the file `klaus` appears, sorted in descending numerical frequency. All words that appear five or fewer times in `klaus` are left out of the accounting. 
