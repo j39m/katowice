@@ -6,9 +6,17 @@
 use strict; 
 use warnings; 
 
-if (@ARGV != 1) { 
+if (@ARGV < 1) { 
   print "usage: xtr.pl <input file>\n" and exit 1; 
 
+} 
+
+# work with extensions
+my $extension = ""; 
+if (defined $ARGV[1]) { 
+  $extension = $ARGV[1]; 
+} else { 
+  $extension = "jpg"
 } 
 
 # else proceed to parse webpage. 
@@ -24,14 +32,14 @@ while (my $line = <$oz>) {
   # multiple capture groups, eurgh
 
   foreach (@stuff) { 
-    if ($_ =~ m/(http:\/\/[^ ]+\.jpg)/) { 
+    if ($_ =~ m/(http:\/\/[^ ]+\.$extension)/) { 
       # preserve read-only value
       my $tama = $1; 
       # "&amp;" = "&"
       $tama =~ s/&amp;/&/g; 
       # GET
       print "getting $tama\n"; 
-      system("curl -s -o hahahohohehe_-_$counter.jpg '$tama'"); 
+      system("curl -s -o hahahohohehe_-_$counter.$extension '$tama'"); 
       $counter++; 
     } 
   } 
