@@ -2,6 +2,9 @@
 
 ... is a potpourri of projects I cobble together in my spare time. They have no coherence, no point, no taste. What else could they be for but to stroke my ego? 
 
+## peanut_airstrip
+... is a Perl script that tries to extract JPEG images from very certain webpages. This is a one-off script that I threw together in a hurry, it's not meant to be flexible. 
+
 ## raspberry_meatballs
 
 ... is a Perl script that looks for the absence of "cover" files in my Music directory. It does not perform a serious recursive traversal: it goes exactly one level down into the subdirectories (of argument 1) and no further, looking for the absence of a file (specified by argument 2). My use is for seeking out albums in which I once encoded the album art into the FLAC files directly, which is behavior I now wish to revers. 
