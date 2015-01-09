@@ -2,12 +2,11 @@
 
 # grape_chair.py solves Layton puzzle 95. Oh my god. 
 # 
-# Deng 2015 provided a solution in three minutes through 
-# intuition: the median value, 5, should be placed in the 
-# center, and then observing a "pinching" of sorts would 
-# then place corresponding pairs summing to 10 in a ring
-# around the five; the values across every line then sum to 
-# 15 all around. 
+# My dyslexic girlfriend provided a solution in three minutes 
+# through intuition: the median value, 5, should be placed in the 
+# center, and then observing a "pinching" of sorts would then 
+# place corresponding pairs summing to 10 in a ring around the 
+# five; the values across every line then sum to 15 all around. 
 
 def first (A, B): 
   return 2 + A + B
