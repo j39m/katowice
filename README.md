@@ -2,6 +2,9 @@
 
 ... is a potpourri of projects I cobble together in my spare time. They have no coherence, no point, no taste. What else could they be for but to stroke my ego? 
 
+## grape_chair 
+... is a Python script that solves Puzzle no. 95 from "Professor Layton and the Curious Village." Of the 720 possible answers this script proves that the solution is unique. For the effort that went into this script the result is unfortunately not impressive, given that Deng 2015 solved the puzzle in two-ish minutes by intuition. 
+
 ## peanut_airstrip
 ... is a Perl script that tries to extract JPEG images from very certain webpages. This is a one-off script that I threw together in a hurry, it's not meant to be flexible. 
 
