@@ -2,6 +2,9 @@
 
 ... is a potpourri of projects I cobble together in my spare time. They have no coherence, no point, no taste. What else could they be for but to stroke my ego? 
 
+## orange_curtain
+... is a Python script that solves Puzzle no. 100 from "Professor Layton and the Curious Village." It (currently) unwisely iterates across all 28! (there isn't an SI prefix to ballpark this, I'm afraid) possible solutions to determine which one is valid. 
+
 ## grape_chair 
 ... is a Python script that solves Puzzle no. 95 from "Professor Layton and the Curious Village." Of the 720 possible answers this script proves that the solution is unique. For the effort that went into this script the result is unfortunately not impressive, given that Deng 2015 solved the puzzle in two-ish minutes by intuition. 
 
