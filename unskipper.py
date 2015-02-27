@@ -24,11 +24,16 @@ def backup_library():
   import shutil
 
   path_to_bkup =  os.getenv('HOME') + "/.quodlibet/unpruned_songs"
+  try: 
+    open(path_to_bkup, 'r')
+  except IOError: 
+    shutil.copy(path_to_songs, path_to_bkup) 
+    print ("Current library state copied to %s" % path_to_bkup) 
+    return True 
 
-  shutil.copy(path_to_songs, path_to_bkup) 
-  print ("Current library state copied to %s" % path_to_bkup) 
-
-  return 
+  print ("Couldn't backup current library state. Aborting.") 
+  print ("Please remove '%s' before trying again." % path_to_bkup) 
+  return False 
 
 
 # weed out skipcounts wherever they may be
@@ -67,7 +72,8 @@ def main():
     return 1 
 
   # try not to mess everything up. keep a backup, just in case. 
-  backup_library() 
+  if ( not backup_library() ): 
+    return 1 
 
   # mutate the songs pickle. 
   ret = prune_skips(songs) 
