@@ -2,6 +2,9 @@
 
 ... is a potpourri of projects I cobble together in my spare time. They have no coherence, no point, no taste. What else could they be for but to stroke my ego? 
 
+## sorts 
+... is practice writing Scala. I've implemented some basic things (at time of writing, Mergesort and Quicksort) and will add more as time goes on. 
+
 ## unskipper 
 ... is a Python script that prunes skipcounts from your Quod Libet library. It's a selfish tic of mine that I don't like seeing nonzero skipcounts on my songs because usually they happen by accident, and of course increase proportionally with the number of times I listen to a song (probably nonlinearly). It'll zero out all skipcounts in your library by popping the associated key from the dictionaries in your library and write the results back to disk. 
 
