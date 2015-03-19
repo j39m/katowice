@@ -5,6 +5,16 @@
 # be interpreted by QL as being skipcount 0. 
 
 
+import os, sys 
+try: 
+  import pickle 
+except ImportError: 
+  print ("Error importing pickle! Make sure you have the Python pickle module.")
+  sys.exit(1) 
+
+path_to_songs = os.getenv('HOME') + "/.quodlibet/songs"
+
+
 # load the pickled library. returns the songs pickle if it can find it, 
 # None if it cannot. 
 def load_library(): 
@@ -83,15 +93,6 @@ def main():
 
 ##### EXECUTION BEGINS HEEEERREEEEE #####
 
-import os, sys 
-try: 
-  import pickle 
-except ImportError: 
-  print ("Error importing pickle! Make sure you have the Python pickle module.")
-  sys.exit(1) 
-
-path_to_songs = os.getenv('HOME') + "/.quodlibet/songs"
-
-ret = main()
-
-sys.exit(ret) 
+if (__name__ == "__main__"): 
+  ret = main()
+  sys.exit(ret) 

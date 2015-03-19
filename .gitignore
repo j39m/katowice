@@ -1,4 +1,6 @@
 *.class
+*.pyc
+
 nui.json
 onion_kalepus
 satsuki
