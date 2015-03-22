@@ -1,19 +1,20 @@
 import scala.util.Random
+import scala.collection.mutable.MutableList
 
 object ManySorts { 
 
-
   // main function, where any sort can be deployed. 
   def main (args: Array[String]) { 
-    val klaus : Vector[Int] = random_int_vector(int_lim=104); 
+    val klaus : Vector[Int] = random_int_vector(26, int_lim=104); 
     println("Initially we have: \n" + klaus); 
     val tama : Vector[Int] = MergeSort.mergesort(klaus); 
     println("Then we mergesort to get: \n" + tama); 
     val qtama : Vector[Int] = QuickSort.quicksort(klaus); 
     println("Then we quicksort to get: \n" + qtama); 
+    val btama : Vector[Int] = BubbleSort.bubble_sort(klaus); 
+    println("Also, bubble sort comes out: \n" + btama); 
     return; 
   } 
-
 
   // generator for random lists of numbers 
   def random_int_vector (length_lim: Int = 52, int_lim: Int = Int.MaxValue): Vector[Int] = { 
@@ -26,13 +27,48 @@ object ManySorts {
     return vector; 
   } 
 
+} 
+
+
+object BubbleSort { 
+
+  // vector to MutableList converter
+  def v_to_ml (convert: Vector[Int]): MutableList[Int] = { 
+    var retval = new MutableList[Int](); 
+    for (i : Int <- convert) { 
+      retval += i; 
+    } 
+    return retval; 
+  } 
+
+  def bubble_sort (sortee: Vector[Int]): Vector[Int] = { 
+    if (sortee.length <= 1) { 
+      return sortee; 
+    } 
+    var local_list : MutableList[Int] = v_to_ml(sortee); 
+    var had_to_swap = true; 
+    while (had_to_swap) { 
+      had_to_swap = false; 
+      var i = 0; 
+      var j = 1; 
+      while(j<local_list.length) { 
+        if (local_list(i) > local_list(j)) { 
+          var tmp = local_list(i); 
+          local_list(i) = local_list(j); 
+          local_list(j) = tmp; 
+          had_to_swap = true; 
+        } 
+        i += 1; 
+        j += 1; 
+      } 
+    } 
+    return local_list.toVector; 
+  } 
 
 } 
 
 
-
 object MergeSort { 
-
 
   def mergesort_merge (listI: Vector[Int], listII: Vector[Int]): Vector[Int] = { 
 
@@ -64,7 +100,6 @@ object MergeSort {
     return merged; 
   } 
 
-
   def mergesort (sortee: Vector[Int]): Vector[Int] = { 
 
     if (sortee.length <= 1) { 
@@ -94,14 +129,11 @@ object MergeSort {
 
   } 
 
-
 } 
-
 
 
 object QuickSort { 
 
-  
   def quicksort (sortee: Vector[Int]): Vector[Int] = { 
 
     if (sortee.length <= 1) { 
@@ -132,6 +164,5 @@ object QuickSort {
     return quicksort(leftside) ++ Vector(pivot) ++ quicksort(rightside); 
 
   } 
-
 
 } 
