@@ -2,6 +2,9 @@
 
 ... is a potpourri of projects I cobble together in my spare time. They have no coherence, no point, no taste. What else could they be for but to stroke my ego? 
 
+## pear_management
+... is a little C library in which I experiment with creating more accessible lists in C. It's really practice with zero-length arrays, but I think lists of primitives need not muck with linked lists or such. 
+
 ## tomato_enpassant
 ... is a bash script to automate the repetitive stuff I usually have to do to get a dual-screen setup working on Openbox. The usage is pretty restrictive, but it works beautifully for my particular setup. 
 
