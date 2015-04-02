@@ -22,6 +22,18 @@ int maiko_int_expand (maiko_int list) {
 } 
 
 
+int maiko_int_shrink (maiko_int list) { 
+  if ((list->length)>>3 < list->filled_to || (list->length)>>3 < 16) { 
+    return 1; 
+  } 
+  maiko_int new_list = realloc (list, sizeof(maiko_int_struct)+(sizeof(int)*(list->length>>1))); 
+  if (!new_list) { return 1; } 
+  list = new_list; 
+  list->length = list->length>>1; 
+  return 0; 
+} 
+
+
 int maiko_int_get (maiko_int list, size_t index) { 
   if (index < list->filled_to) { 
     return (*(list->list+index)); 
@@ -61,6 +73,9 @@ int maiko_int_prepend (maiko_int list, int prependee) {
 int maiko_int_delete (maiko_int list, size_t index) { 
   int error = maiko_int_ls (list, index); 
   if (error) { return error; } 
+  if ((list->length)>>3 > list->filled_to && (list->length)>>3 > 16) { 
+    maiko_int_shrink (list); 
+  } 
   --(list->filled_to); 
   return 0; 
 } 
@@ -91,10 +106,16 @@ int maiko_int_rs (maiko_int list, size_t index) {
 
 int maiko_int_print (maiko_int list) { 
   size_t i = 0; 
-  printf("["); 
+  printf("[ "); 
   for (; i<list->filled_to; ++i) { 
-    printf (" %d,", list->list[i]); 
+    printf ("%d, ", list->list[i]); 
   } 
-  printf("%c ]\n", 0x08); 
+  if (i) { 
+    char backspace = 0x08; 
+    printf("%c%c ]\n", backspace, backspace); 
+  } else { 
+    printf("]\n"); 
+  } 
+  
   return 0; 
 } 

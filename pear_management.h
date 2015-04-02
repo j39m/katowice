@@ -25,6 +25,12 @@ maiko_int maiko_int_init ();
 // returns zero on success, one otherwise. 
 int maiko_int_expand (maiko_int list); 
 
+// shrink a list - by default, halves its size when 
+// it's filled less than 1/8 of the way. lower bound
+// on shrinking is 16 elements. 
+// returns zero on success, one otherwise. 
+int maiko_int_shrink (maiko_int list); 
+
 // safely fetches an item from a list. 
 // returns zero on invalid indices, else it returns
 // the requested integer. 
