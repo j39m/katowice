@@ -53,6 +53,11 @@ int maiko_int_prepend (maiko_int list, int prependee);
 // returns zero on success, one otherwise. 
 int maiko_int_delete (maiko_int list, size_t index); 
 
+// deletes an item off the end of the list. 
+// returns the item (int) on success, zero otherwise. 
+// TODO: raise red flag on unsuccessful pop. 
+int maiko_int_pop (maiko_int list); 
+
 // given an index, shifts everything after that once 
 // leftward. called internally by maiko_int_delete to
 // close the gap left by a deleted value. 

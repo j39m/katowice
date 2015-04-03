@@ -81,6 +81,15 @@ int maiko_int_delete (maiko_int list, size_t index) {
 } 
 
 
+int maiko_int_pop (maiko_int list) { 
+  if (list->filled_to > 0) { 
+    --(list->filled_to); 
+    return list->list[list->filled_to]; 
+  } 
+  return 1; 
+} 
+
+
 int maiko_int_ls (maiko_int list, size_t index) { 
   if (index >= list->filled_to) { return 1; } 
   size_t i = index; 
