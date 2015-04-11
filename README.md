@@ -2,6 +2,9 @@
 
 ... is a potpourri of projects I cobble together in my spare time. They have no coherence, no point, no taste. What else could they be for but to stroke my ego? 
 
+## guava_gundam 
+... is a bash script that performs the extremely hacky way of adjusting my screen brightness, by parsing in the current value (via ACPI), doing janky arithmetic with it, and writing it back. 
+
 ## pear_management
 ... is a little C library in which I experiment with creating more accessible lists in C. It's really practice with zero-length arrays, but I think lists of primitives need not muck with linked lists or such. 
 
