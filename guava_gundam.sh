@@ -7,7 +7,7 @@
 brightness_file="/sys/devices/pci0000:00/0000:00:02.0/drm/card0/card0-LVDS-1/intel_backlight/brightness"; 
 max_brightness_file="/sys/devices/pci0000:00/0000:00:02.0/drm/card0/card0-LVDS-1/intel_backlight/max_brightness"; 
 brightness_direction=${1-increase} ; 
-brightness_increment=${2-65} ;
+brightness_increment=${2-52} ;
 brightness_current=$(cat "$brightness_file"); 
 brightness_max=$(cat "$max_brightness_file"); 
 
