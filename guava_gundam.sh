@@ -20,10 +20,10 @@ fi
 
 # apply sanity check on new value 
 while [ $brightness_new -lt 0 ]; do 
-  ((brightness_new++)); 
+  brightness_new=0; 
 done 
 while [ $brightness_new -gt "$brightness_max" ]; do 
-  ((brightness_new--)); 
+  brightness_new=brightness_max; 
 done 
 
 # write new value 
