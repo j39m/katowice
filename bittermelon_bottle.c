@@ -8,15 +8,27 @@
 void _bb_sanity (FILE *); 
 void _bb_reset (FILE *); 
 char * bb_read_metadata_block_header (FILE *); 
+int bb_sanity (FILE *); 
 int bb_is_last_mbh (char *); 
 int bb_block_type (char *); 
 int bb_block_length (char *); 
+int bb_block_is_comment (char *); 
 
 
-int main () { 
+int main (int argc, char **argv) { 
 
-  char test_name[] = "./test.flac"; 
-  FILE *file = fopen (test_name, "r"); 
+  char *infile; 
+  if (argc > 1) { 
+    infile = argv[1]; 
+  } else { 
+    infile = "./test.flac"; 
+  } 
+
+  FILE *file = fopen (infile, "r"); 
+  if (bb_sanity(file)) { 
+    fprintf (stderr, "bb_sanity() failed!\n"); 
+    return 1; 
+  } 
 
   _bb_sanity (file); 
   _bb_reset (file); 
@@ -105,3 +117,24 @@ void _bb_sanity (FILE *file) {
   return; 
 } 
 
+
+// the normal sanity test on input files. does stuff
+// returns 0 if all good, nonzero otherwise 
+int bb_sanity (FILE *file) { 
+  int err; 
+
+  if (!file) { 
+    return 1; 
+  } 
+
+  char header[5]; 
+  memset ((void *) header, 0, 5); 
+  fread ((void *) header, sizeof(char), 4, file); 
+  err = strcmp (header, "fLaC"); 
+  if (err) { 
+    return 1; 
+  } 
+  
+  fseek (file, 0, SEEK_SET); 
+  return 0; 
+} 
