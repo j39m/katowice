@@ -2,6 +2,9 @@
 
 ... is a potpourri of projects I cobble together in my spare time. They have no coherence, no point, no taste. What else could they be for but to stroke my ego? 
 
+## peredditor
+... is a program written in Perl that brings Reddit to your console. It relies on a number of external utilities like curl and echo and probably less (pager tbd?). R&D is ongoing. 
+
 ## bittermelon\_bottle
 ... is a little C library to practice applied I/O with FLAC files. It attempts to emulate some aspects of metaflac for my own purposes; eventually, the goal will be to expand it into a full-featured metadata parser that will dump metadata information to a file for use in other applications. 
 
