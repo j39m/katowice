@@ -12,6 +12,9 @@ my $depth_control = 13;
 my %global_hash; 
 
 my $wd = "/home/kalvin/Downloads/ksm/MMM/"; 
+if (scalar(@ARGV)) {
+  ($wd) = @ARGV;
+}
 chdir ($wd) 
   or die "Couldn't change directory: $wd\n"; 
 
@@ -20,8 +23,7 @@ traverse($wd, 0);
 
 sub traverse { # (directory, depth) 
 
-  my $dname = shift; 
-  my $depth = shift; 
+  my ($dname, $depth) = @_;
   my @dirs; 
 
   if ($depth > $depth_control) { 
@@ -29,7 +31,7 @@ sub traverse { # (directory, depth)
   } 
 
   opendir (my $dh_, $dname)
-    or print STDERR "Couldn't open directory: $dname\n"; 
+    or die "Couldn't open directory: $dname\n"; 
 
   for my $file (readdir ($dh_)) { 
     if ($file eq "." or $file eq "..") { 
