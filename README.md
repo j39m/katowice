@@ -2,6 +2,9 @@
 
 ... is a potpourri of projects I cobble together in my spare time. They have no coherence, no point, no taste. What else could they be for but to stroke my ego? 
 
+## beans\_refried:
+... is a Python script to reflow text files of unbroken lines for more comfortable reading. Feed it a file (or "-" for stdin) and a maximum line length (the default is 78) and it'll reflow the result to fit. Not for use with the syntactically sensitive, e.g. LaTeX.
+
 ## pickle\_sickle
 ... is a Python script to replace my constant nervous checking of `du -hs / | sort -h`. It will also ignore `/home`, `lost+found`, `/proc` by default so I don't have to do any bash magic. This is important because I am not interested in these contents (especially since `/home` is physically on a different hard disk). 
 
