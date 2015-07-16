@@ -51,12 +51,12 @@ def print_sizes(list_of_sizes):
     size = tup[1]
     if size > 1024*1024:
       size /= (1024*1024)
-      size = str("%.2f GB" % size)
+      size = str("%4.2f GB" % size)
     elif size > 1024:
       size /= 1024
-      size = str("%.2f MB" % size)
+      size = str("%4.2f MB" % size)
     else:
-      size = str("%.2f KB" % size)
+      size = str("%4.2f KB" % size)
     printable = str(print_fmt % (name, size))
     print(printable)
   return
