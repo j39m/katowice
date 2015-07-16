@@ -5,7 +5,11 @@
 # be interpreted by QL as being skipcount 0. 
 
 
-import os, sys 
+import os
+import os.path
+import sys
+import shutil
+
 try: 
   import pickle 
 except ImportError: 
@@ -18,9 +22,10 @@ path_to_songs = os.getenv('HOME') + "/.quodlibet/songs"
 # load the pickled library. returns the songs pickle if it can find it, 
 # None if it cannot. 
 def load_library(): 
-
   try: 
-    songs = pickle.load ( open ( path_to_songs, 'r' ) )
+    sfh = open(path_to_songs, 'r')
+    songs = pickle.load(sfh)
+    sfh.close()
   except IOError: 
     print ("Error loading songs pickle. Does '%s' exist?" % path_to_songs)
     return None 
@@ -31,19 +36,21 @@ def load_library():
 # in case we muck things up, have a backup on hand 
 def backup_library(): 
 
-  import shutil
-
   path_to_bkup =  os.getenv('HOME') + "/.quodlibet/unpruned_songs"
-  try: 
-    open(path_to_bkup, 'r')
-  except IOError: 
-    shutil.copy(path_to_songs, path_to_bkup) 
-    print ("Current library state copied to %s" % path_to_bkup) 
-    return True 
 
-  print ("Couldn't backup current library state. Aborting.") 
-  print ("Please remove '%s' before trying again." % path_to_bkup) 
-  return False 
+  if os.path.isfile(path_to_bkup):
+    print ("Couldn't backup current library state. Aborting.") 
+    print ("Please remove '%s' before trying again." % path_to_bkup) 
+    return False 
+
+  sfh = open(path_to_songs, "rb")
+  bfh = open(path_to_bkup, "wb")
+  shutil.copyfileobj(sfh, bfh)
+  sfh.close()
+  bfh.close()
+
+  print ("Current library state copied to %s" % path_to_bkup) 
+  return True 
 
 
 # weed out skipcounts wherever they may be
@@ -78,11 +85,11 @@ def main():
   # the library is just a list of dictionaries, one dict per song
   songs = load_library() 
 
-  if (songs is None): 
+  if songs is None: 
     return 1 
 
   # try not to mess everything up. keep a backup, just in case. 
-  if ( not backup_library() ): 
+  if not backup_library(): 
     return 1 
 
   # mutate the songs pickle. 
@@ -93,6 +100,6 @@ def main():
 
 ##### EXECUTION BEGINS HEEEERREEEEE #####
 
-if (__name__ == "__main__"): 
+if __name__ == "__main__": 
   ret = main()
   sys.exit(ret) 
