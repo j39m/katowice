@@ -2,6 +2,9 @@
 
 ... is a potpourri of projects I cobble together in my spare time. They have no coherence, no point, no taste. What else could they be for but to stroke my ego? 
 
+## soup\_alphabet:
+... is a Python script that proves that sorting strings by their "reflection" is NOT equivalent to sorting strings in reverse order. It IS equal when the strings are all of equal length, but the empty string is always less than any other string, which means that the complements of two non-equilength strings are NOT sorted the same as the strings sorted in reverse.
+
 ## beans\_refried:
 ... is a Python script to reflow text files of unbroken lines for more comfortable reading. Feed it a file (or "-" for stdin) and a maximum line length (the default is 78) and it'll reflow the result to fit. Not for use with the syntactically sensitive, e.g. LaTeX.
 
