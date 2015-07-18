@@ -57,7 +57,7 @@ class refried_beans:
         for line in self.reflow_file:
             line = line.rstrip()
             while line:
-                if len(line) < self.line_len:
+                if charcount >= len(line) or len(line) < self.line_len:
                     break
                 if line[charcount] in string.whitespace:
                     splitindex = charcount
