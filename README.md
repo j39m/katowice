@@ -2,6 +2,9 @@
 
 ... is a potpourri of projects I cobble together in my spare time. They have no coherence, no point, no taste. What else could they be for but to stroke my ego? 
 
+## blueberry\_decibel:
+... is a tiny Perl script that tells me how my volumes are currently set.
+
 ## soup\_alphabet:
 ... is a Python script that proves that sorting strings by their "reflection" is NOT equivalent to sorting strings in reverse order. It IS equal when the strings are all of equal length, but the empty string is always less than any other string, which means that the complements of two non-equilength strings are NOT sorted the same as the strings sorted in reverse.
 
