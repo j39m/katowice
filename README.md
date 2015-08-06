@@ -2,6 +2,9 @@
 
 ... is a potpourri of projects I cobble together in my spare time. They have no coherence, no point, no taste. What else could they be for but to stroke my ego? 
 
+## nanisore:
+... is a finally formally cast Perl script that gives you quick snapshots into your processes depending on the name of the script (hint: symlinking it to the appropriate names). It used to live as a set of clunky bash aliases that eventually outgrew themselves and forced their way into this.
+
 ## blueberry\_decibel:
 ... is a tiny Perl script that tells me how my volumes are currently set. Note to self: this is usually placed in `/usr/local/bin/howloud`.
 
