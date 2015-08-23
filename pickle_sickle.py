@@ -45,7 +45,7 @@ def print_sizes(list_of_sizes):
   for tup in list_of_sizes:
     if len(tup[0]) > print_magic:
       print_magic = len(tup[0])
-  print_fmt = "%" + str(print_magic) + "s%26s"
+  print_fmt = "%-" + str(print_magic) + "s%26s"
   for tup in list_of_sizes:
     name = tup[0]
     size = tup[1]
