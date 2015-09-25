@@ -40,47 +40,72 @@ class ProbabilisticFailure:
     simulates probablistic failure of a linear network
     """
 
-    def __init__(self, P=.78, N=78, K=13, TEST_TIMES=1300):
+    def __init__(self, P=.78, N=78, K=13, TEST_TIMES=5200):
         self.P = P      # probability of failure
         self.N = N      # number of hops
         self.K = K      # number of retries in event of failure
         self.TEST_TIMES = TEST_TIMES # number of tests to run over a lot of hops
 
-    def single_hop(self):
-        retries = self.K
-        while retries:
+    def single_hop(self, mode):
+        i = self.K
+        while i:
+            i -= 1
             result = random.random()
             if result > self.P:
                 return True
-            retries -= 1
+            else:
+                if mode == "hard":
+                    break
         return False
 
-    def many_hops(self):
+    def many_hops(self, mode):
         hops = self.N
         while hops:
-            if not self.single_hop():
-                return False
             hops -= 1
+            if not self.single_hop(mode):
+                return False
         return True
 
-    def many_trials(self):
+    def many_trials(self, mode):
         trials = self.TEST_TIMES
         failures = 0
         successes = 0
+        outcome = None
         while trials:
-            if self.many_hops():
+            if mode == "hard":
+                retries = self.K
+                while retries:
+                    outcome = self.many_hops(mode)
+                    if outcome:
+                        break
+                    retries -= 1
+            elif mode == "simple":
+                outcome = self.many_hops(mode)
+            if outcome:
                 successes += 1
             else:
                 failures += 1
             trials -= 1
         return (successes, failures)
 
-    def diagnose(self):
-        (successes, failures) = self.many_trials()
-        expected = (1-(self.P**(self.K)))**self.N
+    def diagnose(self, mode):
+        (successes, failures) = self.many_trials(mode)
+        if mode == "simple":
+            expected = (1-(self.P**(self.K)))**self.N
+        elif mode == "hard":
+            expected = 1 - (1 - (1-self.P)**self.N)**self.K
+        else:
+            expected = -1
+        inits = str("P = %f, N = %d, K = %d; %d trials - "
+                    % (self.P, self.N, self.K, self.TEST_TIMES))
         msg = str("expected %03f, got %03f"
                   % (expected, successes/self.TEST_TIMES))
-        print(msg)
+        print(str("%s%s" % (inits, msg)))
 
-klaus = ProbabilisticFailure(.65)
-klaus.diagnose()
+
+if __name__ == "__main__":
+    for _ in range(13):
+        local_p = random.random()
+        #local_p = .26
+        klaus = ProbabilisticFailure(local_p, 5, 8)
+        klaus.diagnose("hard")
