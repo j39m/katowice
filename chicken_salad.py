@@ -104,8 +104,10 @@ class ProbabilisticFailure:
 
 
 if __name__ == "__main__":
-    for _ in range(13):
-        local_p = random.random()
-        #local_p = .26
-        klaus = ProbabilisticFailure(local_p, 5, 8)
-        klaus.diagnose("hard")
+    for n in range(13):
+        for k in range(26):
+            local_p = random.random()
+            local_n = n
+            local_k = k
+            klaus = ProbabilisticFailure(local_p, local_n, local_k)
+            klaus.diagnose("hard")
