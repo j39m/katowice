@@ -37,7 +37,29 @@ def sat(filename):
 
 class ProbabilisticFailure:
     """
-    simulates probablistic failure of a linear network
+    simulates probablistic failure of a linear network. That is,
+
+    [ SIMPLE FORMULATION ]
+    Given some linear network
+    A -- B -- C -- D -- E -- F -- G [snip]
+    with N links, each with identical bandwidth, propagation delay,
+    and probability of dropping the packet being transmitted (!!),
+    find the probability of a packet making it to the end of the line.
+    Each waystation attempts k retransmissions in case of link failure.
+
+    [ HARD FORMULATION ]
+    Given the same conditions as above, cut out each individual link's
+    ability to re-transmit; treat each link failure as a total line failure
+    and have A re-transmit the packet from the start. A is allowed
+    k re-transmissions in total, and failures can happen at any link.
+
+    Note that every link is omniscient about the packet state; X is not
+    made aware of a link failure by failing to receive a Y ACK - rather,
+    it "just knows" (for the sake of this problem) when the packet doesn't
+    go through. Similarly, for the hard formulation, A link failure between
+    P and Q doesn't propagate all the way back to A by a shaky series of
+    error packets. A will "just know" when any link fails. The code is
+    written to reflect this.
     """
 
     def __init__(self, P=.78, N=78, K=13, TEST_TIMES=5200):
