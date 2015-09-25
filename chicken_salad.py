@@ -53,9 +53,8 @@ class ProbabilisticFailure:
             result = random.random()
             if result > self.P:
                 return True
-            else:
-                if mode == "hard":
-                    break
+            elif mode == "hard":
+                break
         return False
 
     def many_hops(self, mode):
@@ -103,11 +102,14 @@ class ProbabilisticFailure:
         print(str("%s%s" % (inits, msg)))
 
 
-if __name__ == "__main__":
-    for n in range(13):
-        for k in range(26):
+def test_PF():
+    for n in range(5):
+        for k in range(13):
             local_p = random.random()
             local_n = n
             local_k = k
             klaus = ProbabilisticFailure(local_p, local_n, local_k)
             klaus.diagnose("hard")
+
+if __name__ == "__main__":
+    test_PF()
