@@ -21,21 +21,19 @@ class refried_beans:
     def __init__(self, args):
 
         self.name = "beans_refried.py"
+        self.reflow_file = None
 
         if not args:
             self.snark("Assuming stdin for reflow. Start inputing.")
             self.reflow_file = sys.stdin
         else:
-            self.reflow_file = None
-            if not os.path.exists(args[0]):
-                if args[0] == "-":
-                    self.reflow_file = sys.stdin
-                else:
-                    self.snark("Couldn't find file `%s!'" % args[0])
-            try:
-                self.reflow_file = open(args[0], "r")
-            except IOError:
-                self.snark("Couldn't open file `%s!'" % args[0])
+            if args[0] == "-":
+                self.reflow_file = sys.stdin
+            else:
+                try:
+                    self.reflow_file = open(args[0], "r")
+                except IOError:
+                    self.snark("Couldn't open file `%s!'" % args[0])
 
         self.line_len = 78
         if len(args) > 1:
@@ -70,6 +68,7 @@ class refried_beans:
                         splitindex = 0
                 charcount += 1
             print(line)
+        return 0
 
 
     def snark(self, errstr):
