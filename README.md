@@ -71,4 +71,4 @@ prints out all the permutations of the word argument. The print statements are a
 
 ## chicken\_salad
 
-... is a Python script that does a number of little things for which I need infrequently and don't want to continuously consult WolframAlpha about. An example is the `expm()` function, which performs modular exponentiation based on its arguments `base, exponent, modulo`. 
+... is a Python script that does a number of little things for which I need infrequently and don't want to continuously consult WolframAlpha about. An example is the `expm()` function, which performs modular exponentiation based on its arguments `base, exponent, modulo`. It additionally simulates a linear probabilistic network (for a homework I had to do).
