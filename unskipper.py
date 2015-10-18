@@ -79,6 +79,29 @@ def prune_skips(song_pickle):
   return 0 
 
 
+def query_library_by_tag(lib, val, tag="artist", corr="~#playcount", rkey="title"):
+    """
+    query the library "lib" by the tag "tag," searching for entries with tag
+    value "val."
+    returns a dictionary of the results.
+    """
+
+    retv = {}
+    for song in lib:
+        if tag in song and val in song[tag] and corr in song:
+            try:
+                lkey = song[rkey]
+            except KeyError:
+                lkey = None
+            if lkey in retv:
+                if not isinstance(retv[lkey], list):
+                    retv[lkey] = [retv[lkey],]
+                retv[lkey].append(song[corr])
+            else:
+                retv[lkey] = song[corr]
+
+    return retv
+
 # the main routine 
 def main(): 
   
