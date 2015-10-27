@@ -26,7 +26,7 @@ class TaquitoReader(object):
     def __init__(self, penance):
         self.infile = open(penance, "r")
         self.start_re = re.compile(r'^\s*/\*\s+PENANCE\s+\*/.*$')
-        self.end_re = re.compile(r'^\s*/*[^*]*\*/.*$')
+        self.end_re = re.compile(r'^\s*/\*[^*]*\*/.*$')
         self.comment_re = re.compile(r'^\s*#.*$')
         self.curr_state = 0     # 0: search for header
                                 # 1: iterate through data
@@ -36,6 +36,11 @@ class TaquitoReader(object):
         return self
 
     def next(self):
+        """
+        Reads the input file until it gets to the /* PENANCE */ section, then
+        begins returning data lines until it hits a new section or the end of
+        the file.
+        """
 
         inload = self.infile.readline()
         while inload and not self.curr_state:
@@ -43,9 +48,11 @@ class TaquitoReader(object):
                 self.curr_state += 1
             inload = self.infile.readline()
 
-        inload = self.infile.readline()
         while inload and self.curr_state == 1:
             stripped = inload.strip()
+            if self.end_re.search(stripped):
+                self.curr_state += 1
+                break
             if (self.comment_re.search(stripped)
                     or not stripped):
                 inload = self.infile.readline()
@@ -67,9 +74,23 @@ class TaquitoPenance(object):
         else:
             self.penance = TaquitoReader(penance)
 
+    def parse(self, line):
+        """
+        Parses a single data entry from the penance file.
+        """
+
+        splitted_and_stripped = [x.strip() for x in line.split(",", 4)]
+        (date, delta, total, comment) = splitted_and_stripped
+
+        date = datetime.date(*[int(x) for x in date.split(".")])
+        total = float(total)
+
+        return (date, delta, total, comment)
+
     def run(self):
+
         for line in self.penance:
-            print(line)
+            (date, delta, total, comment) = self.parse(line)
 
 
 if __name__ == "__main__":
