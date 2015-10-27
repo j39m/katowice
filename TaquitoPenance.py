@@ -92,7 +92,7 @@ class TaquitoPenance(object):
         (date, delta, total, comment) = splitted_and_stripped
 
         date = datetime.date(*[int(x) for x in date.split(".")])
-        total = float(total)
+        (delta, total) = (float(delta), float(total))
 
         return (date, delta, total, comment)
 
@@ -107,6 +107,7 @@ class TaquitoPenance(object):
         y_axis = []
         annotations = []
         running_time = 0
+        running_penance = float(0)
 
         for line in self.penance:
 
@@ -117,13 +118,17 @@ class TaquitoPenance(object):
             else:
                 time_delta = date - olddate
                 time_delta = time_delta.days
-                if time_delta < 1:
+                if time_delta < 0:
                     self.snark("bad date bounds (%s, %s)" %(date, olddate))
                     return 1
                 running_time += time_delta
                 x_axis.append(running_time)
 
-            y_axis.append(total)
+            running_penance += delta
+            if running_penance != total:
+                self.snark("bad delta-total values (%.2f, %.2f)" %
+                           (delta, total))
+            y_axis.append(running_penance)
 
             ann = str("%s: %s" % (str(date), comment))
             annotations.append(ann)
@@ -145,7 +150,7 @@ class TaquitoPenance(object):
         plot.xlabel("Time (Days)")
         plot.ylabel("Guilt (Dollars)")
         plot.xlim(0, x_axis[-1]+13)
-        plot.ylim(0, y_axis[-1]+13)
+        plot.ylim(0, max(y_axis)+13)
 
         for (a, x, y) in zip(annotations, x_axis, y_axis):
             plot.annotate(a, xy=(x,y),)
@@ -156,6 +161,6 @@ class TaquitoPenance(object):
 
 
 if __name__ == "__main__":
-    main_obj = TaquitoPenance(sys.argv)
+    main_obj = TaquitoPenance(*sys.argv)
     retv = main_obj.run()
     sys.exit(retv)
