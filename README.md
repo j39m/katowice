@@ -2,7 +2,7 @@
 
 ... is a potpourri of projects I cobble together in my spare time. They have no coherence, no point, no taste. What else could they be for but to stroke my ego? 
 
-## taquito\_penance:
+## TaquitoPenance
 ... represents an attempt to atone for a recent lapse in my fiscal judgement. It plots my misfortune and shows its progress over time.
 
 ## nanisore:
