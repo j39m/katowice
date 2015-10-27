@@ -2,6 +2,9 @@
 
 ... is a potpourri of projects I cobble together in my spare time. They have no coherence, no point, no taste. What else could they be for but to stroke my ego? 
 
+## taquito\_penance:
+... represents an attempt to atone for a recent lapse in my fiscal judgement. It plots my misfortune and shows its progress over time.
+
 ## nanisore:
 ... is a finally formally cast Perl script that gives you quick snapshots into your processes depending on the name of the script (hint: symlinking it to the appropriate names). It used to live as a set of clunky bash aliases that eventually outgrew themselves and forced their way into this.
 
