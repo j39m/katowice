@@ -96,7 +96,11 @@ class TaquitoPenance(object):
 
         return (date, delta, total, comment)
 
-    def run(self):
+    def build_up_data(self):
+        """
+        Builds up data from the penance file and returns it in suitable
+        formats for you to plot.
+        """
 
         olddate = None
         x_axis = []
@@ -126,9 +130,27 @@ class TaquitoPenance(object):
 
             olddate = date
 
-        print(x_axis)
-        print(y_axis)
-        print(annotations)
+        return (x_axis, y_axis, annotations)
+
+    def run(self):
+        """
+        Runs everything that needs to be run: reads file, parses file,
+        arranges data as appropriate, and then plots the result.
+        """
+
+        (x_axis, y_axis, annotations) = self.build_up_data()
+
+        plot.plot(x_axis, y_axis)
+
+        plot.xlabel("Time (Days)")
+        plot.ylabel("Guilt (Dollars)")
+        plot.xlim(0, x_axis[-1]+13)
+        plot.ylim(0, y_axis[-1]+13)
+
+        for (a, x, y) in zip(annotations, x_axis, y_axis):
+            plot.annotate(a, xy=(x,y),)
+
+        plot.show()
 
         return 0
 
