@@ -14,7 +14,8 @@ import sys
 PENANCE_FILE = os.path.join(os.path.expanduser("~"),
                             "Documents",
                             "personal",
-                            "queenie")
+                            "queenie",
+                            "main")
 
 
 class TaquitoReader(object):
