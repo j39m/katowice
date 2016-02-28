@@ -62,7 +62,8 @@ class BasicHiragana(object):
                             the user.
         @param challenge:   a string in hiragana that this instance
                             generated to challenge the user.
-        @return:             an integer representing the score.
+        @return:            a tuple; the integer score and the hiragana
+                            conversion of the response.
         """
 
         response_h_list = []
@@ -70,11 +71,11 @@ class BasicHiragana(object):
             for romaji in response.split():
                 response_h_list.append(self.all_hiragana[romaji])
         except KeyError:
-            return 0
+            return (0, "")
         response_h = "".join(response_h_list)
         if response_h == challenge:
-            return len(challenge)
-        return 0
+            return (len(challenge), response_h)
+        return (0, response_h)
 
     def collect_input(self):
         """
@@ -94,14 +95,15 @@ class BasicHiragana(object):
             print(challenge)
 
             response = self.collect_input()
-            score = self.score_challenge(response, challenge)
+            (score, response_h) = self.score_challenge(response, challenge)
             if score:
                 running_score += score
             else:
                 print("KABOOM! Your final score was %d." % (running_score,))
+                print("You erred thus:\n%s" % (response_h,))
                 return 0
 
 
 if __name__ == "__main__":
-    game = BasicHiragana(13)
+    game = BasicHiragana(5)
     sys.exit(game.main())
