@@ -29,12 +29,30 @@ class BasicHiragana(object):
                          "su" : "す",
                          "se" : "せ",
                          "so" : "そ",}
+        self.t_column = {"ta" : "た",
+                         "chi" : "ち",
+                         "tsu" : "つ",
+                         "te" : "て",
+                         "to" : "と",}
+        self.n_column = {"na" : "な",
+                         "ni" : "に",
+                         "nu" : "ぬ",
+                         "ne" : "ね",
+                         "no" : "の",}
+        self.h_column = {"ha" : "は",
+                         "hi" : "ひ",
+                         "fu" : "ふ",
+                         "he" : "へ",
+                         "ho" : "ほ",}
 
         self.all_hiragana = {}
 
         all_dicts = (self.basic_vowels,
                      self.k_column,
                      self.s_column,
+                     self.t_column,
+                     self.n_column,
+                     self.h_column,
                      )
         for dictionary in all_dicts:
             for (k, v) in dictionary.items():
@@ -105,5 +123,5 @@ class BasicHiragana(object):
 
 
 if __name__ == "__main__":
-    game = BasicHiragana(5)
+    game = BasicHiragana(1)
     sys.exit(game.main())
