@@ -44,6 +44,22 @@ class BasicHiragana(object):
                          "fu" : "ふ",
                          "he" : "へ",
                          "ho" : "ほ",}
+        self.m_column = {"ma" : "ま",
+                         "mi" : "み",
+                         "mu" : "む",
+                         "me" : "め",
+                         "mo" : "も",}
+        self.y_column = {"ya" : "や",
+                         "yu" : "ゆ",
+                         "yo" : "よ",}
+        self.r_column = {"ra" : "ら",
+                         "ri" : "り",
+                         "ru" : "る",
+                         "re" : "れ",
+                         "ro" : "ろ",}
+        self.w_column = {"wa" : "わ",
+                         "wo" : "を",
+                         "n"  : "ん",}
 
         self.all_hiragana = {}
 
