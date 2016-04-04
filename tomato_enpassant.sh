@@ -10,8 +10,6 @@ cd ~;
 
 xrandr_output=$(xrandr -q); 
 
-killall compton; 
-
 if [[ "$xrandr_output" =~ "HDMI1 connected" ]]; then 
   printf "Doing stuff for HDMI connection.\n"; 
   xrandr --output HDMI1 --auto --left-of LVDS1; 
@@ -22,6 +20,4 @@ else
   pactl set-card-profile 0 output:analog-stereo+input:analog-stereo; 
 fi; 
 
-{ compton > /dev/null 2>&1 & }; 
 sh ~/.fehbg; 
-killall -s SIGUSR1 tint2; 
