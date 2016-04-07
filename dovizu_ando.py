@@ -74,7 +74,7 @@ class BasicHiragana(object):
             for (k, v) in dictionary.items():
                 self.all_hiragana[k] = v
 
-        self.strlen = strlen if (strlen > 0) else 13
+        self.strlen = strlen if (strlen > 0) else 1
         self.adaptive = adaptive
 
     def create_challenge(self):
