@@ -139,5 +139,8 @@ class BasicHiragana(object):
 
 
 if __name__ == "__main__":
-    game = BasicHiragana(1)
+    try:
+        game = BasicHiragana(int(sys.argv[1]))
+    except (IndexError, ValueError) as excepted:
+        game = BasicHiragana(1)
     sys.exit(game.main())
