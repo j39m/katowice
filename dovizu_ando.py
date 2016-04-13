@@ -101,15 +101,24 @@ class BasicHiragana(object):
         """
 
         response_h_list = []
-        try:
-            for romaji in response.split():
+        response_orig_list = response.split()
+        for romaji in response_orig_list:
+            try:
                 response_h_list.append(self.all_hiragana[romaji])
-        except KeyError:
-            return (0, "")
+            except KeyError:
+                response_h_list.append("?")
+
         response_h = "".join(response_h_list)
+        score = 0
         if response_h == challenge:
-            return (len(challenge), response_h)
-        return (0, response_h)
+            score = len(response_h)
+        else:
+            for car_tup in \
+                    zip(response_h_list, [car for car in challenge]):
+                print(car_tup)
+                if car_tup[0] == car_tup[1]:
+                    score += 1
+        return (score, response_h)
 
     def collect_input(self):
         """
@@ -130,9 +139,8 @@ class BasicHiragana(object):
 
             response = self.collect_input()
             (score, response_h) = self.score_challenge(response, challenge)
-            if score:
-                running_score += score
-            else:
+            running_score += score
+            if score != self.strlen:
                 print("KABOOM! Your final score was %d." % (running_score,))
                 print("You erred thus:\n%s" % (response_h,))
                 return 0
