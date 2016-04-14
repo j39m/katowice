@@ -115,7 +115,6 @@ class BasicHiragana(object):
         else:
             for car_tup in \
                     zip(response_h_list, [car for car in challenge]):
-                print(car_tup)
                 if car_tup[0] == car_tup[1]:
                     score += 1
         return (score, response_h)
