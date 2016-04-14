@@ -69,6 +69,10 @@ class BasicHiragana(object):
                      self.t_column,
                      self.n_column,
                      self.h_column,
+                     self.m_column,
+                     #self.y_column,
+                     #self.r_column,
+                     #self.w_column,
                      )
         for dictionary in all_dicts:
             for (k, v) in dictionary.items():
