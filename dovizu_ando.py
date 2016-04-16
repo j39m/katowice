@@ -80,6 +80,7 @@ class BasicHiragana(object):
 
         self.strlen = strlen if (strlen > 0) else 1
         self.adaptive = adaptive
+        self.hiragana_vals = tuple(self.all_hiragana.values())
 
     def create_challenge(self):
         """
@@ -89,7 +90,7 @@ class BasicHiragana(object):
         strlen = self.strlen
         challenge = []
         while strlen:
-            challenge.append(random.choice(tuple(self.all_hiragana.values())))
+            challenge.append(random.choice(self.hiragana_vals))
             strlen -= 1
         return "".join(challenge)
 
