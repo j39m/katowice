@@ -1,8 +1,4 @@
 *.class
 *.pyc
 
-nui.json
-onion_kalepus
-satsuki
-satsuki-out
-wq.py
+ignore
