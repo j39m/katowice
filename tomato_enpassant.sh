@@ -12,12 +12,12 @@ xrandr_output=$(xrandr -q);
 
 if [[ "$xrandr_output" =~ "HDMI1 connected" ]]; then 
   printf "Doing stuff for HDMI connection.\n"; 
-  xrandr --output HDMI1 --auto --left-of LVDS1; 
-  pactl set-card-profile 0 output:hdmi-stereo+input:analog-stereo; 
+  xrandr --output HDMI1 --auto --left-of eDP1; 
+  pactl set-card-profile alsa_card.pci-0000_00_03.0 output:hdmi-stereo ; 
 else 
   printf "Doing stuff for HDMI disconnection.\n"; 
   xrandr --auto; 
-  pactl set-card-profile 0 output:analog-stereo+input:analog-stereo; 
+  pactl set-card-profile alsa_card.pci-0000_00_1b.0 output:analog-stereo ;
 fi; 
 
 sh ~/.fehbg; 
