@@ -2,6 +2,11 @@
 
 ... is a potpourri of projects I cobble together in my spare time. They have no coherence, no point, no taste. What else could they be for but to stroke my ego? 
 
+## ontrol.sh:
+... is a little shell script I threw together to retag the set of HJ Lim's
+Beethoven sonata traversal purchased from Google Play Music in which the
+metadata is terrifyingly inconsistent.
+
 ## dovizu\_ando:
 ... is a game used to practice hiragana.
 
