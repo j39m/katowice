@@ -2,6 +2,9 @@
 
 ... is a potpourri of projects I cobble together in my spare time. They have no coherence, no point, no taste. What else could they be for but to stroke my ego?
 
+## undue\_instagram.py
+... scrapes Instagram photos.
+
 ## colors.c
 ... answers the question, how many orderings can you make of X colors
 with no more than Y of the same color in a row in a list of length Z?
