@@ -2,6 +2,9 @@
 
 ... is a potpourri of projects I cobble together in my spare time. They have no coherence, no point, no taste. What else could they be for but to stroke my ego?
 
+## SoybeanPw.py
+... generates nonrandom passwords.
+
 ## undue\_instagram.py
 ... scrapes Instagram photos.
 
