@@ -9,7 +9,9 @@ import subprocess
 CURL_BIN =  "/usr/bin/curl"
 TMP_FILE =  "klaus.undue.html"
 
-TRUE_RE =   re.compile(r'^.+content="(https://instagram\..+net/.+/([^/]+\.jpg)?.+\.2)".*$')
+#TRUE_RE =   re.compile(r'^.+content="(https://instagram\..+net/.+/([^/]+\.jpg)?.+\.2)".*$')
+TRUE_RE =   re.compile(r'^.+content="(https://instagram\..+net/.+/([^/]+\.jpg)?(.+\.2)?)".*$')
+
 
 
 def doCleanup():
@@ -52,7 +54,7 @@ class instagramPage(object):
 
     def fetchPhoto(self):
         self.webFetch(self.photoUrl, self.photoName)
-        print("Wrote ``%s.''" % self.photoName)
+        print("%s" % self.photoName)
 
     def run(self):
         self.fetchPage()
