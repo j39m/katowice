@@ -82,13 +82,66 @@ class jpSoybean(object):
     """
     Yields up random (probably invalid) hiragana arrangements.
     """
-    def __init__(self,):
-        pass
+    def __init__(self, defaultWordLen=4):
+        self.defaultWordLen = defaultWordLen
+        # The individual hiragana components are given separately.
+        self._base = (
+            "a",    "i",    "u",    "e",    "o",
+            "ka",   "ki",   "ku",   "ke",   "ko",
+            "sa",   "shi",  "su",   "se",   "so",
+            "ta",   "chi",  "tsu",  "te",   "to",
+            "na",   "ni",   "nu",   "ne",   "no",
+            "ha",   "hi",   "hu",   "he",   "ho",
+            "ma",   "mi",   "mu",   "me",   "mo",
+            "ya",           "yu",           "yo",
+            "ra",   "ri",   "ru",   "re",   "ro",
+            "wa",                           "wo",
+        )
+        self._digraphs = (
+            "kya",  "kyu",  "kyo",
+            "sha",  "shu",  "sho",
+            "cha",  "chu",  "cho",
+            "nya",  "nyu",  "nyo",
+            "hya",  "hyu",  "hyo",
+            "mya",  "myu",  "myo",
+            "rya",  "ryu",  "ryo",
+        )
+        self._diacritics = (
+            "ga",   "gi",   "gu",   "ge",   "go",
+            "za",   "ji",   "zu",   "ze",   "zo",
+            "da",                   "de",   "do",
+            "ba",   "bi",   "bu",   "be",   "bo",
+            "pa",   "pi",   "pu",   "pe",   "po",
+        )
+        self._digraphs_with_diacritics = (
+            "gya",  "gyu",  "gyo",
+            "ja",   "ju",   "jo",
+            "bya",  "byu",  "byo",
+            "pya",  "pyu",  "pyo",
+        )
 
+        # We combine all the hiragana into one big tuple.
+        self.hiragana = (
+            *self._base,
+            *self._digraphs,
+            *self._diacritics,
+            *self._digraphs_with_diacritics,
+        )
+
+    def getSyllables(self, numSyl=None):
+        if not numSyl:
+            numSyl = self.defaultWordLen
+        return random.sample(self.hiragana, numSyl)
+
+    @saneLength
+    def getWords(self, numWords):
+        return ["".join(self.getSyllables()) for _ in range(numWords)]
 
 def main(*args):
     wordsEn = enSoybean()
-    print(" ".join(wordsEn.getCorruptedWords()))
+    wordsJp = jpSoybean()
+    print(" ".join(wordsEn.getWords()))
+    print(" ".join(wordsJp.getWords()))
     return 0
 
 
