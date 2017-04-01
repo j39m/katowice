@@ -24,12 +24,12 @@ def saneLength(selMethod):
     """
     Whenever a random selection is made, we should check bounds.
     """
-    def fnWrapper(self, lenSelect=DEFAULT_LENGTH):
+    def fnWrapper(self, lenSelect=DEFAULT_LENGTH, **kwargs):
         if lenSelect < 1:
             lenSelect = 1
         elif lenSelect > MAX_LENGTH:
             lenSelect = MAX_LENGTH
-        return selMethod(self, lenSelect)
+        return selMethod(self, lenSelect, **kwargs)
     return fnWrapper
 
 def misspell(aWord):
@@ -128,20 +128,41 @@ class jpSoybean(object):
             *self._digraphs_with_diacritics,
         )
 
-    def getSyllables(self, numSyl=None):
+        # The neutered set offers only 68 choices per word,
+        # but is much easier to deal with when typing.
+        self.neutered = (
+            *self._base,
+            *self._diacritics
+        )
+
+    def getSyllables(self, numSyl=None, neutered=False):
         if not numSyl:
             numSyl = self.defaultWordLen
-        return random.sample(self.hiragana, numSyl)
+        choiceSet = self.hiragana
+        if neutered:
+            choiceSet = self.neutered
+        return random.sample(choiceSet, numSyl)
 
     @saneLength
-    def getWords(self, numWords):
-        return ["".join(self.getSyllables()) for _ in range(numWords)]
+    def getWords(self, numWords, neuter=False):
+        return [
+            "".join(self.getSyllables(neutered=neuter))
+            for _ in range(numWords)
+        ]
 
 def main(*args):
     wordsEn = enSoybean()
     wordsJp = jpSoybean()
-    print(" ".join(wordsEn.getWords()))
-    print(" ".join(wordsJp.getWords()))
+    # Prints a password in English.
+    #print(" ".join(wordsEn.getWords()))
+    # Prints a password in something not Japanese.
+    #print(" ".join(wordsJp.getWords(neuter=True)))
+    # Prints a shorter password in something not Japanese.
+    shorter = [
+        "".join(wordsJp.getSyllables(numSyl=i, neutered=True))
+        for i in (4, 3, 3, 3,)
+    ]
+    print(" ".join(shorter))
     return 0
 
 
