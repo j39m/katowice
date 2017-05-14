@@ -9,8 +9,8 @@ import subprocess
 CURL_BIN =  "/usr/bin/curl"
 TMP_FILE =  "klaus.undue.html"
 
-#TRUE_RE =   re.compile(r'^.+content="(https://instagram\..+net/.+/([^/]+\.jpg)?.+\.2)".*$')
-TRUE_RE =   re.compile(r'^.+content="(https://instagram\..+net/.+/([^/]+\.jpg)?(.+\.2)?)".*$')
+#TRUE_RE =   re.compile(r'^.+(src|content)="(https://.+instagram\..+(net|com)/.+/([^/]+\.jpg)?(.+\.2)?)".*$')
+TRUE_RE =   re.compile(r'^.+og:image.+(src|content)="(https://.*instagram.+(com|net).+/([0-9a-z_]+_n.jpg(\.2)?))".+')
 
 
 
@@ -49,7 +49,7 @@ class instagramPage(object):
             print("Error parsing!")
             return 1
         else:
-            (self.photoUrl, self.photoName) = (match.group(1), match.group(2))
+            (self.photoUrl, self.photoName) = (match.group(2), match.group(4))
         return 0
 
     def fetchPhoto(self):
