@@ -7,8 +7,8 @@
 use strict;
 use warnings;
 
-$main::screenful = 31;      # how many lines fit on your screen?
-$main::args_width = 43;     # about how wide is your screen?
+$main::screenful = 39;      # how many lines fit on your screen?
+$main::args_width = 52;     # about how wide is your screen?
 $main::sort = "-rss";       # default sort is by memory
 
 if ($0 =~ m/mamisore/i) {
