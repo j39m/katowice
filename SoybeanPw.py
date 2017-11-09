@@ -20,7 +20,7 @@ MAX_LENGTH =        26
 CHANCE_MISSPELL =   0.26
 
 
-def saneLength(selMethod):
+def sane_length(selMethod):
     """
     Whenever a random selection is made, we should check bounds.
     """
@@ -65,14 +65,14 @@ class enSoybean(object):
             allWords = [w.strip() for w in wordsFile.readlines()]
             self.selection = allWords
 
-    @saneLength
+    @sane_length
     def getWords(self, numWords):
         """
         Return a nonrandom list of numWords.
         """
         return random.sample(self.selection, numWords)
 
-    @saneLength
+    @sane_length
     def getCorruptedWords(self, numWords):
         words = self.getWords(numWords)
         return [misspell(w) for w in words]
@@ -143,7 +143,7 @@ class jpSoybean(object):
             choiceSet = self.neutered
         return random.sample(choiceSet, numSyl)
 
-    @saneLength
+    @sane_length
     def getWords(self, numWords, neuter=False):
         return [
             "".join(self.getSyllables(neutered=neuter))
