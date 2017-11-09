@@ -20,19 +20,19 @@ MAX_LENGTH =        26
 CHANCE_MISSPELL =   0.26
 
 
-def sane_length(selMethod):
+def sane_length(select_method):
     """
     Whenever a random selection is made, we should check bounds.
     """
-    def fnWrapper(self, lenSelect=DEFAULT_LENGTH, **kwargs):
-        if lenSelect < 1:
-            lenSelect = 1
-        elif lenSelect > MAX_LENGTH:
-            lenSelect = MAX_LENGTH
-        return selMethod(self, lenSelect, **kwargs)
-    return fnWrapper
+    def fn_wrap(self, sel_len=DEFAULT_LENGTH, **kwargs):
+        if sel_len < 1:
+            sel_len = 1
+        elif sel_len > MAX_LENGTH:
+            sel_len = MAX_LENGTH
+        return select_method(self, sel_len, **kwargs)
+    return fn_wrap
 
-def misspell(aWord):
+def misspell(word):
     """
     Misspell a word some of the time.
     I shouldn't rely on this; assuming all words in the dictionary are
@@ -43,14 +43,14 @@ def misspell(aWord):
     """
     # If a misspelling is not called for, return the word untouched.
     if random.random() > CHANCE_MISSPELL:
-        return aWord
+        return word
     # If a misspelling is due, listify the word, pick a random vowel,
     # and insert it into a random index.
-    lWord = [l for l in aWord]
-    randVowel = random.choice("aoeui")
-    randIndex = random.randint(0, len(aWord))
-    lWord.insert(randIndex, randVowel)
-    return "".join(lWord)
+    listified = [l for l in word]
+    rand_vowel = random.choice("aoeui")
+    rand_ind = random.randint(0, len(word))
+    listified.insert(rand_ind, rand_vowel)
+    return "".join(listified)
 
 
 class enSoybean(object):
