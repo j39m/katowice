@@ -78,12 +78,12 @@ class enSoybean(object):
         return [misspell(w) for w in words]
 
 
-class jpSoybean(object):
+class JapaneseSoybean(object):
     """
     Yields up random (probably invalid) hiragana arrangements.
     """
-    def __init__(self, defaultWordLen=4):
-        self.defaultWordLen = defaultWordLen
+    def __init__(self, default_count=4):
+        self.default_count = default_count
         # The individual hiragana components are given separately.
         self._base = (
             "a",    "i",    "u",    "e",    "o",
@@ -135,34 +135,35 @@ class jpSoybean(object):
             *self._diacritics
         )
 
-    def getSyllables(self, numSyl=None, neutered=False):
-        if not numSyl:
-            numSyl = self.defaultWordLen
-        choiceSet = self.hiragana
-        if neutered:
-            choiceSet = self.neutered
-        return random.sample(choiceSet, numSyl)
+    def get_syllables(self, count=None, neutered=False):
+        """
+        Returns a syllable list of length <count>. The bool neutered
+        controls selection from all hiragana or the easy hiragana.
+        """
+        count = count if count else self.default_count
+        syllables = self.neutered if neutered else self.hiragana
+        return random.sample(syllables, count)
 
-    @sane_length
-    def getWords(self, numWords, neuter=False):
-        return [
-            "".join(self.getSyllables(neutered=neuter))
-            for _ in range(numWords)
-        ]
+    def get_word(self, syl_count=None, neutered=False):
+        """
+        Returns a single word per arguments specified.
+        """
+        syl_list = self.get_syllables(syl_count, neutered)
+        return "".join(syl_list)
+
+    def get_words(self, *args, neutered=False):
+        """
+        Return a list of several words. *args should contain numbers
+        specifying the length of each word. The neutered arg determines
+        whether we select from easy or all hiragana.
+        """
+        return [self.get_word(syl_count, neutered) for syl_count in args]
+
 
 def main(*args):
-    wordsEn = enSoybean()
-    wordsJp = jpSoybean()
-    # Prints a password in English.
-    #print(" ".join(wordsEn.getWords()))
-    # Prints a password in something not Japanese.
-    #print(" ".join(wordsJp.getWords(neuter=True)))
-    # Prints a shorter password in something not Japanese.
-    shorter = [
-        "".join(wordsJp.getSyllables(numSyl=i, neutered=True))
-        for i in (4, 3, 3, 3,)
-    ]
-    print(" ".join(shorter))
+    pw_obj = JapaneseSoybean()
+    word_list = pw_obj.get_words(4, 3, 3, 3, neutered=True)
+    print(" ".join(word_list))
     return 0
 
 
