@@ -53,27 +53,24 @@ def misspell(word):
     return "".join(listified)
 
 
-class enSoybean(object):
+class EnglishSoybean(object):
     """
     Yields up random English words.
     Actually yields up random selections from the system dictionary...
     """
-    WF = "/usr/share/dict/linux.words"
+    WORDS_PATH = "/usr/share/dict/linux.words"
 
-    def __init__(self,):
-        with open(self.WF) as wordsFile:
-            allWords = [w.strip() for w in wordsFile.readlines()]
-            self.selection = allWords
+    def __init__(self):
+        with open(self.WORDS_PATH) as words_fp:
+            self.words = [word.strip() for word in words_fp]
 
-    @sane_length
-    def getWords(self, numWords):
-        """
-        Return a nonrandom list of numWords.
-        """
-        return random.sample(self.selection, numWords)
+    def get_words(self, count):
+        """Return a list of words."""
+        word_list = random.sample(self.words, count)
+        return [word.lower() for word in word_list]
 
-    @sane_length
-    def getCorruptedWords(self, numWords):
+    def get_misspelled_words(self, count):
+        return list()
         words = self.getWords(numWords)
         return [misspell(w) for w in words]
 
@@ -161,8 +158,10 @@ class JapaneseSoybean(object):
 
 
 def main(*args):
-    pw_obj = JapaneseSoybean()
-    word_list = pw_obj.get_words(4, 3, 3, 3, neutered=True)
+    #pw_obj = JapaneseSoybean()
+    #word_list = pw_obj.get_words(4, 3, 3, 3, neutered=True)
+    pw_obj = EnglishSoybean()
+    word_list = pw_obj.get_words(3)
     print(" ".join(word_list))
     return 0
 
