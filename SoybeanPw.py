@@ -132,7 +132,7 @@ class JapaneseSoybean(object):
             *self._diacritics
         )
 
-    def get_syllables(self, count=None, neutered=False):
+    def get_syllables(self, count=None, neutered=True):
         """
         Returns a syllable list of length <count>. The bool neutered
         controls selection from all hiragana or the easy hiragana.
@@ -141,14 +141,14 @@ class JapaneseSoybean(object):
         syllables = self.neutered if neutered else self.hiragana
         return random.sample(syllables, count)
 
-    def get_word(self, syl_count=None, neutered=False):
+    def get_word(self, syl_count=None, neutered=True):
         """
         Returns a single word per arguments specified.
         """
         syl_list = self.get_syllables(syl_count, neutered)
         return "".join(syl_list)
 
-    def get_words(self, *args, neutered=False):
+    def get_words(self, *args, neutered=True):
         """
         Return a list of several words. *args should contain numbers
         specifying the length of each word. The neutered arg determines
