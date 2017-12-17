@@ -41,12 +41,10 @@ def backup_library():
 def prune_skips(song_pickle):
     """Main function for pruning skips from a pickle."""
     found_skips = False
+    skipfmt = "prune {:d} skips on ``{:s}.''"
     for song in song_pickle:
         try:
-            skipmsg = str(
-                "prune %d skips on ``%s''."
-                % (song.pop("~#skipcount"), song["title"])
-            )
+            skipmsg = skipfmt.format(song.pop("~#skipcount"), song["title"])
             found_skips = True
             print(skipmsg)
         except KeyError:
