@@ -14,14 +14,14 @@ TRUE_RE =   re.compile(r'^.+og:image.+(src|content)="(https://.*instagram.+(com|
 
 
 
-def doCleanup():
+def cleanup():
     try:
         os.unlink(TMP_FILE)
     except OSError:
         print("Couldn't unlink %s!" % TMP_FILE)
 
 
-class instagramPage(object):
+class InstagramPage(object):
 
     def __init__(self, url, *args):
         self.url =          url
@@ -62,7 +62,7 @@ class instagramPage(object):
             return 1
 
         self.fetchPhoto()
-        doCleanup()
+        cleanup()
         return 0
 
 
@@ -75,14 +75,14 @@ def main(*args):
     # Case args: take them one by one.
     if args:
         for a in args:
-            downQueue.append(instagramPage(a))
+            downQueue.append(InstagramPage(a))
     # Case no args: read from stdin.
     else:
         while stdinLine != "":
             stdinLine = sys.stdin.readline().strip()
             stdinQueue.append(stdinLine)
         for line in stdinQueue:
-            downQueue.append(instagramPage(line))
+            downQueue.append(InstagramPage(line))
 
     for p in downQueue:
         retv += p.run()
