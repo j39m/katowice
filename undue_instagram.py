@@ -1,92 +1,76 @@
 #!/usr/bin/python3
 
 import sys
-import os
 import re
-import subprocess
+import curl
 
 
-CURL_BIN =  "/usr/bin/curl"
-TMP_FILE =  "klaus.undue.html"
-
-#TRUE_RE =   re.compile(r'^.+(src|content)="(https://.+instagram\..+(net|com)/.+/([^/]+\.jpg)?(.+\.2)?)".*$')
-TRUE_RE =   re.compile(r'^.+og:image.+(src|content)="(https://.*instagram.+(com|net).+/([0-9a-z_]+_n.jpg(\.2)?))".+')
-
+TRUE_RE = re.compile(
+    r'^.+og:image.+(src|content)="(https://.*ins'
+    r'tagram.+(com|net).+/([0-9a-z_]+_n.jpg(\.2)?))".+'
+)
 
 
-def cleanup():
-    try:
-        os.unlink(TMP_FILE)
-    except OSError:
-        print("Couldn't unlink %s!" % TMP_FILE)
+def parse_page(content):
+    """
+    Parse an Instagram page and return the tuple of the contained photo
+    URL and photo filename.
+    """
+    content_str = content.decode(encoding="UTF-8")
+    content_l = content_str.splitlines()
+    match = None
+    for line in content_l:
+        match = TRUE_RE.match(line)
+        if match:
+            break
+    if not match:
+        return (None, None)
+    return (match.group(2), match.group(4))
+
+
+def write_photo(content, fname):
+    """
+    Accept bytes of an Instagram photo and write the result to the param
+    ``fname.''
+    """
+    with open(fname, "wb") as fpt:
+        fpt.write(content)
 
 
 class InstagramPage(object):
+    """Represent an Instagram page."""
+    def __init__(self, url):
+        self.url = url
 
-    def __init__(self, url, *args):
-        self.url =          url
-        self.photoUrl =     None
-        self.photoName =    None
-
-    def webFetch(self, fetchee, tmpName=TMP_FILE):
-        cmd = (CURL_BIN, "-s", "-o", tmpName, fetchee)
-        output = subprocess.check_output(cmd)
-
-    def fetchPage(self):
-        self.webFetch(self.url)
-
-    def parsePage(self):
-        f = open(TMP_FILE, "r")
-        slurp = f.readlines()
-        f.close()
-
-        match = None
-        for line in slurp:
-            match = TRUE_RE.match(line)
-            if match:
-                break
-        if not match:
-            print("Error parsing!")
-            return 1
-        else:
-            (self.photoUrl, self.photoName) = (match.group(2), match.group(4))
-        return 0
-
-    def fetchPhoto(self):
-        self.webFetch(self.photoUrl, self.photoName)
-        print("%s" % self.photoName)
+    def curl(self, targ):
+        __curl = curl.Curl()
+        gotten = __curl.get(targ)
+        __curl.close()
+        return gotten
 
     def run(self):
-        self.fetchPage()
-        if self.parsePage():
-            return 1
+        page = self.curl(self.url)
+        (purl, pname) = parse_page(page)
 
-        self.fetchPhoto()
-        cleanup()
+        if not purl:
+            print("FATAL: Failed to parse ``{}!''".format(self.url))
+            return 1
+        photo_bytes = self.curl(purl)
+        write_photo(photo_bytes, pname)
+
+        print(pname)
         return 0
 
 
 def main(*args):
+    """Main entry point."""
     retv = 0
-    downQueue = list()
-    stdinLine = None
-    stdinQueue = list()
+    wkq = [InstagramPage(a) for a in args]
 
-    # Case args: take them one by one.
-    if args:
-        for a in args:
-            downQueue.append(InstagramPage(a))
-    # Case no args: read from stdin.
-    else:
-        while stdinLine != "":
-            stdinLine = sys.stdin.readline().strip()
-            stdinQueue.append(stdinLine)
-        for line in stdinQueue:
-            downQueue.append(InstagramPage(line))
-
-    for p in downQueue:
-        retv += p.run()
+    for ent in wkq:
+        retv += ent.run()
     return retv
+
 
 if __name__ == "__main__":
     sys.exit(main(*sys.argv[1:]))
