@@ -59,10 +59,10 @@ def prune_skips(song_pickle):
 def main():
     """The main entry point."""
     raise NotImplementedError
-    songs = load_library()
     backup_library()
+    songs = load_library()
 
-    return prune_skips(songs)
+    return 0
 
 
 ##### EXECUTION BEGINS HEEEERREEEEE #####
