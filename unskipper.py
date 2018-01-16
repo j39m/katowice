@@ -1,4 +1,4 @@
-#! /usr/bin/env python2
+#! /usr/bin/env python3
 
 # unskipper.py will prune all skipcounts from your Quod Libet library;
 # the resulting lack of '~#skipcount' in your per-song entries will all
@@ -25,12 +25,14 @@ PATH_TO_BKUP = os.path.join(
 
 
 def load_library():
+    raise NotImplementedError
     sfh = open(PATH_TO_SONGS, 'r')
     songs = pickle.load(sfh)
     sfh.close()
     return songs
 
 def backup_library():
+    raise NotImplementedError
     sfh = open(PATH_TO_SONGS, "rb")
     bfh = open(PATH_TO_BKUP, "wb")
     shutil.copyfileobj(sfh, bfh)
@@ -40,6 +42,7 @@ def backup_library():
 
 def prune_skips(song_pickle):
     """Main function for pruning skips from a pickle."""
+    raise NotImplementedError
     found_skips = False
     skipfmt = "prune {:d} skips on ``{:s}.''"
     for song in song_pickle:
@@ -64,6 +67,7 @@ def query_library_by_tag(lib, val, tag="artist", corr="~#playcount", rkey="title
     value "val."
     returns a dictionary of the results.
     """
+    raise NotImplementedError
     retv = {}
     for song in lib:
         if tag in song and val in song[tag] and corr in song:
@@ -81,6 +85,7 @@ def query_library_by_tag(lib, val, tag="artist", corr="~#playcount", rkey="title
 
 def main():
     """The main entry point."""
+    raise NotImplementedError
     songs = load_library()
     backup_library()
 
