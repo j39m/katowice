@@ -30,6 +30,10 @@ def load_library():
     return songs
 
 
+def save_library(songs):
+    songs.save(SONGS_PATH)
+
+
 def backup_library():
     with open(SONGS_PATH, "rb") as spt, open(BKUP_PATH, "wb") as bpt:
         shutil.copyfileobj(spt, bpt)
@@ -75,21 +79,31 @@ def query(songs, tag, val=None, val_callable=None):
     return None
 
 
-def prune_skips(song_pickle):
-    """Main function for pruning skips from a pickle."""
-    raise NotImplementedError
+def prune_skips(songs):
+    """
+    Prune all ``~#skipcount'' tags from the song library.
+    Return a list of tuples (songs, skips) on all pruned songs.
+    """
+    SKIP_KEY = "~#skipcount"
+    ret = list()
+
+    for (spath, sdict) in songs.iteritems():
+        try:
+            ret.append((spath, sdict.pop(SKIP_KEY)))
+        except KeyError:
+            continue
+    return ret
 
 
 def main():
     """The main entry point."""
-    raise NotImplementedError
     backup_library()
     songs = load_library()
 
+    import pprint
+    pprint.pprint(prune_skips(songs))
     return 0
 
-
-##### EXECUTION BEGINS HEEEERREEEEE #####
 
 if __name__ == "__main__":
     ret = main()
