@@ -35,17 +35,24 @@ def backup_library():
         shutil.copyfileobj(spt, bpt)
 
 
-def _query_simple(songs, tag, val):
-    """Helper function for simple queries. Called by query()."""
-    raise NotImplementedError
-
-
 def _query_callable(songs, tag, val_callable):
     """
     Helper function for queries passing a callable truth.
     Called by query().
     """
-    raise NotImplementedError
+    ret = dict()
+    for (spath, sdict) in songs.iteritems():
+        try:
+            if val_callable(sdict[tag]):
+                ret[spath] = sdict
+        except KeyError:
+            continue
+    return ret
+
+
+def _query_simple(songs, tag, val):
+    """Helper function for simple queries. Called by query()."""
+    return _query_callable(songs, tag, lambda x: x == val)
 
 
 def query(songs, tag, val=None, val_callable=None):
