@@ -133,5 +133,27 @@ def test_PF():
             klaus = ProbabilisticFailure(local_p, local_n, local_k)
             klaus.diagnose("hard")
 
+
+def accrue(bal, inc, ror, years=5):
+    """
+    Given an initial balance in USD, a monthly increment to add to the
+    principal, a decimal rate of return, and the number of years to
+    invest, return the amount in USD at the end of the years elapsed.
+    """
+    def year_pass(bal, inc, ror):
+        for _ in range(12):
+            bal = (bal + inc) * (1 + ror)
+        return bal
+
+    for _ in range(years):
+        bal = year_pass(bal, inc, ror)
+    return bal
+
+
 if __name__ == "__main__":
-    test_PF()
+    BAL = 16000
+    INC = (1400 * 2)
+    # 2.83% annual yield comes out like this per month
+    ROR = 0.002328285695076815
+    YEARS = 5
+    print(accrue(BAL, INC, ROR, YEARS))
