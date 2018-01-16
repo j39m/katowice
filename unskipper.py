@@ -8,37 +8,32 @@
 import os
 import sys
 import shutil
-import pickle
+import quodlibet.library
 
 HOME = os.getenv("HOME")
 QLDIR = ".quodlibet"
-PATH_TO_SONGS = os.path.join(
+SONGS_PATH = os.path.join(
     HOME,
     QLDIR,
     "songs",
 )
-PATH_TO_BKUP = os.path.join(
+BKUP_PATH = os.path.join(
     HOME,
     QLDIR,
-    "unpruned",
+    "songs.bk",
 )
 
 
 def load_library():
-    raise NotImplementedError
-    sfh = open(PATH_TO_SONGS, 'r')
-    songs = pickle.load(sfh)
-    sfh.close()
+    songs = quodlibet.library.init()
+    songs.load(SONGS_PATH)
     return songs
 
+
 def backup_library():
-    raise NotImplementedError
-    sfh = open(PATH_TO_SONGS, "rb")
-    bfh = open(PATH_TO_BKUP, "wb")
-    shutil.copyfileobj(sfh, bfh)
-    sfh.close()
-    bfh.close()
-    return 0
+    with open(SONGS_PATH, "rb") as spt, open(BKUP_PATH, "wb") as bpt:
+        shutil.copyfileobj(spt, bpt)
+
 
 def prune_skips(song_pickle):
     """Main function for pruning skips from a pickle."""
@@ -54,34 +49,12 @@ def prune_skips(song_pickle):
             continue
     # write the finished pickle down
     try:
-        pickle.dump(song_pickle, open(PATH_TO_SONGS, "w"))
+        pickle.dump(song_pickle, open(SONGS_PATH, "w"))
     except pickle.PicklingError:
         print ("NANISORE?")
         return 1
     return 0
 
-
-def query_library_by_tag(lib, val, tag="artist", corr="~#playcount", rkey="title"):
-    """
-    query the library "lib" by the tag "tag," searching for entries with tag
-    value "val."
-    returns a dictionary of the results.
-    """
-    raise NotImplementedError
-    retv = {}
-    for song in lib:
-        if tag in song and val in song[tag] and corr in song:
-            try:
-                lkey = song[rkey]
-            except KeyError:
-                lkey = None
-            if lkey in retv:
-                if not isinstance(retv[lkey], list):
-                    retv[lkey] = [retv[lkey],]
-                retv[lkey].append(song[corr])
-            else:
-                retv[lkey] = song[corr]
-    return retv
 
 def main():
     """The main entry point."""
