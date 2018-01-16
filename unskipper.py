@@ -35,25 +35,42 @@ def backup_library():
         shutil.copyfileobj(spt, bpt)
 
 
+def _query_simple(songs, tag, val):
+    """Helper function for simple queries. Called by query()."""
+    raise NotImplementedError
+
+
+def _query_callable(songs, tag, val_callable):
+    """
+    Helper function for queries passing a callable truth.
+    Called by query().
+    """
+    raise NotImplementedError
+
+
+def query(songs, tag, val=None, val_callable=None):
+    """
+    Given a Quod Libet library, return the sub-dict of songs that contain
+    tags with the prescribed values.
+
+    You can call query() with either some simple value passed in for ``val''
+    or a more complex function for ``val_callable.''
+
+    @param songs        the Quod Libet library to search
+    @param tag          the tag to query for
+    @param val          a simple comparable s.t. we can eval ``blah == val.''
+    @param val_callable a callable s.t. we can eval ``val_callable(blah).''
+    """
+    if val is not None:
+        return _query_simple(songs, tag, val)
+    elif val_callable is not None:
+        return _query_callable(songs, tag, val_callable)
+    return None
+
+
 def prune_skips(song_pickle):
     """Main function for pruning skips from a pickle."""
     raise NotImplementedError
-    found_skips = False
-    skipfmt = "prune {:d} skips on ``{:s}.''"
-    for song in song_pickle:
-        try:
-            skipmsg = skipfmt.format(song.pop("~#skipcount"), song["title"])
-            found_skips = True
-            print(skipmsg)
-        except KeyError:
-            continue
-    # write the finished pickle down
-    try:
-        pickle.dump(song_pickle, open(SONGS_PATH, "w"))
-    except pickle.PicklingError:
-        print ("NANISORE?")
-        return 1
-    return 0
 
 
 def main():
