@@ -112,6 +112,7 @@ def main():
 
     skipped = prune_skips(songs)
     _print_skips(skipped)
+    save_library(songs)
     return 0
 
 
