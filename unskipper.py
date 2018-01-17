@@ -82,17 +82,27 @@ def query(songs, tag, val=None, val_callable=None):
 def prune_skips(songs):
     """
     Prune all ``~#skipcount'' tags from the song library.
-    Return a list of tuples (songs, skips) on all pruned songs.
+    Return a list of tuples (song_dict, skips) on all pruned songs.
     """
     SKIP_KEY = "~#skipcount"
     ret = list()
 
     for (spath, sdict) in songs.iteritems():
         try:
-            ret.append((spath, sdict.pop(SKIP_KEY)))
+            ret.append((sdict, sdict.pop(SKIP_KEY)))
         except KeyError:
             continue
     return ret
+
+
+def _print_skips(skiplist):
+    """
+    Given a list as per return of prune_skips(), pretty-print songs that
+    were impacted.
+    """
+    msg = "Prune {} skip{} on ``{}.''"
+    for (sdict, skips) in skiplist:
+        print(msg.format(skips, ("s" if skips > 1 else ""), sdict["title"]))
 
 
 def main():
@@ -100,8 +110,8 @@ def main():
     backup_library()
     songs = load_library()
 
-    import pprint
-    pprint.pprint(prune_skips(songs))
+    skipped = prune_skips(songs)
+    _print_skips(skipped)
     return 0
 
 
