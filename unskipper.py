@@ -22,6 +22,7 @@ BKUP_PATH = os.path.join(
     QLDIR,
     "songs.bk",
 )
+CTL_FIFO = os.path.join(HOME, QLDIR, "control")
 
 
 def load_library():
@@ -37,6 +38,14 @@ def save_library(songs):
 def backup_library():
     with open(SONGS_PATH, "rb") as spt, open(BKUP_PATH, "wb") as bpt:
         shutil.copyfileobj(spt, bpt)
+
+
+def is_quodlibet_present():
+    try:
+        os.stat(CTL_FIFO)
+        return True
+    except FileNotFoundError:
+        return False
 
 
 def _query_callable(songs, tag, val_callable):
@@ -112,6 +121,11 @@ def main():
 
     skipped = prune_skips(songs)
     _print_skips(skipped)
+
+    if is_quodlibet_present():
+        print("Detected running Quod Libet - bailing!")
+        return 1
+
     save_library(songs)
     return 0
 
