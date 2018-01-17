@@ -32,7 +32,9 @@ def load_library():
 
 
 def save_library(songs):
-    songs.save(SONGS_PATH)
+    tmppath = SONGS_PATH + ".tmp"
+    songs.save(tmppath)
+    os.rename(tmppath, SONGS_PATH)
 
 
 def backup_library():
