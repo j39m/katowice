@@ -11,6 +11,14 @@ TRUE_RE = re.compile(
 )
 
 
+def simple_curl(targ):
+    """Fetch something with curl."""
+    mycurl = curl.Curl()
+    gotten = mycurl.get(targ)
+    mycurl.close()
+    return gotten
+
+
 def parse_page(content):
     """
     Parse an Instagram page and return the tuple of the contained photo
@@ -42,20 +50,15 @@ class InstagramPage(object):
     def __init__(self, url):
         self.url = url
 
-    def curl(self, targ):
-        __curl = curl.Curl()
-        gotten = __curl.get(targ)
-        __curl.close()
-        return gotten
-
     def run(self):
-        page = self.curl(self.url)
+        page = simple_curl(self.url)
         (purl, pname) = parse_page(page)
 
         if not purl:
-            print("FATAL: Failed to parse ``{}!''".format(self.url))
+            errmsg = "FATAL: Failed to parse ``{}!''\n"
+            sys.stderr.write(errmsg.format(self.url))
             return 1
-        photo_bytes = self.curl(purl)
+        photo_bytes = simple_curl(purl)
         write_photo(photo_bytes, pname)
 
         print(pname)
