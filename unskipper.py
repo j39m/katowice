@@ -122,6 +122,10 @@ def main():
     songs = load_library()
 
     skipped = prune_skips(songs)
+    if not skipped:
+        print("No skips pruned.")
+        return 0
+
     _print_skips(skipped)
 
     if is_quodlibet_present():
