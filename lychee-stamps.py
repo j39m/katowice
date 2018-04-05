@@ -11,7 +11,7 @@ TSDELIM = ":"
 def ts_to_s(tstr):
     """Given a timestamp in HH:MM:SS, return integral seconds."""
     teased = tstr.split(TSDELIM)
-    (hrs, mins, secs) = (int(unit) for unit in teased)
+    (hrs, mins, secs) = (int(unit, 10) for unit in teased)
     return (hrs * 3600) + (mins * 60) + secs
 
 def read_ts_file(ts_fname):
@@ -33,7 +33,7 @@ def do_verify(start_pts, durations):
     Given lists of start points and durations of each track, verify that
     every track is contiguous.
     """
-    errfmt = "Wrong duration given at line {}!"
+    errfmt = "Wrong duration given at line {} (miss by {}s)!"
     prev_end = None
     for (cnt, (stpt, dur)) in enumerate(zip(start_pts, durations)):
         endpt = stpt + dur
@@ -41,7 +41,8 @@ def do_verify(start_pts, durations):
             prev_end = endpt
             continue
         if prev_end != stpt:
-            raise OSError(errfmt.format(cnt))
+            diff = prev_end - stpt
+            raise OSError(errfmt.format(cnt, diff))
         prev_end = endpt
 
 def main():
