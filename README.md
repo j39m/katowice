@@ -4,6 +4,12 @@
 They have no coherence, no point, no taste. What else could they be for
 but to stroke my ego?
 
+## lychee-stamps.py
+... verifies that a file full of timestamps and durations describes a
+continuous timeline - i.e. that each duration spans the whole track into
+the next timestamp, leaving no holes and causing no bleed-ins. It's used
+to verify my work for cutting the score-only extract from TLJ.
+
 ## SoybeanPw.py
 ... generates nonrandom passwords.
 
