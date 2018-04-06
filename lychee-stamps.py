@@ -42,7 +42,8 @@ def do_verify(start_pts, durations):
             continue
         if prev_end != stpt:
             diff = prev_end - stpt
-            raise OSError(errfmt.format(cnt, diff))
+            print(errfmt.format(cnt, diff))
+            return 1
         prev_end = endpt
 
 def main():
