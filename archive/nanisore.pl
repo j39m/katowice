@@ -17,6 +17,7 @@ if ($0 =~ m/mamisore/i) {
 } elsif ($0 =~ m/hahisore/i) {
     # running state
     $main::sort = "state";
+    $main::screenful = 9001;
 } else { # NANISORE
     # memory usage
     $main::sort = "-rss";
