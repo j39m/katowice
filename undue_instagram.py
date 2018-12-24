@@ -6,8 +6,8 @@ import curl
 
 
 TRUE_RE = re.compile(
-    r'^.+og:image.+(src|content)="(https://.*ins'
-    r'tagram.+(com|net).+/([0-9a-z_]+_n.jpg(\.2)?))".+'
+    r'^\s+<meta property="og:image"\s+(src|content)="(https://.*ins'
+    r'tagram.+(com|net).+/([0-9a-z_]+_n.jpg[^"]+))".+$'
 )
 
 
