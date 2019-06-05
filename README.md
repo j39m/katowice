@@ -14,7 +14,7 @@ continuous timeline - i.e. that each duration spans the whole track into
 the next timestamp, leaving no holes and causing no bleed-ins. It's used
 to verify my work for cutting the score-only extract from TLJ.
 
-## SoybeanPw.py
+## xkpw.py
 ... generates nonrandom passwords.
 
 ## undue\_instagram.py
