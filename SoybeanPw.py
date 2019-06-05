@@ -13,9 +13,6 @@ import random
 import re
 import sys
 
-DEFAULT_LENGTH = 4
-MAX_LENGTH = 26
-
 CHANCE_MISSPELL = 0.26
 
 def misspell(word):
