@@ -179,7 +179,9 @@ def generate_japanese_password(args):
     Returns:
         A list of pseudo-Japanese words.
     """
-    return list()
+    password_maker = JapaneseSoybean()
+    print(args.counts)
+    return password_maker.get_words(*args.counts, neutered=args.difficult)
 
 def generate_english_password(args):
     """
@@ -210,9 +212,9 @@ def init_japanese_parser(subparsers):
     japanese_parser.add_argument(
         "counts",
         help="list of word lengths",
-        action="append",
         default=DEFAULT_JAPANESE_WORDS,
-        nargs=argparse.REMAINDER,
+        type=int,
+        nargs="*",
     )
 
     japanese_parser.set_defaults(func=generate_japanese_password)
@@ -235,8 +237,9 @@ def init_english_parser(subparsers):
     english_parser.add_argument(
         "count",
         help="number of words to print",
+        type=int,
         default=DEFAULT_ENGLISH_WORDS,
-        nargs=argparse.REMAINDER,
+        nargs="*",
     )
 
     english_parser.set_defaults(func=generate_english_password)
