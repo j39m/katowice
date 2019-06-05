@@ -13,28 +13,15 @@ import random
 import re
 import sys
 
+DEFAULT_LENGTH = 4
+MAX_LENGTH = 26
 
-DEFAULT_LENGTH =    4
-MAX_LENGTH =        26
-
-CHANCE_MISSPELL =   0.26
-
-
-def sane_length(select_method):
-    """
-    Whenever a random selection is made, we should check bounds.
-    """
-    def fn_wrap(self, sel_len=DEFAULT_LENGTH, **kwargs):
-        if sel_len < 1:
-            sel_len = 1
-        elif sel_len > MAX_LENGTH:
-            sel_len = MAX_LENGTH
-        return select_method(self, sel_len, **kwargs)
-    return fn_wrap
+CHANCE_MISSPELL = 0.26
 
 def misspell(word):
     """
-    Misspell a word some of the time.
+    Misspells a word some of the time by inserting a vowel.
+
     I shouldn't rely on this; assuming all words in the dictionary are
     5 characters long, there are 30 misspellings and 1 proper spellings.
     So for a 4-word password, your search space is roughly multiplied by
@@ -46,12 +33,11 @@ def misspell(word):
         return word
     # If a misspelling is due, listify the word, pick a random vowel,
     # and insert it into a random index.
-    listified = [l for l in word]
-    rand_vowel = random.choice("aoeui")
-    rand_ind = random.randint(0, len(word))
-    listified.insert(rand_ind, rand_vowel)
+    listified = [letter for letter in word]
+    random_vowel = random.choice("aoeui")
+    random_index = random.randint(0, len(word))
+    listified.insert(random_index, random_vowel)
     return "".join(listified)
-
 
 class EnglishSoybean(object):
     """
@@ -73,7 +59,6 @@ class EnglishSoybean(object):
         return list()
         words = self.getWords(numWords)
         return [misspell(w) for w in words]
-
 
 class JapaneseSoybean(object):
     """
@@ -156,15 +141,13 @@ class JapaneseSoybean(object):
         """
         return [self.get_word(syl_count, neutered) for syl_count in args]
 
-
 def main(*args):
-    #pw_obj = JapaneseSoybean()
-    #word_list = pw_obj.get_words(4, 3, 3, 3, neutered=True)
-    pw_obj = EnglishSoybean()
-    word_list = pw_obj.get_words(3)
+    pw_obj = JapaneseSoybean()
+    word_list = pw_obj.get_words(4, 3, 3, 3, neutered=True)
+    #pw_obj = EnglishSoybean()
+    #word_list = pw_obj.get_words(3)
     print(" ".join(word_list))
     return 0
-
 
 if __name__ == "__main__":
     _r = main(*sys.argv)
