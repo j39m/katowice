@@ -193,11 +193,16 @@ def generate_english_password(args):
     Returns:
         A list of English words.
     """
-    return list()
+    password_maker = EnglishSoybean()
+    if args.misspell:
+        return password_maker.get_misspelled_words(args.count)
+    return password_maker.get_words(args.count)
 
 def init_global_defaults(parser):
     """
-    Set up the default, argument-less xkpw execution.
+    Set up the default, argument-less xkpw execution. This function
+    must always match the setup performed on the Japanese subparser
+    in init_japanese_parser.
 
     Args:
         parser: the top-level ArgumentParser.
@@ -252,7 +257,7 @@ def init_english_parser(subparsers):
         help="number of words to print",
         type=int,
         default=DEFAULT_ENGLISH_WORDS,
-        nargs="*",
+        nargs="?",
     )
 
     english_parser.set_defaults(func=generate_english_password)
