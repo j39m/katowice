@@ -39,7 +39,7 @@ def misspell(word):
     listified.insert(random_index, random_vowel)
     return "".join(listified)
 
-class EnglishSoybean(object):
+class EnglishSoybean:
     """
     Yields up random English words.
     Actually yields up random selections from the system dictionary...
@@ -61,11 +61,16 @@ class EnglishSoybean(object):
         return [word.lower() for word in word_list]
 
     def get_misspelled_words(self, count):
-        return list()
-        words = self.getWords(numWords)
+        """
+        Returns a list of possibly misspelled words.
+
+        Args:
+            count: the number of possibly misspelled words.
+        """
+        words = self.get_words(count)
         return [misspell(w) for w in words]
 
-class JapaneseSoybean(object):
+class JapaneseSoybean:
     """
     Yields up random (probably invalid) hiragana arrangements.
     """
@@ -252,5 +257,4 @@ def main(*args):
     return 0
 
 if __name__ == "__main__":
-    exit_code = main(*sys.argv)
-    sys.exit(exit_code)
+    main(*sys.argv)
