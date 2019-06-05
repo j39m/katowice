@@ -162,6 +162,7 @@ class JapaneseSoybean(object):
         ]
 
 def main(*args):
+    """Read arguments. Pick a language. Print a password."""
     pw_obj = JapaneseSoybean()
     word_list = pw_obj.get_words(4, 3, 3, 3, neutered=True)
     #pw_obj = EnglishSoybean()
@@ -170,5 +171,5 @@ def main(*args):
     return 0
 
 if __name__ == "__main__":
-    _r = main(*sys.argv)
-    sys.exit(_r)
+    exit_code = main(*sys.argv)
+    sys.exit(exit_code)
