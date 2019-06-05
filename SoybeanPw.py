@@ -48,7 +48,12 @@ class EnglishSoybean(object):
             self.words = [word.strip() for word in words_fp]
 
     def get_words(self, count):
-        """Return a list of words."""
+        """
+        Returns a list of words.
+
+        Args:
+            count: the number of words returned.
+        """
         word_list = random.sample(self.words, count)
         return [word.lower() for word in word_list]
 
@@ -117,9 +122,12 @@ class JapaneseSoybean(object):
     def get_syllables(self, count=None, neutered=True):
         """
         Returns a list of syllables.
-        *   counts controls how many syllables are returned in the list.
-        *   neutered selects a set of syllables; if True, we select from
-            the easy hiragana. If False, we select from all hiragana.
+
+        Args:
+            count: controls how many syllables are returned in the list.
+            neutered: selects a set of syllables; if True, we select from
+                      the easy hiragana. If False, we select from all
+                      hiragana.
         """
         count = count if count else self.default_count
         syllables = self.neutered if neutered else self.hiragana
@@ -128,9 +136,12 @@ class JapaneseSoybean(object):
     def get_word(self, syllable_count=None, neutered=True):
         """
         Returns a single word.
-        *   syllable_count controls how many syllables are composed
-            into the returned word.
-        *   neutered controls 
+
+        Args:
+            syllable_count: controls how many syllables are composed
+                            into the returned word.
+            neutered: composes the word only of easy hiragana if True and
+                      of any hiragana if False.
         """
         syllables = self.get_syllables(syllable_count, neutered)
         return "".join(syllables)
@@ -138,10 +149,12 @@ class JapaneseSoybean(object):
     def get_words(self, *word_lengths, neutered=True):
         """
         Returns a list of several words.
-        *   word_lengths should contain natural numbers specifying the
-            length of each word.
-        *   neutered determines whether we select from easy hiragana
-            or all hiragana.
+
+        Args:
+            word_lengths: a list of natural numbers specifying the
+                          length of each word.
+            neutered: controls whether the returned list of words is
+                      composed of easy hiragana or all hiragana.
         """
         return [
             self.get_word(word_length, neutered)
