@@ -116,27 +116,37 @@ class JapaneseSoybean(object):
 
     def get_syllables(self, count=None, neutered=True):
         """
-        Returns a syllable list of length <count>. The bool neutered
-        controls selection from all hiragana or the easy hiragana.
+        Returns a list of syllables.
+        *   counts controls how many syllables are returned in the list.
+        *   neutered selects a set of syllables; if True, we select from
+            the easy hiragana. If False, we select from all hiragana.
         """
         count = count if count else self.default_count
         syllables = self.neutered if neutered else self.hiragana
         return random.sample(syllables, count)
 
-    def get_word(self, syl_count=None, neutered=True):
+    def get_word(self, syllable_count=None, neutered=True):
         """
-        Returns a single word per arguments specified.
+        Returns a single word.
+        *   syllable_count controls how many syllables are composed
+            into the returned word.
+        *   neutered controls 
         """
-        syl_list = self.get_syllables(syl_count, neutered)
-        return "".join(syl_list)
+        syllables = self.get_syllables(syllable_count, neutered)
+        return "".join(syllables)
 
-    def get_words(self, *args, neutered=True):
+    def get_words(self, *word_lengths, neutered=True):
         """
-        Return a list of several words. *args should contain numbers
-        specifying the length of each word. The neutered arg determines
-        whether we select from easy or all hiragana.
+        Returns a list of several words.
+        *   word_lengths should contain natural numbers specifying the
+            length of each word.
+        *   neutered determines whether we select from easy hiragana
+            or all hiragana.
         """
-        return [self.get_word(syl_count, neutered) for syl_count in args]
+        return [
+            self.get_word(word_length, neutered)
+            for word_length in word_lengths
+        ]
 
 def main(*args):
     pw_obj = JapaneseSoybean()
