@@ -1,0 +1,3 @@
+noblacklist ${DOCUMENTS}
+noblacklist ${HOME}/Documents/other_music
+noblacklist ${DOWNLOADS}

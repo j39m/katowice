@@ -4,6 +4,10 @@
 They have no coherence, no point, no taste. What else could they be for
 but to stroke my ego?
 
+## firejail-locals
+... contains all the local customizations I wish to retain for my
+firejail usage.
+
 ## lychee-stamps.py
 ... verifies that a file full of timestamps and durations describes a
 continuous timeline - i.e. that each duration spans the whole track into

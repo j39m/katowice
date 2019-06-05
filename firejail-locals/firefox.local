@@ -1,0 +1,7 @@
+# Sometimes I do need to access stuff in Documents.
+noblacklist ${DOCUMENTS}
+whitelist ${DOCUMENTS}
+read-only ${DOCUMENTS}
+
+# I _do_ want u2f.
+ignore nou2f

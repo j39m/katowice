@@ -1,0 +1,15 @@
+noblacklist ${DOWNLOADS}
+whitelist ${DOWNLOADS}
+read-only ${DOWNLOADS}
+noblacklist ${MUSIC}
+whitelist ${MUSIC}
+read-only ${MUSIC}
+noblacklist ${DOCUMENTS}
+whitelist ${DOCUMENTS}
+read-only ${DOCUMENTS}
+
+# Why the hell do I need to do this?
+whitelist ${HOME}/.config/zathura
+noblacklist ${HOME}/.local/share/zathura
+whitelist ${HOME}/.local/share/zathura
+read-write ${HOME}/.local/share/zathura
