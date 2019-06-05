@@ -9,11 +9,14 @@ that you've found a good script that generates good passwords. An angry
 cryptologist will come around in due course to explain why that is untrue.
 """
 
+import argparse
 import random
-import re
 import sys
 
 CHANCE_MISSPELL = 0.26
+
+DEFAULT_JAPANESE_WORDS = [4, 3, 3, 3]
+DEFAULT_ENGLISH_WORDS = 4
 
 def misspell(word):
     """
@@ -69,6 +72,7 @@ class JapaneseSoybean(object):
     def __init__(self, default_count=4):
         self.default_count = default_count
         # The individual hiragana components are given separately.
+        # pylint: disable=bad-whitespace
         self._base = (
             "a",    "i",    "u",    "e",    "o",
             "ka",   "ki",   "ku",   "ke",   "ko",
@@ -126,8 +130,7 @@ class JapaneseSoybean(object):
         Args:
             count: controls how many syllables are returned in the list.
             neutered: selects a set of syllables; if True, we select from
-                      the easy hiragana. If False, we select from all
-                      hiragana.
+                the easy hiragana. If False, we select from all hiragana.
         """
         count = count if count else self.default_count
         syllables = self.neutered if neutered else self.hiragana
@@ -139,9 +142,9 @@ class JapaneseSoybean(object):
 
         Args:
             syllable_count: controls how many syllables are composed
-                            into the returned word.
+                into the returned word.
             neutered: composes the word only of easy hiragana if True and
-                      of any hiragana if False.
+                of any hiragana if False.
         """
         syllables = self.get_syllables(syllable_count, neutered)
         return "".join(syllables)
@@ -152,21 +155,99 @@ class JapaneseSoybean(object):
 
         Args:
             word_lengths: a list of natural numbers specifying the
-                          length of each word.
+                length of each word.
             neutered: controls whether the returned list of words is
-                      composed of easy hiragana or all hiragana.
+                composed of easy hiragana or all hiragana.
         """
         return [
             self.get_word(word_length, neutered)
             for word_length in word_lengths
         ]
 
+def generate_japanese_password(args):
+    """
+    Generates a pseudo-Japanese password composed of random syllables.
+
+    Args:
+        args: Namespace object parsed by argparse.
+
+    Returns:
+        A list of pseudo-Japanese words.
+    """
+    return list()
+
+def generate_english_password(args):
+    """
+    Generates an English password composed of random words.
+
+    Args:
+        args: Namespace object parsed by argparse.
+
+    Returns:
+        A list of English words.
+    """
+    return list()
+
+def init_japanese_parser(subparsers):
+    """
+    Adds the "jp" subparser to the argparse subparsers.
+
+    Args:
+        subparsers: the object returned from an earlier call to
+                    ArgumentParser.add_subparsers().
+    """
+    japanese_parser = subparsers.add_parser("jp")
+    japanese_parser.add_argument(
+        "--difficult",
+        "-d",
+        help="use all hiragana",
+        action="store_true")
+    japanese_parser.add_argument(
+        "counts",
+        help="list of word lengths",
+        action="append",
+        default=DEFAULT_JAPANESE_WORDS,
+        nargs=argparse.REMAINDER,
+    )
+
+    japanese_parser.set_defaults(func=generate_japanese_password)
+
+def init_english_parser(subparsers):
+    """
+    Adds the "en" subparser to the argparse subparsers.
+
+    Args:
+        subparsers: the object returned from an earlier call to
+                    ArgumentParser.add_subparsers().
+    """
+    english_parser = subparsers.add_parser("en")
+    english_parser.add_argument(
+        "--misspell",
+        "-m",
+        help="randomly introduce vowels into words",
+        action="store_true",
+    )
+    english_parser.add_argument(
+        "count",
+        help="number of words to print",
+        default=DEFAULT_ENGLISH_WORDS,
+        nargs=argparse.REMAINDER,
+    )
+
+    english_parser.set_defaults(func=generate_english_password)
+
 def main(*args):
     """Read arguments. Pick a language. Print a password."""
-    pw_obj = JapaneseSoybean()
-    word_list = pw_obj.get_words(4, 3, 3, 3, neutered=True)
-    #pw_obj = EnglishSoybean()
-    #word_list = pw_obj.get_words(3)
+    parser = argparse.ArgumentParser()
+    parser.set_defaults(func=generate_japanese_password)
+    subparsers = parser.add_subparsers()
+
+    init_japanese_parser(subparsers)
+    init_english_parser(subparsers)
+
+    parsed_args = parser.parse_args(args[1:])
+
+    word_list = parsed_args.func(parsed_args)
     print(" ".join(word_list))
     return 0
 
