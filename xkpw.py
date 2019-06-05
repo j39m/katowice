@@ -180,8 +180,8 @@ def generate_japanese_password(args):
         A list of pseudo-Japanese words.
     """
     password_maker = JapaneseSoybean()
-    print(args.counts)
-    return password_maker.get_words(*args.counts, neutered=args.difficult)
+    is_easy = not args.difficult
+    return password_maker.get_words(*args.counts, neutered=is_easy)
 
 def generate_english_password(args):
     """
@@ -194,6 +194,19 @@ def generate_english_password(args):
         A list of English words.
     """
     return list()
+
+def init_global_defaults(parser):
+    """
+    Set up the default, argument-less xkpw execution.
+
+    Args:
+        parser: the top-level ArgumentParser.
+    """
+    parser.set_defaults(
+        func=generate_japanese_password,
+        counts=DEFAULT_JAPANESE_WORDS,
+        difficult=False,
+    )
 
 def init_japanese_parser(subparsers):
     """
@@ -247,9 +260,9 @@ def init_english_parser(subparsers):
 def main(*args):
     """Read arguments. Pick a language. Print a password."""
     parser = argparse.ArgumentParser()
-    parser.set_defaults(func=generate_japanese_password)
     subparsers = parser.add_subparsers()
 
+    init_global_defaults(parser)
     init_japanese_parser(subparsers)
     init_english_parser(subparsers)
 
