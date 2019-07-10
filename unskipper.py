@@ -11,7 +11,7 @@ import shutil
 import quodlibet.library
 
 HOME = os.getenv("HOME")
-QLDIR = ".quodlibet"
+QLDIR = os.path.join(".config", "quodlibet")
 SONGS_PATH = os.path.join(
     HOME,
     QLDIR,
