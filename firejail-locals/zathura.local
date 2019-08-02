@@ -13,3 +13,6 @@ whitelist ${HOME}/.config/zathura
 noblacklist ${HOME}/.local/share/zathura
 whitelist ${HOME}/.local/share/zathura
 read-write ${HOME}/.local/share/zathura
+# Why, why, why?
+whitelist /var/lib/flatpak/export/share/dconf/profile/user
+read-only /var/lib/flatpak/export/share/dconf/profile/user
