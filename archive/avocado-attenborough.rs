@@ -53,7 +53,12 @@ fn target_brightness(current: i32, max: i32) -> Result<i32, std::io::Error> {
     let tentative = current + delta.unwrap();
     if tentative >= max {
         return Ok(max);
-    } else if tentative <= 0 {
+    } else if tentative < 0 {
+        // For kicks, set the brightness all the way up if caller is
+        // trying to take it below 0.
+        if current == 0 {
+            return Ok(max);
+        }
         return Ok(0);
     }
     Ok(tentative)
