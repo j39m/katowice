@@ -40,12 +40,16 @@ fn write_int(path: &PathBuf, value: i32) -> std::io::Result<()> {
 // brightness.
 fn target_brightness(current: i32, max: i32) -> Result<i32, std::io::Error> {
     let args: Vec<String> = std::env::args().collect();
+    if args.len() < 2 {
+        return Err(Error::new(ErrorKind::InvalidInput, "missing delta arg"));
+    }
+    // We expect a integral value, like ``-312'' or ``520.''
     let delta_as_string = &args[1];
     let delta = delta_as_string.parse::<i32>();
 
     if !delta.is_ok() {
         return Err(Error::new(
-            ErrorKind::InvalidInput,
+            ErrorKind::InvalidData,
             format!("bad arg: {}", delta_as_string),
         ));
     }
