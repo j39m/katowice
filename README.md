@@ -4,6 +4,9 @@
 They have no coherence, no point, no taste. What else could they be for
 but to stroke my ego?
 
+## avocado-attenborough.rs
+... is a small suid executable that sets my screen brightness.
+
 ## firejail-locals
 ... contains all the local customizations I wish to retain for my
 firejail usage.
