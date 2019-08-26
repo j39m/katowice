@@ -1,7 +1,7 @@
 #!/bin/bash
 
 NANISORE_WIDTH=52
-NANISORE_SCREENFUL=39
+NANISORE_SCREENFUL=44
 
 function _nanisore() {
     ps -eo args:"${NANISORE_WIDTH}",euser,pid,pcpu,pmem,state \
