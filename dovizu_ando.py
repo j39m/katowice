@@ -137,17 +137,26 @@ class BasicHiragana(object):
         the main routine in which the game runs.
         """
         running_score = 0
-        while True:
+        running_total = 0
+        game_active = True
+
+        while game_active:
             challenge = self.create_challenge()
             print(challenge)
 
             response = self.collect_input()
-            (score, response_h) = self.score_challenge(response, challenge)
+            (score, response_hiragana) = self.score_challenge(
+                response, challenge)
             running_score += score
-            if score != self.strlen:
-                print("KABOOM! Your final score was %d." % (running_score,))
-                print("You erred thus:\n%s" % (response_h,))
-                return 0
+            running_total += self.strlen
+            print("{} - {} / {} == {:.3f}%".format(
+                response_hiragana if score < self.strlen else "Congratulations",
+                running_score,
+                running_total,
+                100 * running_score / running_total))
+
+            # Terminates the busy loop if this round was a total gas.
+            game_active = True if score else False
 
 
 if __name__ == "__main__":
@@ -155,4 +164,7 @@ if __name__ == "__main__":
         game = BasicHiragana(int(sys.argv[1]))
     except (IndexError, ValueError) as excepted:
         game = BasicHiragana(1)
-    sys.exit(game.main())
+    try:
+        sys.exit(game.main())
+    except KeyboardInterrupt:
+        sys.exit(0)
