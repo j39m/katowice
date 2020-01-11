@@ -10,7 +10,7 @@ const BRIGHTNESS_BASENAME: &str = "brightness";
 
 // Defines the apparent path to the directory containing both
 // the brightness and the max_brightness files.
-const BRIGHTNESS_CONTAINING_DIR: &str = "/sys/class/backlight/intel_backlight/";
+const BRIGHTNESS_CONTAINING_DIR: &str = "/sys/class/backlight/amdgpu_bl0/";
 
 // Reads the file named by |path| and returns the integral contents.
 fn sysfs_file_to_int(path: &PathBuf) -> std::result::Result<i32, Error> {
