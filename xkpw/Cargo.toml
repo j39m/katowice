@@ -1,0 +1,12 @@
+[package]
+name = "xkpw"
+version = "0.1.0"
+authors = ["j39m"]
+edition = "2018"
+
+[dependencies]
+clap = "^2"
+
+[[bin]]
+name = "xkpw"
+path = "main.rs"
