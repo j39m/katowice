@@ -67,23 +67,23 @@ mod args {
 } // mod args
 
 mod kana {
-    pub const BASE: &'static [&str] = &[
+    const BASE: &'static [&str] = &[
         "a", "i", "u", "e", "o", "ka", "ki", "ku", "ke", "ko", "sa", "shi", "su", "se", "so", "ta",
         "chi", "tsu", "te", "to", "na", "ni", "nu", "ne", "no", "ha", "hi", "hu", "he", "ho", "ma",
         "mi", "mu", "me", "mo", "ya", "yu", "yo", "ra", "ri", "ru", "re", "ro", "wa", "wo",
     ];
 
-    pub const DIGRAPHS: &'static [&str] = &[
+    const DIGRAPHS: &'static [&str] = &[
         "kya", "kyu", "kyo", "sha", "shu", "sho", "cha", "chu", "cho", "nya", "nyu", "nyo", "hya",
         "hyu", "hyo", "mya", "myu", "myo", "rya", "ryu", "ryo",
     ];
 
-    pub const DIACRITICS: &'static [&str] = &[
+    const DIACRITICS: &'static [&str] = &[
         "ga", "gi", "gu", "ge", "go", "za", "ji", "zu", "ze", "zo", "da", "de", "do", "ba", "bi",
         "bu", "be", "bo", "pa", "pi", "pu", "pe", "po",
     ];
 
-    pub const DIGRAPHS_WITH_DIACRITICS: &'static [&str] = &[
+    const DIGRAPHS_WITH_DIACRITICS: &'static [&str] = &[
         "gya", "gyu", "gyo", "ja", "ju", "jo", "bya", "byu", "byo", "pya", "pyu", "pyo",
     ];
 
