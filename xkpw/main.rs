@@ -59,7 +59,7 @@ mod args {
                         .unwrap_or_else(|e| e.exit()),
                 })
             }
-            _ => ()
+            _ => (),
         }
         crate::PasswordOptions::Japanese(crate::KanaPasswordOptions {
             syllable_counts: vec![4, 3, 3, 3],
@@ -69,8 +69,8 @@ mod args {
 
 mod helpers {
     use rand::seq::SliceRandom;
-    use std::io::Read;
     use std::convert::TryInto;
+    use std::io::Read;
 
     // Reads the dictionary at |path| and returns a linewise vector of
     // its contents.
