@@ -6,6 +6,7 @@ edition = "2018"
 
 [dependencies]
 clap = "^2"
+rand = "^0"
 
 [[bin]]
 name = "xkpw"

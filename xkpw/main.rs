@@ -1,46 +1,26 @@
 extern crate clap;
+extern crate rand;
 
-use std::result::Result;
-use std::string::String;
-use std::vec::Vec;
+pub const DEFAULT_ENGLISH_DICTIONARY_PATH: &'static str = "/usr/share/dict/words";
 
-mod structs {
+#[derive(Debug)]
+pub struct EnglishPasswordOptions {
+    pub num_words: u8,
+    pub dictionary_path: String,
+}
 
-    pub const DEFAULT_ENGLISH_DICTIONARY_PATH: &'static str = "/usr/share/dict/words";
+#[derive(Debug)]
+pub struct KanaPasswordOptions {
+    pub syllable_counts: Vec<u8>,
+}
 
-    #[derive(Debug)]
-    pub enum XkpwError {
-        // Denotes an invalid command-line argument.
-        InvalidArgument(String),
-    }
-
-    impl std::fmt::Display for XkpwError {
-        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-            match self {
-                XkpwError::InvalidArgument(message) => write!(f, "{}", message),
-            }
-        }
-    }
-
-    #[derive(Debug)]
-    pub struct EnglishPasswordOptions {
-        pub num_words: u8,
-        pub dictionary_path: String,
-    }
-
-    #[derive(Debug)]
-    pub struct KanaPasswordOptions {
-        pub syllable_counts: Vec<u8>,
-    }
-
-    pub enum PasswordOptions {
-        English(EnglishPasswordOptions),
-        Japanese(KanaPasswordOptions),
-    }
-} // mod structs
+pub enum PasswordOptions {
+    English(EnglishPasswordOptions),
+    Japanese(KanaPasswordOptions),
+}
 
 mod args {
-    use crate::structs::{EnglishPasswordOptions, KanaPasswordOptions, PasswordOptions, XkpwError};
+    use crate::{EnglishPasswordOptions, KanaPasswordOptions, PasswordOptions};
     use clap::{value_t, values_t};
 
     // Aborts this process on error.
@@ -67,32 +47,83 @@ mod args {
 
         match matches.subcommand() {
             ("en", Some(en_matches)) => {
-                return PasswordOptions::English(EnglishPasswordOptions {
+                return crate::PasswordOptions::English(crate::EnglishPasswordOptions {
                     num_words: clap::value_t!(en_matches, "num-words", u8)
                         .unwrap_or_else(|e| e.exit()),
-                    dictionary_path: crate::structs::DEFAULT_ENGLISH_DICTIONARY_PATH.to_owned(),
+                    dictionary_path: crate::DEFAULT_ENGLISH_DICTIONARY_PATH.to_owned(),
                 })
             }
-
             ("jp", Some(jp_matches)) => {
-                return PasswordOptions::Japanese(KanaPasswordOptions {
+                return crate::PasswordOptions::Japanese(crate::KanaPasswordOptions {
                     syllable_counts: clap::values_t!(jp_matches, "syllable-counts", u8)
                         .unwrap_or_else(|e| e.exit()),
                 })
             }
             _ => ()
         }
-        PasswordOptions::Japanese(KanaPasswordOptions {
+        crate::PasswordOptions::Japanese(crate::KanaPasswordOptions {
             syllable_counts: vec![4, 3, 3, 3],
         })
     }
 } // mod args
 
-fn main_helper() -> i32 {
-    let options = crate::args::parse_args();
-    1
-}
+mod helpers {
+    use rand::seq::SliceRandom;
+    use std::io::Read;
+    use std::convert::TryInto;
+
+    // Reads the dictionary at |path| and returns a linewise vector of
+    // its contents.
+    fn ingest_english_dictionary(path: &std::path::Path) -> std::io::Result<Vec<String>> {
+        let mut file = std::fs::File::open(path)?;
+        let mut contents = String::new();
+        file.read_to_string(&mut contents)?;
+        Ok(contents
+            .lines()
+            .map(|word| word.trim().to_lowercase())
+            .collect())
+    }
+
+    // Returns 1 if we fail to read the word dictionary.
+    fn print_english_password(options: crate::EnglishPasswordOptions) -> i32 {
+        let words = match ingest_english_dictionary(std::path::Path::new(&options.dictionary_path))
+        {
+            Ok(result) => result,
+            Err(error) => {
+                eprintln!("Error reading dictionary: {}", error);
+                return 1;
+            }
+        };
+        let mut rng = &mut rand::thread_rng();
+        let selection: Vec<&String> = words
+            .choose_multiple(&mut rng, options.num_words.try_into().unwrap())
+            .collect();
+
+        let mut iter = selection.iter();
+        if let Some(word) = iter.next() {
+            print!("{}", word);
+            for word in iter {
+                print!(" {}", word);
+            }
+            print!("\n");
+        }
+        0
+    }
+
+    fn print_kana_password(options: crate::KanaPasswordOptions) {
+        eprintln!("XXX(j39m): FIX ME");
+    }
+
+    pub fn main() -> i32 {
+        let options = crate::args::parse_args();
+        match options {
+            crate::PasswordOptions::English(options) => return print_english_password(options),
+            crate::PasswordOptions::Japanese(options) => print_kana_password(options),
+        }
+        0
+    }
+} // mod helpers
 
 fn main() {
-    std::process::exit(main_helper());
+    std::process::exit(crate::helpers::main());
 }
