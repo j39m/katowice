@@ -2,8 +2,11 @@
 
 ... is a potpourri of projects I cobble together in my spare time.
 
-> **NOTE**: Google LLC owns the copyright on commits
-> `e281f451bca055a7bcfc7d74814511b4d6763a19` and newer.
+> **NOTE**: This project is free software, a personal project by j39m.
+> However, Google LLC owns the copyright on commits
+> `e281f451bca055a7bcfc7d74814511b4d6763a19` and newer. This does not
+> impact your ability to use and to hack at this free software; I
+> provide this notice only for attribution purposes.
 
 ## avocado-attenborough.rs
 ... is a small executable that sets my screen brightness.
