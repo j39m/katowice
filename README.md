@@ -2,8 +2,7 @@
 
 ... is a potpourri of projects I cobble together in my spare time.
 
-> **NOTE**
-> Google LLC owns the copyright on commit
+> **NOTE**: Google LLC owns the copyright on commits
 > `e281f451bca055a7bcfc7d74814511b4d6763a19` and newer.
 
 ## avocado-attenborough.rs
