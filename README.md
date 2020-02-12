@@ -1,8 +1,10 @@
 # katowice
 
 ... is a potpourri of projects I cobble together in my spare time.
-They have no coherence, no point, no taste. What else could they be for
-but to stroke my ego?
+
+> **NOTE**
+> Google LLC owns the copyright on commit
+> `e281f451bca055a7bcfc7d74814511b4d6763a19` and newer.
 
 ## avocado-attenborough.rs
 ... is a small executable that sets my screen brightness.
