@@ -4,14 +4,8 @@ use std::process::Command;
 fn simple_firejail_command(target: &str, args: std::env::Args) -> Command {
     let mut command = Command::new("/usr/bin/firejail");
 
-    let executable_target = match target {
-        "npv" => "mpv",
-        "vlk" => "vlc",
-        "z" => "zathura",
-        _ => panic!("BUG: unhandled executable_target"),
-    };
-    command.arg(format!("--profile=/etc/firejail/{}.profile", executable_target));
-    command.arg(format!("/usr/bin/{}", executable_target));
+    command.arg(format!("--profile=/etc/firejail/{}.profile", target));
+    command.arg(format!("/usr/bin/{}", target));
 
     let argv_remainder : Vec<String> = args.collect();
     command.args(argv_remainder);
@@ -25,7 +19,9 @@ fn init_command() -> Command {
 
     let target = args.next().unwrap();
     match target.as_str() {
-        "npv" | "vlk" | "z" => return simple_firejail_command(&target, args),
+        "npv" => return simple_firejail_command("mpv", args),
+        "vlk" => return simple_firejail_command("vlc", args),
+        "z" => return simple_firejail_command("zathura", args),
         _ => panic!(format!("no handler for ``{}''", target)),
     }
 }
