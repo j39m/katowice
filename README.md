@@ -8,6 +8,9 @@
 > impact your ability to use and to hack at this free software; I
 > provide this notice only for attribution purposes.
 
+## unner.rs
+... is a small executable that removes some boilerplate from my `$PATH`.
+
 ## avocado-attenborough.rs
 ... is a small executable that sets my screen brightness.
 
