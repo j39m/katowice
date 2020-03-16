@@ -1,0 +1,4 @@
+noblacklist ${HOME}/.cache/mozilla
+noblacklist ${HOME}/.mozilla
+whitelist ${HOME}/.cache/mozilla/firefox
+whitelist ${HOME}/.mozilla
