@@ -21,9 +21,6 @@ firejail usage.
 ## xkpw
 ... generates nonrandom passwords.
 
-## undue\_instagram.py
-... scrapes Instagram photos.
-
 ## nanisore.sh:
 ... is a shell script that quickly spits out a screenful of processes
 ordered by top memory usage, CPU consumption, or process state.
