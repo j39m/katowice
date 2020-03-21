@@ -22,7 +22,7 @@ struct CgroupedFirejailedCommandOptions<'a> {
     bin_path: &'a str,
     memory_high: Option<i32>,
     memory_max: Option<i32>,
-    firejail_profile: &'a str,
+    firejail_profile: Option<&'a str>,
     implicit_extra_args: Option<&'a [&'a str]>,
     argv_remainder: std::env::Args,
 }
@@ -41,8 +41,11 @@ fn cgrouped_firejail_command(options: CgroupedFirejailedCommandOptions) -> Comma
         command.args(&["-p", memory_max_owned_string.as_str()]);
     }
 
-    command.arg(FIREJAIL);
-    command.arg(format!("--profile={}", options.firejail_profile));
+    if let Some(firejail_profile) = options.firejail_profile {
+        command.arg(FIREJAIL);
+        command.arg(format!("--profile={}", firejail_profile));
+    }
+
     command.arg(options.bin_path);
 
     if let Some(implicit_extra_args) = options.implicit_extra_args {
@@ -78,20 +81,20 @@ fn init_command() -> Command {
                 bin_path: FIREFOX,
                 memory_high: Some(4420),
                 memory_max: Some(5200),
-                firejail_profile: FIREFOX_PROFILE,
+                firejail_profile: None, //FIREFOX_PROFILE,
                 implicit_extra_args: Some(&["-P", FIREFOX_MOZILLA_SFW_PROFILE]),
                 argv_remainder: args,
-            })
+            });
         }
         "keira" => {
             return cgrouped_firejail_command(CgroupedFirejailedCommandOptions {
                 bin_path: KEIRA,
                 memory_high: Some(4420),
                 memory_max: Some(5200),
-                firejail_profile: KEIRA_PROFILE,
+                firejail_profile: None, //KEIRA_PROFILE,
                 implicit_extra_args: Some(&["-P", "nightly"]),
                 argv_remainder: args,
-            })
+            });
         }
         "npv" => return simple_firejail_command("mpv", args),
         "t" => {
@@ -99,7 +102,7 @@ fn init_command() -> Command {
                 bin_path: TERM,
                 memory_high: None,
                 memory_max: None,
-                firejail_profile: TERM_PROFILE,
+                firejail_profile: Some(TERM_PROFILE),
                 implicit_extra_args: None,
                 argv_remainder: args,
             })
@@ -109,10 +112,10 @@ fn init_command() -> Command {
                 bin_path: THUNDERBIRD,
                 memory_high: None,
                 memory_max: None,
-                firejail_profile: THUNDERBIRD_PROFILE,
+                firejail_profile: None, //THUNDERBIRD_PROFILE,
                 implicit_extra_args: None,
                 argv_remainder: args,
-            })
+            });
         }
         "vlk" => return simple_firejail_command("vlc", args),
         "z" => return simple_firejail_command("zathura", args),
