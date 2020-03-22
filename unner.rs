@@ -43,6 +43,7 @@ fn cgrouped_firejail_command(options: CgroupedFirejailedCommandOptions) -> Comma
 
     if let Some(firejail_profile) = options.firejail_profile {
         command.arg(FIREJAIL);
+        command.arg("--ignore=seccomp");
         command.arg(format!("--profile={}", firejail_profile));
     }
 
@@ -81,7 +82,7 @@ fn init_command() -> Command {
                 bin_path: FIREFOX,
                 memory_high: Some(4420),
                 memory_max: Some(5200),
-                firejail_profile: None, //FIREFOX_PROFILE,
+                firejail_profile: Some(FIREFOX_PROFILE),
                 implicit_extra_args: Some(&["-P", FIREFOX_MOZILLA_SFW_PROFILE]),
                 argv_remainder: args,
             });
@@ -91,7 +92,7 @@ fn init_command() -> Command {
                 bin_path: KEIRA,
                 memory_high: Some(4420),
                 memory_max: Some(5200),
-                firejail_profile: None, //KEIRA_PROFILE,
+                firejail_profile: Some(KEIRA_PROFILE),
                 implicit_extra_args: Some(&["-P", "nightly"]),
                 argv_remainder: args,
             });
@@ -112,7 +113,7 @@ fn init_command() -> Command {
                 bin_path: THUNDERBIRD,
                 memory_high: None,
                 memory_max: None,
-                firejail_profile: None, //THUNDERBIRD_PROFILE,
+                firejail_profile: Some(THUNDERBIRD_PROFILE),
                 implicit_extra_args: None,
                 argv_remainder: args,
             });
