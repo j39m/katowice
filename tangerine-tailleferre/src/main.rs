@@ -175,6 +175,12 @@ fn expenditure_type_name_from_enum(type_: &ExpenditureType) -> &'static str {
 }
 
 fn build_show_command(options: SqlOptions) -> String {
+    let wordy_display_command = format!(
+        r#"select {} from {} where date >= date("{}");"#,
+        "*",
+        expenditure_type_name_from_enum(&options.expenditure_type),
+        options.target_date.format("%Y-%m-%d").to_string()
+    );
     let summation_command = format!(
         r#"select {} from {} where date >= date("{}");"#,
         "sum(amount)",
@@ -182,14 +188,7 @@ fn build_show_command(options: SqlOptions) -> String {
         options.target_date.format("%Y-%m-%d").to_string()
     );
 
-    let wordy_display_command = format!(
-        r#"select {} from {} where date >= date("{}");"#,
-        "*",
-        expenditure_type_name_from_enum(&options.expenditure_type),
-        options.target_date.format("%Y-%m-%d").to_string()
-    );
-
-    format!("{} {}", summation_command, wordy_display_command)
+    format!("{} {}", wordy_display_command, summation_command)
 }
 
 fn build_insert_command(options: SqlOptions) -> String {
