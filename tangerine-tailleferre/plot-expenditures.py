@@ -67,8 +67,6 @@ class IngestedData:
 
 def ingest_data():
     data = IngestedData()
-    running_total = 0
-
     for line in sys.stdin:
         data.ingest_line(line)
 
