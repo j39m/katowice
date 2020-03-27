@@ -27,14 +27,16 @@ class IngestedData:
         # Stateful running total.
         self._running_total = 0
 
-    def _update_plottable_data(self, point_date, amount):
+    def _update_plottable_data(self):
+        last_date = self.raw_x[-1]
+
         try:
-            if self.plottable_x[-1] == point_date:
+            if self.plottable_x[-1] == last_date:
                 self.plottable_y[-1] = self._running_total
             else:
                 raise ValueError
         except (IndexError, ValueError):
-            self.plottable_x.append(point_date)
+            self.plottable_x.append(last_date)
             self.plottable_y.append(self._running_total)
 
     def _process_line(self, line):
@@ -47,7 +49,7 @@ class IngestedData:
         self._running_total += amount
         self.raw_x.append(point_date)
         self.raw_y.append(amount)
-        self._update_plottable_data(point_date, amount)
+        self._update_plottable_data()
 
     def ingest_line(self, line):
         """
