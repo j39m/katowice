@@ -14,7 +14,7 @@ def ingest_data():
     running_total = 0
 
     prior_value_error = None
-    for (count, line) in enumerate(sys.stdin):
+    for line in sys.stdin:
         # Raise a previous ValueError iff it took place on a line not
         # the last.
         if prior_value_error is not None:
@@ -25,10 +25,21 @@ def ingest_data():
             prior_value_error = e
             continue
 
-        x.append(datetime.date(*[int(token) for token in raw_date.split(sep="-")]))
+        point_date = datetime.date(
+            *[int(token) for token in raw_date.split(sep="-")])
         running_total += float(raw_amount)
-        y.append(running_total)
+        # Overwrites the most current data point's y-value in place if
+        # the date hasn't changed since the last loop pass.
+        try:
+            if x[-1] == point_date:
+                y[-1] = running_total
+            else:
+                raise ValueError
+        except (IndexError, ValueError):
+            x.append(point_date)
+            y.append(running_total)
 
+    assert len(x) == len(y), "BUG: unbalanced x-y axes"
     return (x, y)
 
 def main():
