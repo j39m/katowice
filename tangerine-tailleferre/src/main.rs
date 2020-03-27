@@ -59,16 +59,21 @@ fn expenditure_type_from_clap(matches: &clap::ArgMatches) -> ExpenditureType {
     ));
 }
 
-fn expenditure_target_date_from_clap(matches: &clap::ArgMatches) -> chrono::Date<chrono::Utc> {
+fn expenditure_target_date_from_clap(
+    matches: &clap::ArgMatches,
+) -> Option<chrono::Date<chrono::Utc>> {
     if let Some(cli_target_date) = matches.value_of(CLAP_TARGET_DATE) {
-        return chrono::Utc
-            .datetime_from_str(cli_target_date, "%Y-%m-%d")
-            .unwrap_or_else(|e| panic!(e))
-            .date();
+        return Some(
+            chrono::Utc
+                .datetime_from_str(
+                    &format!("{} 00:00:00", cli_target_date).to_string(),
+                    "%Y-%m-%d %H:%M:%S",
+                )
+                .unwrap()
+                .date(),
+        );
     }
-
-    // Looks back about half a year ~= ceil(365.25 / 2)
-    return chrono::Utc::now().date() - chrono::Duration::days(183);
+    None
 }
 
 fn expenditure_amount_from_clap(matches: &clap::ArgMatches) -> f64 {
@@ -80,18 +85,29 @@ fn expenditure_description_from_clap(matches: &clap::ArgMatches) -> String {
 }
 
 fn build_show_options(matches: &clap::ArgMatches) -> SqlOptions {
+    let target_date = match expenditure_target_date_from_clap(matches) {
+        Some(date) => date,
+        // Aribtrary choice: peeks back 6 months.
+        None => (chrono::Utc::now() - chrono::Duration::days(183)).date(),
+    };
+
     SqlOptions {
         expenditure_type: expenditure_type_from_clap(matches),
-        target_date: expenditure_target_date_from_clap(matches),
+        target_date: target_date,
         amount: None,
         description: None,
     }
 }
 
 fn build_insert_options(matches: &clap::ArgMatches) -> SqlOptions {
+    let target_date = match expenditure_target_date_from_clap(matches) {
+        Some(date) => date,
+        None => chrono::Utc::now().date(),
+    };
+
     SqlOptions {
         expenditure_type: expenditure_type_from_clap(matches),
-        target_date: expenditure_target_date_from_clap(matches),
+        target_date: target_date,
         amount: Some(expenditure_amount_from_clap(matches)),
         description: Some(expenditure_description_from_clap(matches)),
     }
@@ -180,7 +196,7 @@ fn build_insert_command(options: SqlOptions) -> String {
     format!(
         r#"insert into {} values(date("{}"), "{}", {});"#,
         expenditure_type_name_from_enum(&options.expenditure_type),
-        options.target_date,
+        options.target_date.format("%Y-%m-%d"),
         options.description.unwrap(),
         options.amount.unwrap()
     )
