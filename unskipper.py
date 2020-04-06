@@ -8,6 +8,9 @@
 import os
 import sys
 import shutil
+
+import gi
+gi.require_version("PangoCairo", "1.0")
 import quodlibet.library
 
 HOME = os.getenv("HOME")
