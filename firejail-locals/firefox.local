@@ -5,3 +5,6 @@ read-only ${DOCUMENTS}
 
 # I _do_ want u2f.
 ignore nou2f
+
+# I _do_ want to open links the easy way.
+ignore nodbus
