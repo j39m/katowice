@@ -17,12 +17,13 @@
 
 set -eu;
 
-uid="$(id -u "${1}")";
+uid="$(id -u)";
 
 for sock in /run/user/"${uid}"/sway-ipc.*.*.sock; do
     [ -S "${sock}" ] || continue;
     swaymsg -s "${sock}" exec -- /usr/bin/swaylock -fk \
         -i /usr/share/pixmaps/lock.png \
+        --font "'Fira Sans ExtraLight'" \
         --indicator-radius 130 --ring-color c35b9c80 \
         --inside-color c35b9c80 --ring-ver-color c35b9c80 \
         --inside-ver-color c35b9c80;
