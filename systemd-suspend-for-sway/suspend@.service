@@ -3,9 +3,8 @@ Description=User suspend actions
 Before=sleep.target
 
 [Service]
-User=%I
 Type=forking
-ExecStart=/usr/local/bin/slylocker.sh %I
+ExecStart=/usr/local/bin/slylocker.sh
 ExecStartPost=/usr/bin/sleep 1.3
 
 [Install]
