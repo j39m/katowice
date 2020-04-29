@@ -24,7 +24,7 @@ struct CgroupedFirejailedCommandOptions<'a> {
     memory_max: Option<i32>,
     firejail_profile: Option<&'a str>,
     implicit_extra_args: Option<&'a [&'a str]>,
-    argv_remainder: std::env::Args,
+    argv_remainder: Vec<String>,
 }
 
 fn cgrouped_firejail_command(options: CgroupedFirejailedCommandOptions) -> Command {
@@ -53,29 +53,32 @@ fn cgrouped_firejail_command(options: CgroupedFirejailedCommandOptions) -> Comma
         command.args(implicit_extra_args);
     }
 
-    let argv_remainder: Vec<String> = options.argv_remainder.collect();
-    command.args(argv_remainder);
+    command.args(options.argv_remainder);
 
     command
 }
 
-fn simple_firejail_command(target: &str, args: std::env::Args) -> Command {
+fn simple_firejail_command(target: &str, args: Vec<String>) -> Command {
     let mut command = Command::new(FIREJAIL);
 
     command.arg(format!("--profile=/etc/firejail/{}.profile", target));
     command.arg(format!("/usr/bin/{}", target));
-
-    let argv_remainder: Vec<String> = args.collect();
-    command.args(argv_remainder);
+    command.args(args);
 
     command
 }
 
 fn init_command() -> Command {
-    let mut args = std::env::args();
-    args.next();
+    let mut args_less_the_first = std::env::args();
+    // Pops the name of this executable.
+    args_less_the_first.next();
 
-    let target = args.next().unwrap();
+    // Pops the name of the unner target.
+    let target = args_less_the_first.next().unwrap();
+
+    // Copies and collects the remaining argv.
+    let args: Vec<String> = args_less_the_first.collect();
+
     match target.as_str() {
         "ff" => {
             return cgrouped_firejail_command(CgroupedFirejailedCommandOptions {
