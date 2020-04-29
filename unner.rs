@@ -114,6 +114,17 @@ fn init_command() -> Command {
                 argv_remainder: args,
             })
         }
+        "read" => {
+            let formatted_args: Vec<String> = vec![format!("about:reader?url={}", args[0])];
+            return cgrouped_firejail_command(CgroupedFirejailedCommandOptions {
+                bin_path: FIREFOX,
+                memory_high: Some(FIREFOX_MEMORY_HIGH),
+                memory_max: Some(FIREFOX_MEMORY_MAX),
+                firejail_profile: Some(FIREFOX_PROFILE),
+                implicit_extra_args: Some(&["-P", FIREFOX_MOZILLA_SFW_PROFILE]),
+                argv_remainder: formatted_args,
+            });
+        }
         "tbb" => {
             return cgrouped_firejail_command(CgroupedFirejailedCommandOptions {
                 bin_path: THUNDERBIRD,
