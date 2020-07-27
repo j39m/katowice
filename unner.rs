@@ -135,7 +135,16 @@ fn init_command() -> Command {
                 argv_remainder: args,
             });
         }
-        "vlk" => return simple_firejail_command("vlc", args),
+        "vlk" => {
+            return cgrouped_firejail_command(CgroupedFirejailedCommandOptions {
+                bin_path: "/usr/bin/vlc",
+                memory_high: None,
+                memory_max: None,
+                firejail_profile: Some("/etc/firejail/vlc.profile"),
+                implicit_extra_args: None,
+                argv_remainder: args,
+            })
+        }
         "z" => return simple_firejail_command("zathura", args),
         _ => panic!(format!("no handler for ``{}''", target)),
     }
