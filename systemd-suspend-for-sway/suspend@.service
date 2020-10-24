@@ -6,7 +6,6 @@ Before=sleep.target
 User=%I
 Type=oneshot
 ExecStart=/usr/local/bin/slylocker.sh
-ExecStartPost=/usr/bin/sleep 0.52
 
 [Install]
 WantedBy=sleep.target
