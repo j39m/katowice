@@ -13,3 +13,4 @@ for _ in {1..26}; do
     pgrep -u "${uid}" -x swaylock && break
     sleep 0.13
 done
+sleep 1.82
