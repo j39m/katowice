@@ -8,6 +8,12 @@
 > impact your ability to use and to hack at this free software; I
 > provide this notice only for attribution purposes.
 
+## satsuma-surveil.sh
+
+... is a script that streams my default PulseAudio sink to my local
+network, allowing me to treat my primary music player as a streaming
+jukebox.
+
 ## tangerine-tailleferre
 
 ... is a small executable that controls my personal expenditures table.
