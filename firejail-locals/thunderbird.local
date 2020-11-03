@@ -1,4 +1,8 @@
+ignore noexec ${HOME}
+
 noblacklist ${HOME}/.cache/mozilla
 noblacklist ${HOME}/.mozilla
+noblacklist ${HOME}/Downloads/.thunderbird-beta
 whitelist ${HOME}/.cache/mozilla/firefox
 whitelist ${HOME}/.mozilla
+whitelist ${HOME}/Downloads/.thunderbird-beta

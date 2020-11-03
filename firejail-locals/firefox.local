@@ -1,3 +1,6 @@
+# Workaround allowing Nightly to execute from ~/.
+ignore noexec ${HOME}
+
 # Sometimes I do need to access stuff in Documents.
 noblacklist ${DOCUMENTS}
 whitelist ${DOCUMENTS}
