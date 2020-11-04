@@ -1,5 +1,12 @@
 ignore noexec ${HOME}
 
+# TODO(j39m): remove this, it shouldn't be necessary??
+ignore nodbus
+
+ignore dbus-user none
+dbus-user filter
+dbus-user.talk org.mozilla.firefox.*
+
 noblacklist ${HOME}/.cache/mozilla
 noblacklist ${HOME}/.mozilla
 noblacklist ${HOME}/Downloads/.thunderbird-beta
