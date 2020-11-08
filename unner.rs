@@ -145,7 +145,7 @@ fn init_command() -> Command {
                 argv_remainder: args,
             })
         }
-        "z" => return simple_firejail_command("zathura", args),
+        "e" => return simple_firejail_command("evince", args),
         _ => panic!(format!("no handler for ``{}''", target)),
     }
 }
