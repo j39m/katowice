@@ -36,36 +36,29 @@ fn write_int(path: &PathBuf, value: i32) -> std::io::Result<()> {
     file.flush()
 }
 
-// Reads the current and max brightness; returns the new target
-// brightness.
-fn target_brightness(current: i32, max: i32) -> Result<i32, std::io::Error> {
+fn get_brightness_delta() -> i32 {
     let args: Vec<String> = std::env::args().collect();
-    if args.len() < 2 {
-        return Err(Error::new(ErrorKind::InvalidInput, "missing delta arg"));
-    }
+
     // We expect a integral value, like ``-312'' or ``520.''
     let delta_as_string = &args[1];
     let delta = delta_as_string.parse::<i32>();
 
-    if !delta.is_ok() {
-        return Err(Error::new(
-            ErrorKind::InvalidData,
-            format!("bad arg: {}", delta_as_string),
-        ));
-    }
+    return delta.unwrap();
+}
 
-    let tentative = current + delta.unwrap();
+// Reads the current and max brightness; returns the new target
+// brightness.
+fn get_target_brightness(current: i32, max: i32) -> i32 {
+    let tentative = current + get_brightness_delta();
     if tentative >= max {
-        return Ok(max);
+        return max;
     } else if tentative < 0 {
-        // For kicks, set the brightness all the way up if caller is
-        // trying to take it below 0.
         if current == 0 {
-            return Ok(max);
+            return max;
         }
-        return Ok(0);
+        return 0;
     }
-    Ok(tentative)
+    tentative
 }
 
 fn main() -> Result<(), std::io::Error> {
@@ -75,6 +68,6 @@ fn main() -> Result<(), std::io::Error> {
     let current = sysfs_file_to_int(&brightness_path)?;
     let max = sysfs_file_to_int(&base_dir.join(MAX_BRIGHTNESS_BASENAME))?;
 
-    let new = target_brightness(current, max)?;
+    let new = get_target_brightness(current, max);
     write_int(&brightness_path, new)
 }
