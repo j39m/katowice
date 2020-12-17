@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -eu;
+set -u;
 
 uid="$(id -u)";
 
