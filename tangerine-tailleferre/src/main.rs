@@ -4,7 +4,7 @@ use std::process::Command;
 // clap exposes the macro value_t!
 use clap::value_t;
 
-// chrono needs this to call Utc.datetime_from_str().
+// chrono needs this to call Local.datetime_from_str().
 use chrono::offset::TimeZone;
 
 const SQLITE3: &'static str = "/usr/bin/sqlite3";
@@ -30,7 +30,7 @@ struct SqlOptions {
     expenditure_type: ExpenditureType,
 
     // Target date is always required in transacting expenditures.
-    target_date: chrono::Date<chrono::Utc>,
+    target_date: chrono::Date<chrono::Local>,
 
     // Amount and description are required for insertion.
     // They are meaningless for read-only queries.
@@ -61,10 +61,10 @@ fn expenditure_type_from_clap(matches: &clap::ArgMatches) -> ExpenditureType {
 
 fn expenditure_target_date_from_clap(
     matches: &clap::ArgMatches,
-) -> Option<chrono::Date<chrono::Utc>> {
+) -> Option<chrono::Date<chrono::Local>> {
     if let Some(cli_target_date) = matches.value_of(CLAP_TARGET_DATE) {
         return Some(
-            chrono::Utc
+            chrono::Local
                 .datetime_from_str(
                     &format!("{} 00:00:00", cli_target_date).to_string(),
                     "%Y-%m-%d %H:%M:%S",
@@ -88,7 +88,7 @@ fn build_show_options(matches: &clap::ArgMatches) -> SqlOptions {
     let target_date = match expenditure_target_date_from_clap(matches) {
         Some(date) => date,
         // Aribtrary choice: peeks back 6 months.
-        None => (chrono::Utc::now() - chrono::Duration::days(183)).date(),
+        None => (chrono::Local::now() - chrono::Duration::days(183)).date(),
     };
 
     SqlOptions {
@@ -102,7 +102,7 @@ fn build_show_options(matches: &clap::ArgMatches) -> SqlOptions {
 fn build_insert_options(matches: &clap::ArgMatches) -> SqlOptions {
     let target_date = match expenditure_target_date_from_clap(matches) {
         Some(date) => date,
-        None => chrono::Utc::now().date(),
+        None => chrono::Local::now().date(),
     };
 
     SqlOptions {
