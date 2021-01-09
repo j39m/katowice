@@ -1,7 +1,7 @@
 #!/bin/bash
 
 MONITOR_DEVICE="pulse://"
-MONITOR_DEVICE+="alsa_output.pci-0000_06_00.6.HiFi__hw_Generic_1__sink"
+MONITOR_DEVICE+="alsa_output.pci-0000_06_00.6.analog-stereo"
 MONITOR_DEVICE+=".monitor"
 
 SOUT="#transcode{vcodec=none,acodec=opus,"
