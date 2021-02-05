@@ -11,3 +11,7 @@ read-only ${MUSIC}
 noblacklist ${DOCUMENTS}
 whitelist ${DOCUMENTS}
 read-only ${DOCUMENTS}
+
+mkdir ${RUNUSER}/firejailed-evince/
+whitelist ${RUNUSER}/firejailed-evince/
+read-write ${RUNUSER}/firejailed-evince/
