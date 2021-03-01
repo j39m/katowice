@@ -126,16 +126,6 @@ fn init_command() -> Command {
             });
         }
         "npv" => return simple_firejail_command("mpv", args),
-        "t" => {
-            return cgrouped_firejail_command(CgroupedFirejailedCommandOptions {
-                bin_path: TERM,
-                memory_high: None,
-                memory_max: None,
-                firejail_profile: Some(TERM_PROFILE),
-                implicit_extra_args: None,
-                argv_remainder: args,
-            })
-        }
         "read" => {
             let formatted_args: Vec<String> = vec![format!("about:reader?url={}", args[0])];
             return cgrouped_firejail_command(CgroupedFirejailedCommandOptions {
@@ -146,6 +136,16 @@ fn init_command() -> Command {
                 implicit_extra_args: Some(&["-P", FIREFOX_MOZILLA_SFW_PROFILE]),
                 argv_remainder: formatted_args,
             });
+        }
+        "t" => {
+            return cgrouped_firejail_command(CgroupedFirejailedCommandOptions {
+                bin_path: TERM,
+                memory_high: None,
+                memory_max: None,
+                firejail_profile: Some(TERM_PROFILE),
+                implicit_extra_args: None,
+                argv_remainder: args,
+            })
         }
         "tbb" => {
             return cgrouped_firejail_command(CgroupedFirejailedCommandOptions {
