@@ -1,3 +1,4 @@
+use std::io::Write;
 use std::os::unix::process::CommandExt;
 use std::process::Command;
 
@@ -19,6 +20,8 @@ const TERM_PROFILE: &'static str = "/etc/firejail/x-terminal-emulator.profile";
 
 const THUNDERBIRD: &'static str = "/home/kalvin/Downloads/.thunderbird-beta/thunderbird";
 const THUNDERBIRD_PROFILE: &'static str = "/etc/firejail/thunderbird-beta.profile";
+
+const QUODLIBET_FIFO: &'static str = "/home/kalvin/.config/quodlibet/control";
 
 const SWAYMSG: &'static str = "/usr/bin/swaymsg";
 const SWAY_EXTERNAL_DISPLAY: &'static str = "HDMI-A-1";
@@ -92,6 +95,24 @@ fn swaymsg_display_command(args: Vec<String>) -> Command {
     command
 }
 
+fn quodlibet_command(args: Vec<String>) -> Command {
+    let mut file = std::fs::OpenOptions::new()
+        .append(true)
+        .open(QUODLIBET_FIFO)
+        .unwrap();
+    file.write_all(match args[0].as_str() {
+        "pp" => "play-pause".as_bytes(),
+        "sa" => "stop-after 1".as_bytes(),
+        _ => panic!(
+            "bad argument for quodlibet command: ``{}''",
+            args[0].as_str()
+        ),
+    })
+    .unwrap();
+
+    Command::new("/bin/true")
+}
+
 fn init_command() -> Command {
     let mut args_less_the_first = std::env::args();
     // Pops the name of this executable.
@@ -126,6 +147,7 @@ fn init_command() -> Command {
             });
         }
         "npv" => return simple_firejail_command("mpv", args),
+        "q" => return quodlibet_command(args),
         "read" => {
             let formatted_args: Vec<String> = vec![format!("about:reader?url={}", args[0])];
             return cgrouped_firejail_command(CgroupedFirejailedCommandOptions {
