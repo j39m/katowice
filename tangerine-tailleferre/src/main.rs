@@ -19,13 +19,13 @@ const CLAP_EXPENDITURE_TYPE: &'static str = "expenditure-type";
 const CLAP_TARGET_DATE: &'static str = "target-date";
 
 #[derive(Debug)]
-enum ExpenditureType {
+pub enum ExpenditureType {
     Personal,
     Essential,
 }
 
 #[derive(Debug)]
-struct SqlOptions {
+pub struct SqlOptions {
     // Expenditure type is always required in transacting expenditures.
     expenditure_type: ExpenditureType,
 
@@ -39,60 +39,62 @@ struct SqlOptions {
 }
 
 #[derive(Debug)]
-enum SqlCommand {
+pub enum SqlCommand {
     Edit,
     Show(SqlOptions),
     Insert(SqlOptions),
 }
 
-fn expenditure_type_from_clap(matches: &clap::ArgMatches) -> ExpenditureType {
-    let symbolic_type = matches.value_of(CLAP_EXPENDITURE_TYPE).unwrap();
+mod from_clap {
+    use super::*;
 
-    match symbolic_type {
-        "p" => return ExpenditureType::Personal,
-        "e" => return ExpenditureType::Essential,
-        _ => (),
-    };
-    panic!(format!(
-        "invalid {} ``{}''",
-        CLAP_EXPENDITURE_TYPE, symbolic_type
-    ));
-}
+    pub fn expenditure_type(matches: &clap::ArgMatches) -> ExpenditureType {
+        let symbolic_type = matches.value_of(CLAP_EXPENDITURE_TYPE).unwrap();
 
-fn expenditure_target_date_from_clap(
-    matches: &clap::ArgMatches,
-) -> Option<chrono::Date<chrono::Local>> {
-    if let Some(cli_target_date) = matches.value_of(CLAP_TARGET_DATE) {
-        return Some(
-            chrono::Local
-                .datetime_from_str(
-                    &format!("{} 00:00:00", cli_target_date).to_string(),
-                    "%Y-%m-%d %H:%M:%S",
-                )
-                .unwrap()
-                .date(),
-        );
+        match symbolic_type {
+            "p" => return ExpenditureType::Personal,
+            "e" => return ExpenditureType::Essential,
+            _ => (),
+        };
+        panic!(format!(
+            "invalid {} ``{}''",
+            CLAP_EXPENDITURE_TYPE, symbolic_type
+        ));
     }
-    None
-}
 
-fn expenditure_amount_from_clap(matches: &clap::ArgMatches) -> f64 {
-    clap::value_t!(matches, CLAP_AMOUNT, f64).unwrap_or_else(|e| e.exit())
-}
+    pub fn target_date(matches: &clap::ArgMatches) -> Option<chrono::Date<chrono::Local>> {
+        if let Some(cli_target_date) = matches.value_of(CLAP_TARGET_DATE) {
+            return Some(
+                chrono::Local
+                    .datetime_from_str(
+                        &format!("{} 00:00:00", cli_target_date).to_string(),
+                        "%Y-%m-%d %H:%M:%S",
+                    )
+                    .unwrap()
+                    .date(),
+            );
+        }
+        None
+    }
 
-fn expenditure_description_from_clap(matches: &clap::ArgMatches) -> String {
-    clap::value_t!(matches, CLAP_DESCRIPTION, String).unwrap_or_else(|e| e.exit())
-}
+    pub fn amount(matches: &clap::ArgMatches) -> f64 {
+        clap::value_t!(matches, CLAP_AMOUNT, f64).unwrap_or_else(|e| e.exit())
+    }
+
+    pub fn description(matches: &clap::ArgMatches) -> String {
+        clap::value_t!(matches, CLAP_DESCRIPTION, String).unwrap_or_else(|e| e.exit())
+    }
+} // mod from_clap
 
 fn build_show_options(matches: &clap::ArgMatches) -> SqlOptions {
-    let target_date = match expenditure_target_date_from_clap(matches) {
+    let target_date = match from_clap::target_date(matches) {
         Some(date) => date,
         // Aribtrary choice: peeks back 6 months.
         None => (chrono::Local::now() - chrono::Duration::days(183)).date(),
     };
 
     SqlOptions {
-        expenditure_type: expenditure_type_from_clap(matches),
+        expenditure_type: from_clap::expenditure_type(matches),
         target_date: target_date,
         amount: None,
         description: None,
@@ -100,16 +102,16 @@ fn build_show_options(matches: &clap::ArgMatches) -> SqlOptions {
 }
 
 fn build_insert_options(matches: &clap::ArgMatches) -> SqlOptions {
-    let target_date = match expenditure_target_date_from_clap(matches) {
+    let target_date = match from_clap::target_date(matches) {
         Some(date) => date,
         None => chrono::Local::now().date(),
     };
 
     SqlOptions {
-        expenditure_type: expenditure_type_from_clap(matches),
+        expenditure_type: from_clap::expenditure_type(matches),
         target_date: target_date,
-        amount: Some(expenditure_amount_from_clap(matches)),
-        description: Some(expenditure_description_from_clap(matches)),
+        amount: Some(from_clap::amount(matches)),
+        description: Some(from_clap::description(matches)),
     }
 }
 
