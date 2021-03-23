@@ -64,15 +64,16 @@ mod from_clap {
 
     pub fn target_date(matches: &clap::ArgMatches) -> Option<chrono::Date<chrono::Local>> {
         if let Some(cli_target_date) = matches.value_of(CLAP_TARGET_DATE) {
-            return Some(
-                chrono::Local
-                    .datetime_from_str(
-                        &format!("{} 00:00:00", cli_target_date).to_string(),
-                        "%Y-%m-%d %H:%M:%S",
-                    )
-                    .unwrap()
-                    .date(),
-            );
+            if let Ok(datetime) = chrono::Local.datetime_from_str(
+                &format!("{} 00:00:00", cli_target_date).to_string(),
+                "%Y-%m-%d %H:%M:%S",
+            ) {
+                return Some(datetime.date());
+            }
+            if let Ok(date_delta) = cli_target_date.parse::<i64>() {
+                return Some((chrono::Local::now() - chrono::Duration::days(date_delta)).date());
+            }
+            panic!(format!("bad target date: ``{}''", cli_target_date));
         }
         None
     }
