@@ -190,7 +190,7 @@ fn init_command() -> Command {
             })
         }
         "e" => return simple_firejail_command("evince", args),
-        _ => panic!(format!("no handler for ``{}''", target)),
+        _ => panic!("no handler for ``{}''", target),
     }
 }
 
