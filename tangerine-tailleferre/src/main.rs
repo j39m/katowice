@@ -56,10 +56,7 @@ mod from_clap {
             "e" => return ExpenditureType::Essential,
             _ => (),
         };
-        panic!(format!(
-            "invalid {} ``{}''",
-            CLAP_EXPENDITURE_TYPE, symbolic_type
-        ));
+        panic!("invalid {} ``{}''", CLAP_EXPENDITURE_TYPE, symbolic_type);
     }
 
     pub fn target_date(matches: &clap::ArgMatches) -> Option<chrono::Date<chrono::Local>> {
@@ -73,7 +70,7 @@ mod from_clap {
             if let Ok(date_delta) = cli_target_date.parse::<i64>() {
                 return Some((chrono::Local::now() - chrono::Duration::days(date_delta)).date());
             }
-            panic!(format!("bad target date: ``{}''", cli_target_date));
+            panic!("bad target date: ``{}''", cli_target_date);
         }
         None
     }
