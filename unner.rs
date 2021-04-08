@@ -23,9 +23,6 @@ const THUNDERBIRD_PROFILE: &'static str = "/etc/firejail/thunderbird-beta.profil
 
 const QUODLIBET_FIFO: &'static str = "/home/kalvin/.config/quodlibet/control";
 
-const SWAYMSG: &'static str = "/usr/bin/swaymsg";
-const SWAY_EXTERNAL_DISPLAY: &'static str = "HDMI-A-1";
-
 #[derive(Debug)]
 struct CgroupedFirejailedCommandOptions<'a> {
     bin_path: &'a str,
@@ -77,24 +74,6 @@ fn simple_firejail_command(target: &str, args: Vec<String>) -> Command {
     command
 }
 
-fn swaymsg_display_command(args: Vec<String>) -> Command {
-    let mut command = Command::new(SWAYMSG);
-    command.arg(format!(
-        "output {} {}",
-        SWAY_EXTERNAL_DISPLAY,
-        match args[0].as_str() {
-            "e" => "enable",
-            "d" => "disable",
-            _ => panic!(
-                "bad argument for swaymsg ``output'' command: ``{}''",
-                args[0].as_str()
-            ),
-        }
-    ));
-
-    command
-}
-
 fn quodlibet_command(args: Vec<String>) -> Command {
     let mut file = std::fs::OpenOptions::new()
         .append(true)
@@ -125,7 +104,6 @@ fn init_command() -> Command {
     let args: Vec<String> = args_less_the_first.collect();
 
     match target.as_str() {
-        "d" => return swaymsg_display_command(args),
         "ff" => {
             return cgrouped_firejail_command(CgroupedFirejailedCommandOptions {
                 bin_path: FIREFOX,
