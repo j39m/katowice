@@ -15,6 +15,9 @@ const FIREFOX_MEMORY_MAX: i32 = 5200;
 const KEIRA: &'static str = "/home/kalvin/Downloads/.firefox-nightly/firefox";
 const KEIRA_PROFILE: &'static str = "/etc/firejail/firefox-nightly.profile";
 
+const MPV: &'static str = "/usr/bin/mpv";
+const MPV_PROFILE: &'static str = "/etc/firejail/mpv.profile";
+
 const TERM: &'static str = "/usr/bin/alacritty";
 const TERM_PROFILE: &'static str = "/etc/firejail/x-terminal-emulator.profile";
 
@@ -124,7 +127,16 @@ fn init_command() -> Command {
                 argv_remainder: args,
             });
         }
-        "npv" => return simple_firejail_command("mpv", args),
+        "npv" => {
+            return cgrouped_firejail_command(CgroupedFirejailedCommandOptions {
+                bin_path: MPV,
+                memory_high: None,
+                memory_max: None,
+                firejail_profile: Some(MPV_PROFILE),
+                implicit_extra_args: Some(&["--pulse-buffer=13"]),
+                argv_remainder: args,
+            });
+        }
         "q" => return quodlibet_command(args),
         "read" => {
             let formatted_args: Vec<String> = vec![format!("about:reader?url={}", args[0])];
