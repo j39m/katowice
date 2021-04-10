@@ -1,4 +1,5 @@
 use std::io::Write;
+use std::option::Option;
 use std::os::unix::process::CommandExt;
 use std::process::Command;
 
@@ -77,7 +78,7 @@ fn simple_firejail_command(target: &str, args: Vec<String>) -> Command {
     command
 }
 
-fn quodlibet_command(args: Vec<String>) -> Command {
+fn quodlibet_command(args: Vec<String>) {
     let mut file = std::fs::OpenOptions::new()
         .append(true)
         .open(QUODLIBET_FIFO)
@@ -91,11 +92,9 @@ fn quodlibet_command(args: Vec<String>) -> Command {
         ),
     })
     .unwrap();
-
-    Command::new("/bin/true")
 }
 
-fn init_command() -> Command {
+fn init_command() -> Option<Command> {
     let mut args_less_the_first = std::env::args();
     // Pops the name of this executable.
     args_less_the_first.next();
@@ -108,84 +107,102 @@ fn init_command() -> Command {
 
     match target.as_str() {
         "ff" => {
-            return cgrouped_firejail_command(CgroupedFirejailedCommandOptions {
-                bin_path: FIREFOX,
-                memory_high: Some(FIREFOX_MEMORY_HIGH),
-                memory_max: Some(FIREFOX_MEMORY_MAX),
-                firejail_profile: Some(FIREFOX_PROFILE),
-                implicit_extra_args: Some(&["-P", FIREFOX_MOZILLA_SFW_PROFILE]),
-                argv_remainder: args,
-            });
+            return Some(cgrouped_firejail_command(
+                CgroupedFirejailedCommandOptions {
+                    bin_path: FIREFOX,
+                    memory_high: Some(FIREFOX_MEMORY_HIGH),
+                    memory_max: Some(FIREFOX_MEMORY_MAX),
+                    firejail_profile: Some(FIREFOX_PROFILE),
+                    implicit_extra_args: Some(&["-P", FIREFOX_MOZILLA_SFW_PROFILE]),
+                    argv_remainder: args,
+                },
+            ));
         }
         "keira" => {
-            return cgrouped_firejail_command(CgroupedFirejailedCommandOptions {
-                bin_path: KEIRA,
-                memory_high: Some(FIREFOX_MEMORY_HIGH),
-                memory_max: Some(FIREFOX_MEMORY_MAX),
-                firejail_profile: Some(KEIRA_PROFILE),
-                implicit_extra_args: Some(&["-P", "nightly"]),
-                argv_remainder: args,
-            });
+            return Some(cgrouped_firejail_command(
+                CgroupedFirejailedCommandOptions {
+                    bin_path: KEIRA,
+                    memory_high: Some(FIREFOX_MEMORY_HIGH),
+                    memory_max: Some(FIREFOX_MEMORY_MAX),
+                    firejail_profile: Some(KEIRA_PROFILE),
+                    implicit_extra_args: Some(&["-P", "nightly"]),
+                    argv_remainder: args,
+                },
+            ));
         }
         "npv" => {
-            return cgrouped_firejail_command(CgroupedFirejailedCommandOptions {
-                bin_path: MPV,
-                memory_high: None,
-                memory_max: None,
-                firejail_profile: Some(MPV_PROFILE),
-                implicit_extra_args: Some(&["--pulse-buffer=13"]),
-                argv_remainder: args,
-            });
+            return Some(cgrouped_firejail_command(
+                CgroupedFirejailedCommandOptions {
+                    bin_path: MPV,
+                    memory_high: None,
+                    memory_max: None,
+                    firejail_profile: Some(MPV_PROFILE),
+                    implicit_extra_args: Some(&["--pulse-buffer=13"]),
+                    argv_remainder: args,
+                },
+            ));
         }
-        "q" => return quodlibet_command(args),
+        "q" => {
+            quodlibet_command(args);
+            return None;
+        }
         "read" => {
             let formatted_args: Vec<String> = vec![format!("about:reader?url={}", args[0])];
-            return cgrouped_firejail_command(CgroupedFirejailedCommandOptions {
-                bin_path: FIREFOX,
-                memory_high: Some(FIREFOX_MEMORY_HIGH),
-                memory_max: Some(FIREFOX_MEMORY_MAX),
-                firejail_profile: Some(FIREFOX_PROFILE),
-                implicit_extra_args: Some(&["-P", FIREFOX_MOZILLA_SFW_PROFILE]),
-                argv_remainder: formatted_args,
-            });
+            return Some(cgrouped_firejail_command(
+                CgroupedFirejailedCommandOptions {
+                    bin_path: FIREFOX,
+                    memory_high: Some(FIREFOX_MEMORY_HIGH),
+                    memory_max: Some(FIREFOX_MEMORY_MAX),
+                    firejail_profile: Some(FIREFOX_PROFILE),
+                    implicit_extra_args: Some(&["-P", FIREFOX_MOZILLA_SFW_PROFILE]),
+                    argv_remainder: formatted_args,
+                },
+            ));
         }
         "t" => {
-            return cgrouped_firejail_command(CgroupedFirejailedCommandOptions {
-                bin_path: TERM,
-                memory_high: None,
-                memory_max: None,
-                firejail_profile: Some(TERM_PROFILE),
-                implicit_extra_args: None,
-                argv_remainder: args,
-            })
+            return Some(cgrouped_firejail_command(
+                CgroupedFirejailedCommandOptions {
+                    bin_path: TERM,
+                    memory_high: None,
+                    memory_max: None,
+                    firejail_profile: Some(TERM_PROFILE),
+                    implicit_extra_args: None,
+                    argv_remainder: args,
+                },
+            ));
         }
         "tbb" => {
-            return cgrouped_firejail_command(CgroupedFirejailedCommandOptions {
-                bin_path: THUNDERBIRD,
-                memory_high: None,
-                memory_max: None,
-                firejail_profile: Some(THUNDERBIRD_PROFILE),
-                implicit_extra_args: None,
-                argv_remainder: args,
-            });
+            return Some(cgrouped_firejail_command(
+                CgroupedFirejailedCommandOptions {
+                    bin_path: THUNDERBIRD,
+                    memory_high: None,
+                    memory_max: None,
+                    firejail_profile: Some(THUNDERBIRD_PROFILE),
+                    implicit_extra_args: None,
+                    argv_remainder: args,
+                },
+            ));
         }
         "vlk" => {
-            return cgrouped_firejail_command(CgroupedFirejailedCommandOptions {
-                bin_path: "/usr/bin/vlc",
-                memory_high: None,
-                memory_max: None,
-                firejail_profile: Some("/etc/firejail/vlc.profile"),
-                implicit_extra_args: None,
-                argv_remainder: args,
-            })
+            return Some(cgrouped_firejail_command(
+                CgroupedFirejailedCommandOptions {
+                    bin_path: "/usr/bin/vlc",
+                    memory_high: None,
+                    memory_max: None,
+                    firejail_profile: Some("/etc/firejail/vlc.profile"),
+                    implicit_extra_args: None,
+                    argv_remainder: args,
+                },
+            ));
         }
-        "e" => return simple_firejail_command("evince", args),
+        "e" => return Some(simple_firejail_command("evince", args)),
         _ => panic!("no handler for ``{}''", target),
     }
 }
 
 fn main() {
-    let mut command = init_command();
-    println!("{:#?}", command);
-    command.exec();
+    if let Some(mut command) = init_command() {
+        println!("{:#?}", command);
+        command.exec();
+    }
 }
