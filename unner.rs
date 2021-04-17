@@ -190,7 +190,7 @@ fn init_command() -> Option<Command> {
                     memory_high: None,
                     memory_max: None,
                     firejail_profile: Some("/etc/firejail/vlc.profile"),
-                    implicit_extra_args: None,
+                    implicit_extra_args: Some(&["--play-and-exit"]),
                     argv_remainder: args,
                 },
             ));
