@@ -29,6 +29,10 @@ struct LoopManager {
     backing: PathBuf,
 }
 
+struct LuksManager {
+    device: PathBuf,
+}
+
 impl SshfsManager {
     pub fn new() -> Result<SshfsManager, AuricError> {
         let xdg_runtime_dir = match std::env::var("XDG_RUNTIME_DIR") {
@@ -177,6 +181,56 @@ impl LoopManager {
         if !result.success() {
             return Err(AuricError::Subprocess(format!(
                 "failed to detach loop device: ``{}''",
+                result.stderr_str()
+            )));
+        }
+        Ok(())
+    }
+}
+
+impl LuksManager {
+    pub fn new() -> LuksManager {
+        let mut device = PathBuf::from("/dev/disk/by-label");
+        device.push(LOOP_DEVICE_PARTITION_LABEL);
+        LuksManager { device: device }
+    }
+
+    // `locked_device` is necessary as an external argument because no
+    // device mapping exists in a pre-unlock world, so we need to target
+    // the loop device directly.
+    pub fn unlock(&self, locked_device: &PathBuf) -> Result<(), AuricError> {
+        let result = Exec::cmd("udisksctl")
+            .arg("unlock")
+            .arg("-b")
+            .arg(locked_device)
+            .stdout(Redirection::Pipe)
+            .stderr(Redirection::Pipe)
+            .capture()?;
+        if !result.success() {
+            return Err(AuricError::Subprocess(format!(
+                "failed to unlock {}: ``{}''",
+                locked_device.to_str().unwrap(),
+                result.stderr_str()
+            )));
+        }
+        Ok(())
+    }
+
+    // No extra argument is needed here (c.f. `self::unlock()`) because
+    // we can go straight after the well-known device available in
+    // /dev/disk/by-label.
+    pub fn lock(&self) -> Result<(), AuricError> {
+        let result = Exec::cmd("udisksctl")
+            .arg("lock")
+            .arg("-b")
+            .arg(&self.device)
+            .stdout(Redirection::Pipe)
+            .stderr(Redirection::Pipe)
+            .capture()?;
+        if !result.success() {
+            return Err(AuricError::Subprocess(format!(
+                "failed to lock {}: ``{}''",
+                self.device.to_str().unwrap(),
                 result.stderr_str()
             )));
         }
