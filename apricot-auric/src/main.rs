@@ -90,9 +90,16 @@ impl SshfsManager {
             return Ok(());
         }
 
+        // Invoke `sshfs`
+        // *    with compression,
+        // *    allowing other users to access the mounted filesystem
+        //      (necessary to allow loop-mounts), and
+        // *    demanding synchronous writes, making it easier to reason
+        //      about when a write is done.
         let result = Exec::cmd("sshfs")
+            .arg("-C")
             .arg("-o")
-            .arg("allow_other")
+            .arg("allow_other,sshfs_sync")
             .arg(RSYNC_DOT_NET_REMOTE_DIR)
             .arg(&self.mountpoint)
             .stdout(Redirection::Pipe)
