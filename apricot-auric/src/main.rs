@@ -80,12 +80,16 @@ impl SshfsManager {
         result
     }
 
-    pub fn loop_backing_device_present(&self) -> bool {
+    fn loop_backing_device_present(&self) -> bool {
         self.loop_backing_device_path().is_file()
     }
 
     pub fn mount(&self) -> Result<(), AuricError> {
         self.ensure_mountpoint_is_dir()?;
+        if self.loop_backing_device_present() {
+            return Ok(());
+        }
+
         let result = Exec::cmd("sshfs")
             .arg("-o")
             .arg("allow_other")
@@ -104,6 +108,10 @@ impl SshfsManager {
     }
 
     pub fn unmount(&self) -> Result<(), AuricError> {
+        if !self.loop_backing_device_present() {
+            return Ok(());
+        }
+
         let result = Exec::cmd("fusermount")
             .arg("-u")
             .arg(&self.mountpoint)
@@ -154,6 +162,10 @@ impl LoopManager {
     }
 
     pub fn attach(&self) -> Result<(), AuricError> {
+        if let Ok(_attached_loop) = self.find() {
+            return Ok(());
+        }
+
         let result = Exec::cmd("udisksctl")
             .arg("loop-setup")
             .arg("-f")
