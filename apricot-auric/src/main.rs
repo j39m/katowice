@@ -218,9 +218,6 @@ impl LuksManager {
         LuksManager { device: device }
     }
 
-    // `locked_device` is necessary as an external argument because no
-    // device mapping exists in a pre-unlock world, so we need to target
-    // the loop device directly.
     pub fn unlock(&self, locked_device: &PathBuf) -> Result<(), AuricError> {
         let result = Exec::cmd("udisksctl")
             .arg("unlock")
@@ -239,21 +236,18 @@ impl LuksManager {
         Ok(())
     }
 
-    // No extra argument is needed here (c.f. `self::unlock()`) because
-    // we can go straight after the well-known device available in
-    // /dev/disk/by-label.
-    pub fn lock(&self) -> Result<(), AuricError> {
+    pub fn lock(&self, underlying_device: &PathBuf) -> Result<(), AuricError> {
         let result = Exec::cmd("udisksctl")
             .arg("lock")
             .arg("-b")
-            .arg(&self.device)
+            .arg(underlying_device)
             .stdout(Redirection::Pipe)
             .stderr(Redirection::Pipe)
             .capture()?;
         if !result.success() {
             return Err(AuricError::Subprocess(format!(
                 "failed to lock {}: ``{}''",
-                self.device.to_str().unwrap(),
+                underlying_device.to_str().unwrap(),
                 result.stderr_str()
             )));
         }
@@ -336,7 +330,8 @@ impl AuricImpl {
 
     fn unmount(&self) -> Result<(), AuricError> {
         self.luks_manager.unmount()?;
-        self.luks_manager.lock()?;
+        let loop_device = self.loop_manager.find()?;
+        self.luks_manager.lock(&loop_device)?;
         self.loop_manager.detach()?;
         self.sshfs_manager.unmount()
     }
