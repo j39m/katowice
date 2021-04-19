@@ -236,6 +236,42 @@ impl LuksManager {
         }
         Ok(())
     }
+
+    pub fn mount(&self) -> Result<(), AuricError> {
+        let result = Exec::cmd("udisksctl")
+            .arg("mount")
+            .arg("-b")
+            .arg(&self.device)
+            .stdout(Redirection::Pipe)
+            .stderr(Redirection::Pipe)
+            .capture()?;
+        if !result.success() {
+            return Err(AuricError::Subprocess(format!(
+                "failed to mount {}: ``{}''",
+                self.device.to_str().unwrap(),
+                result.stderr_str()
+            )));
+        }
+        Ok(())
+    }
+
+    pub fn unmount(&self) -> Result<(), AuricError> {
+        let result = Exec::cmd("udisksctl")
+            .arg("unmount")
+            .arg("-b")
+            .arg(&self.device)
+            .stdout(Redirection::Pipe)
+            .stderr(Redirection::Pipe)
+            .capture()?;
+        if !result.success() {
+            return Err(AuricError::Subprocess(format!(
+                "failed to unmount {}: ``{}''",
+                self.device.to_str().unwrap(),
+                result.stderr_str()
+            )));
+        }
+        Ok(())
+    }
 }
 
 fn main_impl() -> Result<(), AuricError> {
