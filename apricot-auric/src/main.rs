@@ -15,11 +15,17 @@ pub enum AuricError {
     NotFound,
 }
 
+enum AuricOperationMode {
+    Mount,
+    Unmount,
+}
+
 impl From<subprocess::PopenError> for AuricError {
     fn from(err: subprocess::PopenError) -> AuricError {
         AuricError::Subprocess(err.to_string())
     }
 }
+
 struct SshfsManager {
     mountpoint: PathBuf,
 }
@@ -31,6 +37,12 @@ struct LoopManager {
 
 struct LuksManager {
     device: PathBuf,
+}
+
+struct AuricImpl {
+    sshfs_manager: SshfsManager,
+    loop_manager: LoopManager,
+    luks_manager: LuksManager,
 }
 
 impl SshfsManager {
@@ -121,8 +133,7 @@ impl LoopManager {
     }
 
     pub fn find(&self) -> Result<PathBuf, AuricError> {
-        let result = Exec::cmd("sudo")
-            .arg("losetup")
+        let result = Exec::cmd("losetup")
             .arg("-l")
             .stdout(Redirection::Pipe)
             .stderr(Redirection::Pipe)
@@ -274,9 +285,62 @@ impl LuksManager {
     }
 }
 
+fn get_action() -> Result<AuricOperationMode, AuricError> {
+    let mut args_iter = std::env::args();
+    args_iter.next();
+    if let Some(action) = args_iter.next() {
+        match action.as_str() {
+            "mount" => return Ok(AuricOperationMode::Mount),
+            "unmount" => return Ok(AuricOperationMode::Unmount),
+            _ => {
+                return Err(AuricError::Invocation(format!(
+                    "unknown action: ``{}''",
+                    action
+                )))
+            }
+        }
+    }
+    Err(AuricError::Invocation("no action given".to_string()))
+}
+
+impl AuricImpl {
+    pub fn new() -> Result<AuricImpl, AuricError> {
+        let sshfs_manager = SshfsManager::new()?;
+        let loop_backing_device_path = sshfs_manager.loop_backing_device_path();
+        Ok(AuricImpl {
+            sshfs_manager: sshfs_manager,
+            loop_manager: LoopManager::new(&loop_backing_device_path),
+            luks_manager: LuksManager::new(),
+        })
+    }
+
+    fn mount(&self) -> Result<(), AuricError> {
+        self.sshfs_manager.mount()?;
+        self.loop_manager.attach()?;
+        let loop_device = self.loop_manager.find()?;
+        self.luks_manager.unlock(&loop_device)?;
+        self.luks_manager.mount()
+    }
+
+    fn unmount(&self) -> Result<(), AuricError> {
+        self.luks_manager.unmount()?;
+        self.luks_manager.lock()?;
+        self.loop_manager.detach()?;
+        self.sshfs_manager.unmount()
+    }
+
+    pub fn act(&self, mode: AuricOperationMode) -> Result<(), AuricError> {
+        match mode {
+            AuricOperationMode::Mount => return self.mount(),
+            AuricOperationMode::Unmount => return self.unmount(),
+        }
+    }
+}
+
 fn main_impl() -> Result<(), AuricError> {
-    println!("Hello there!");
-    Ok(())
+    let action = get_action()?;
+    let auric_impl = AuricImpl::new()?;
+    auric_impl.act(action)
 }
 
 fn main() {
