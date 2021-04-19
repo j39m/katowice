@@ -5,6 +5,7 @@ use subprocess::{Exec, Redirection};
 
 const LOOP_BACKING_DEVICE_BASENAME: &'static str = "flaglock6-home";
 const LOOP_DEVICE_PARTITION_LABEL: &'static str = "fl6";
+const RSYNC_DOT_NET_REMOTE_DIR: &'static str = "usw-s007.rsync.net:./";
 
 #[derive(Debug)]
 pub enum AuricError {
@@ -48,7 +49,7 @@ impl SshfsManager {
         })
     }
 
-    pub fn ensure_mountpoint_is_dir(&self) -> Result<(), AuricError> {
+    fn ensure_mountpoint_is_dir(&self) -> Result<(), AuricError> {
         if self.mountpoint.is_dir() {
             return Ok(());
         }
@@ -65,6 +66,41 @@ impl SshfsManager {
 
     pub fn loop_backing_device_present(&self) -> bool {
         self.loop_backing_device_path().is_file()
+    }
+
+    pub fn mount(&self) -> Result<(), AuricError> {
+        self.ensure_mountpoint_is_dir()?;
+        let result = Exec::cmd("sshfs")
+            .arg("-o")
+            .arg("allow_other")
+            .arg(RSYNC_DOT_NET_REMOTE_DIR)
+            .arg(&self.mountpoint)
+            .stdout(Redirection::Pipe)
+            .stderr(Redirection::Pipe)
+            .capture()?;
+        if !result.success() {
+            return Err(AuricError::Subprocess(format!(
+                "sshfs failed: ``{}''",
+                result.stderr_str()
+            )));
+        }
+        Ok(())
+    }
+
+    pub fn unmount(&self) -> Result<(), AuricError> {
+        let result = Exec::cmd("fusermount")
+            .arg("-u")
+            .arg(&self.mountpoint)
+            .stdout(Redirection::Pipe)
+            .stderr(Redirection::Pipe)
+            .capture()?;
+        if !result.success() {
+            return Err(AuricError::Subprocess(format!(
+                "fusermount -u failed: ``{}''",
+                result.stderr_str()
+            )));
+        }
+        Ok(())
     }
 }
 
