@@ -5,4 +5,5 @@ authors = ["j39m"]
 edition = "2018"
 
 [dependencies]
-lazy_static = "^1"
+regex = "^1.4"
+subprocess = "^0.2"
