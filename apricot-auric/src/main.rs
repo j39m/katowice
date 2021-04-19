@@ -45,6 +45,26 @@ struct AuricImpl {
     luks_manager: LuksManager,
 }
 
+fn exec_with_stdout(command: &str, args: &[&str], error_hint: &str) -> Result<String, AuricError> {
+    let result = Exec::cmd(command)
+        .args(args)
+        .stdout(Redirection::Pipe)
+        .stderr(Redirection::Pipe)
+        .capture()?;
+    if !result.success() {
+        return Err(AuricError::Subprocess(format!(
+            "{} failed: ``{}''",
+            error_hint,
+            result.stderr_str(),
+        )));
+    }
+    Ok(result.stdout_str())
+}
+
+fn exec(command: &str, args: &[&str], error_hint: &str) -> Result<(), AuricError> {
+    exec_with_stdout(command, args, error_hint).map(|_stdout_str| ())
+}
+
 impl SshfsManager {
     pub fn new() -> Result<SshfsManager, AuricError> {
         let xdg_runtime_dir = match std::env::var("XDG_RUNTIME_DIR") {
@@ -94,42 +114,28 @@ impl SshfsManager {
         // *    with compression and
         // *    allowing other users to access the mounted filesystem
         //      (necessary to allow loop-mounts).
-        let result = Exec::cmd("sshfs")
-            .arg("-C")
-            .arg("-o")
-            .arg("allow_other")
-            .arg(RSYNC_DOT_NET_REMOTE_DIR)
-            .arg(&self.mountpoint)
-            .stdout(Redirection::Pipe)
-            .stderr(Redirection::Pipe)
-            .capture()?;
-        if !result.success() {
-            return Err(AuricError::Subprocess(format!(
-                "sshfs failed: ``{}''",
-                result.stderr_str()
-            )));
-        }
-        Ok(())
+        exec(
+            "sshfs",
+            &[
+                "-C",
+                "-o",
+                "allow_other",
+                RSYNC_DOT_NET_REMOTE_DIR,
+                self.mountpoint.to_str().unwrap(),
+            ],
+            "sshfs mount",
+        )
     }
 
     pub fn unmount(&self) -> Result<(), AuricError> {
         if !self.loop_backing_device_present() {
             return Ok(());
         }
-
-        let result = Exec::cmd("fusermount")
-            .arg("-u")
-            .arg(&self.mountpoint)
-            .stdout(Redirection::Pipe)
-            .stderr(Redirection::Pipe)
-            .capture()?;
-        if !result.success() {
-            return Err(AuricError::Subprocess(format!(
-                "fusermount -u failed: ``{}''",
-                result.stderr_str()
-            )));
-        }
-        Ok(())
+        exec(
+            "fusermount",
+            &["-u", self.mountpoint.to_str().unwrap()],
+            "fusermount -u",
+        )
     }
 }
 
@@ -146,19 +152,8 @@ impl LoopManager {
     }
 
     pub fn find(&self) -> Result<PathBuf, AuricError> {
-        let result = Exec::cmd("losetup")
-            .arg("-l")
-            .stdout(Redirection::Pipe)
-            .stderr(Redirection::Pipe)
-            .capture()?;
-        if !result.success() {
-            return Err(AuricError::Subprocess(format!(
-                "failed to list loop devices: ``{}''",
-                result.stderr_str()
-            )));
-        }
-
-        for line in result.stdout_str().lines() {
+        let losetup_stdout = exec_with_stdout("losetup", &["-l"], "loop device enumeration")?;
+        for line in losetup_stdout.lines() {
             if let Some(captures) = self.target.captures(line) {
                 return Ok(PathBuf::from(captures.get(1).unwrap().as_str()));
             }
@@ -171,20 +166,11 @@ impl LoopManager {
             return Ok(());
         }
 
-        let result = Exec::cmd("udisksctl")
-            .arg("loop-setup")
-            .arg("-f")
-            .arg(&self.backing)
-            .stdout(Redirection::Pipe)
-            .stderr(Redirection::Pipe)
-            .capture()?;
-        if !result.success() {
-            return Err(AuricError::Subprocess(format!(
-                "failed to attach loop device: ``{}''",
-                result.stderr_str()
-            )));
-        }
-        Ok(())
+        exec(
+            "udisksctl",
+            &["loop-setup", "-f", self.backing.to_str().unwrap()],
+            "loop device attach",
+        )
     }
 
     // Note that the loop device will linger if the volume remains
@@ -199,20 +185,11 @@ impl LoopManager {
                 return Err(e);
             }
         };
-        let result = Exec::cmd("udisksctl")
-            .arg("loop-delete")
-            .arg("-b")
-            .arg(&attached_loop)
-            .stdout(Redirection::Pipe)
-            .stderr(Redirection::Pipe)
-            .capture()?;
-        if !result.success() {
-            return Err(AuricError::Subprocess(format!(
-                "failed to detach loop device: ``{}''",
-                result.stderr_str()
-            )));
-        }
-        Ok(())
+        exec(
+            "udisksctl",
+            &["loop-delete", "-b", attached_loop.to_str().unwrap()],
+            "loop device detach",
+        )
     }
 }
 
@@ -224,75 +201,35 @@ impl LuksManager {
     }
 
     pub fn unlock(&self, locked_device: &PathBuf) -> Result<(), AuricError> {
-        let result = Exec::cmd("udisksctl")
-            .arg("unlock")
-            .arg("-b")
-            .arg(locked_device)
-            .stdout(Redirection::Pipe)
-            .stderr(Redirection::Pipe)
-            .capture()?;
-        if !result.success() {
-            return Err(AuricError::Subprocess(format!(
-                "failed to unlock {}: ``{}''",
-                locked_device.to_str().unwrap(),
-                result.stderr_str()
-            )));
-        }
-        Ok(())
+        exec(
+            "udisksctl",
+            &["unlock", "-b", locked_device.to_str().unwrap()],
+            format!("unlocking {}", locked_device.to_str().unwrap()).as_str(),
+        )
     }
 
     pub fn lock(&self, underlying_device: &PathBuf) -> Result<(), AuricError> {
-        let result = Exec::cmd("udisksctl")
-            .arg("lock")
-            .arg("-b")
-            .arg(underlying_device)
-            .stdout(Redirection::Pipe)
-            .stderr(Redirection::Pipe)
-            .capture()?;
-        if !result.success() {
-            return Err(AuricError::Subprocess(format!(
-                "failed to lock {}: ``{}''",
-                underlying_device.to_str().unwrap(),
-                result.stderr_str()
-            )));
-        }
-        Ok(())
+        exec(
+            "udisksctl",
+            &["lock", "-b", underlying_device.to_str().unwrap()],
+            format!("locking {}", underlying_device.to_str().unwrap()).as_str(),
+        )
     }
 
     pub fn mount(&self) -> Result<(), AuricError> {
-        let result = Exec::cmd("udisksctl")
-            .arg("mount")
-            .arg("-b")
-            .arg(&self.device)
-            .stdout(Redirection::Pipe)
-            .stderr(Redirection::Pipe)
-            .capture()?;
-        if !result.success() {
-            return Err(AuricError::Subprocess(format!(
-                "failed to mount {}: ``{}''",
-                self.device.to_str().unwrap(),
-                result.stderr_str()
-            )));
-        }
-        Ok(())
+        exec(
+            "udisksctl",
+            &["mount", "-b", self.device.to_str().unwrap()],
+            format!("mounting {}", self.device.to_str().unwrap()).as_str(),
+        )
     }
 
     pub fn unmount(&self) -> Result<(), AuricError> {
-        let result = Exec::cmd("udisksctl")
-            .arg("unmount")
-            .arg("-b")
-            .arg(&self.device)
-            .stdout(Redirection::Pipe)
-            .stderr(Redirection::Pipe)
-            .capture()?;
-        if !result.success() {
-            return Err(AuricError::Subprocess(format!(
-                "failed to unmount {}: ``{}''",
-                self.device.to_str().unwrap(),
-                result.stderr_str()
-            )));
-        }
-        Ok(())
+        exec(
+            "udisksctl",
+            &["unmount", "-b", self.device.to_str().unwrap()],
+            format!("unmounting {}", self.device.to_str().unwrap()).as_str(),
+        )
     }
 }
 
