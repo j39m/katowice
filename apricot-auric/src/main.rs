@@ -272,12 +272,12 @@ impl AuricImpl {
         let loop_device = self.loop_manager.find()?;
         println!("{}", "Unlocking volume...");
         self.luks_manager.unlock(&loop_device)?;
-        println!("{}", "Mounting...");
+        println!("{}", "Mounting volume...");
         self.luks_manager.mount()
     }
 
     fn unmount(&self) -> Result<(), AuricError> {
-        println!("{}", "Unmounting...");
+        println!("{}", "Unmounting volume...");
         self.luks_manager.unmount()?;
         println!("{}", "Finding backing loop device...");
         let loop_device = self.loop_manager.find()?;
