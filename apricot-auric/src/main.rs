@@ -111,15 +111,16 @@ impl SshfsManager {
         }
 
         // Invoke `sshfs`
-        // *    with compression and
+        // *    with compression,
         // *    allowing other users to access the mounted filesystem
-        //      (necessary to allow loop-mounts).
+        //      (necessary to allow loop-mounts), and
+        // *    attempting to reconnect if we lose the connection.
         exec(
             "sshfs",
             &[
                 "-C",
                 "-o",
-                "allow_other",
+                "allow_other,reconnect",
                 RSYNC_DOT_NET_REMOTE_DIR,
                 self.mountpoint.to_str().unwrap(),
             ],
