@@ -264,18 +264,28 @@ impl AuricImpl {
     }
 
     fn mount(&self) -> Result<(), AuricError> {
+        println!("{}", "Mounting sshfs...");
         self.sshfs_manager.mount()?;
+        println!("{}", "Attaching loop device...");
         self.loop_manager.attach()?;
+        println!("{}", "Finding newly attached loop device...");
         let loop_device = self.loop_manager.find()?;
+        println!("{}", "Unlocking volume...");
         self.luks_manager.unlock(&loop_device)?;
+        println!("{}", "Mounting...");
         self.luks_manager.mount()
     }
 
     fn unmount(&self) -> Result<(), AuricError> {
+        println!("{}", "Unmounting...");
         self.luks_manager.unmount()?;
+        println!("{}", "Finding backing loop device...");
         let loop_device = self.loop_manager.find()?;
+        println!("{}", "Locking volume...");
         self.luks_manager.lock(&loop_device)?;
+        println!("{}", "Detaching loop device...");
         self.loop_manager.detach()?;
+        println!("{}", "Unmounting sshfs...");
         self.sshfs_manager.unmount()
     }
 
