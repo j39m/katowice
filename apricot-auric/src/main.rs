@@ -1,7 +1,7 @@
 use regex::Regex;
 use std::path::PathBuf;
 use std::result::Result;
-use subprocess::{Exec, Redirection};
+use subprocess::{Exec, ExitStatus, Redirection};
 
 const LOOP_BACKING_DEVICE_BASENAME: &'static str = "flaglock6-home";
 const LOOP_DEVICE_PARTITION_LABEL: &'static str = "fl6";
@@ -18,6 +18,7 @@ pub enum AuricError {
 enum AuricOperationMode {
     Mount,
     Unmount,
+    Rsync,
 }
 
 impl From<subprocess::PopenError> for AuricError {
@@ -241,6 +242,7 @@ fn get_action() -> Result<AuricOperationMode, AuricError> {
         match action.as_str() {
             "mount" => return Ok(AuricOperationMode::Mount),
             "unmount" => return Ok(AuricOperationMode::Unmount),
+            "rsync" => return Ok(AuricOperationMode::Rsync),
             _ => {
                 return Err(AuricError::Invocation(format!(
                     "unknown action: ``{}''",
@@ -289,10 +291,67 @@ impl AuricImpl {
         self.sshfs_manager.unmount()
     }
 
+    fn rsync(&self) -> Result<(), AuricError> {
+        // I'm not pulling in the `home_dir` crate just to grab a value
+        // that I suspect will be immutable for many years to come.
+        // Likewise, the user mount directory is lazily hardcoded.
+        let mut remote_directory = PathBuf::from(r"/run/media/kalvin/");
+        remote_directory.push(LOOP_DEVICE_PARTITION_LABEL);
+        if !remote_directory.is_dir() {
+            return Err(AuricError::Invocation(format!(
+                "remote directory ``{}'' not mounted",
+                remote_directory.display()
+            )));
+        }
+
+        let cmd = Exec::cmd("rsync").args(&[
+            "--delete",
+            "-avPS",
+            "--exclude=/.cache/",
+            "--exclude=/.cargo/",
+            "--exclude=/.local/share/",
+            "--exclude=/.mozilla/",
+            "--exclude=/.thunderbird/",
+            "--exclude=/Downloads/.firefox-nightly/",
+            "--exclude=/Downloads/.thunderbird-beta/",
+            "--delete-excluded",
+            "/home/kalvin/",
+            remote_directory.to_str().unwrap(),
+        ]);
+        let result = cmd.join()?;
+        if !result.success() {
+            match result {
+                ExitStatus::Exited(code) => {
+                    return Err(AuricError::Subprocess(format!(
+                        "rsync exited with code {}",
+                        code
+                    )))
+                }
+                ExitStatus::Signaled(signum) => {
+                    return Err(AuricError::Subprocess(format!(
+                        "rsync exited with signal {}",
+                        signum
+                    )))
+                }
+                ExitStatus::Other(code) => {
+                    return Err(AuricError::Subprocess(format!(
+                        "unknown rsync error: {}",
+                        code
+                    )))
+                }
+                ExitStatus::Undetermined => {
+                    return Err(AuricError::Subprocess("unknown rsync error!".to_string()))
+                }
+            }
+        }
+        Ok(())
+    }
+
     pub fn act(&self, mode: AuricOperationMode) -> Result<(), AuricError> {
         match mode {
             AuricOperationMode::Mount => return self.mount(),
             AuricOperationMode::Unmount => return self.unmount(),
+            AuricOperationMode::Rsync => return self.rsync(),
         }
     }
 }
