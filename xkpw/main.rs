@@ -20,10 +20,14 @@ pub enum PasswordOptions {
 }
 
 mod args {
+    use super::{
+        EnglishPasswordOptions, KanaPasswordOptions, PasswordOptions,
+        DEFAULT_ENGLISH_DICTIONARY_PATH,
+    };
     use clap::{value_t, values_t};
 
     // Aborts this process on error.
-    pub fn parse_args() -> crate::PasswordOptions {
+    pub fn parse_args() -> PasswordOptions {
         let matches = clap::App::new("xkpw")
             .version("0.1.0")
             .author("j39m")
@@ -46,21 +50,21 @@ mod args {
 
         match matches.subcommand() {
             ("en", Some(en_matches)) => {
-                return crate::PasswordOptions::English(crate::EnglishPasswordOptions {
+                return PasswordOptions::English(EnglishPasswordOptions {
                     num_words: clap::value_t!(en_matches, "num-words", u8)
                         .unwrap_or_else(|e| e.exit()),
-                    dictionary_path: crate::DEFAULT_ENGLISH_DICTIONARY_PATH.to_owned(),
+                    dictionary_path: DEFAULT_ENGLISH_DICTIONARY_PATH.to_owned(),
                 })
             }
             ("jp", Some(jp_matches)) => {
-                return crate::PasswordOptions::Japanese(crate::KanaPasswordOptions {
+                return PasswordOptions::Japanese(KanaPasswordOptions {
                     syllable_counts: clap::values_t!(jp_matches, "syllable-counts", u8)
                         .unwrap_or_else(|e| e.exit()),
                 })
             }
             _ => (),
         }
-        crate::PasswordOptions::Japanese(crate::KanaPasswordOptions {
+        PasswordOptions::Japanese(KanaPasswordOptions {
             syllable_counts: vec![4, 3, 3, 3],
         })
     }
@@ -112,6 +116,7 @@ mod kana {
 } // mod kana
 
 mod helpers {
+    use super::{EnglishPasswordOptions, KanaPasswordOptions, PasswordOptions};
     use rand::seq::SliceRandom;
     use std::convert::TryInto;
     use std::io::Read;
@@ -142,7 +147,7 @@ mod helpers {
     }
 
     // Returns 1 if we fail to read the word dictionary.
-    fn print_english_password(options: crate::EnglishPasswordOptions) -> i32 {
+    fn print_english_password(options: EnglishPasswordOptions) -> i32 {
         let all_words =
             match ingest_english_dictionary(std::path::Path::new(&options.dictionary_path)) {
                 Ok(result) => result,
@@ -173,10 +178,7 @@ mod helpers {
 
     // Builds random pseudo-Japanese words from |kana_set|, observing
     // the word lengths specified by |options|.
-    fn build_kana_words(
-        kana_set: Vec<&'static str>,
-        options: crate::KanaPasswordOptions,
-    ) -> Vec<String> {
+    fn build_kana_words(kana_set: Vec<&'static str>, options: KanaPasswordOptions) -> Vec<String> {
         options
             .syllable_counts
             .iter()
@@ -186,15 +188,15 @@ mod helpers {
 
     // Builds a vector of owned kana words, maps these to a vector of
     // borrowed kana words, and then prints the same.
-    fn print_kana_password(options: crate::KanaPasswordOptions) {
+    fn print_kana_password(options: KanaPasswordOptions) {
         print_words(build_kana_words(crate::kana::get(true), options));
     }
 
     pub fn main() -> i32 {
         let options = crate::args::parse_args();
         match options {
-            crate::PasswordOptions::English(options) => return print_english_password(options),
-            crate::PasswordOptions::Japanese(options) => print_kana_password(options),
+            PasswordOptions::English(options) => return print_english_password(options),
+            PasswordOptions::Japanese(options) => print_kana_password(options),
         }
         0
     }
