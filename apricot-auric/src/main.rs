@@ -343,6 +343,7 @@ impl LocalBackupManager {
             &[
                 "lvcreate",
                 "--monitor",
+                "n",
                 "-s",
                 "-n",
                 lv_snapshot_name.as_str(),
