@@ -1,7 +1,3 @@
-use std::fs::File;
-use std::io::Read;
-use std::io::Write;
-use std::io::{Error, ErrorKind};
 use std::path::{Path, PathBuf};
 use std::string::String;
 
@@ -13,27 +9,18 @@ const BRIGHTNESS_BASENAME: &str = "brightness";
 const BRIGHTNESS_CONTAINING_DIR: &str = "/sys/class/backlight/amdgpu_bl0/";
 
 // Reads the file named by |path| and returns the integral contents.
-fn sysfs_file_to_int(path: &PathBuf) -> std::result::Result<i32, Error> {
-    let mut file = File::open(path)?;
-    let mut raw_contents = String::new();
-    file.read_to_string(&mut raw_contents)?;
+fn sysfs_file_to_int(path: &PathBuf) -> i32 {
+    let contents = std::fs::read_to_string(path).unwrap();
 
-    let contents = raw_contents.trim();
-
-    match contents.parse::<i32>() {
-        Ok(value) => Ok(value),
-        Err(why) => Err(Error::new(
-            ErrorKind::InvalidInput,
-            format!("parse failure ({:#?}): {}", path, why),
-        )),
+    match contents.trim().parse::<i32>() {
+        Ok(value) => return value,
+        Err(why) => panic!("parse failure ({:#?}): {}", path, why),
     }
 }
 
 // Stringifies and writes |value| into file named by |path|.
-fn write_int(path: &PathBuf, value: i32) -> std::io::Result<()> {
-    let mut file = File::create(&path)?;
-    file.write_all(&value.to_string().as_bytes())?;
-    file.flush()
+fn write_int(path: &PathBuf, value: i32) {
+    std::fs::write(path, value.to_string().as_bytes()).unwrap();
 }
 
 fn get_brightness_delta() -> i32 {
@@ -61,13 +48,13 @@ fn get_target_brightness(current: i32, max: i32) -> i32 {
     tentative
 }
 
-fn main() -> Result<(), std::io::Error> {
+fn main() {
     let base_dir = Path::new(BRIGHTNESS_CONTAINING_DIR);
     let brightness_path: PathBuf = base_dir.join(BRIGHTNESS_BASENAME);
 
-    let current = sysfs_file_to_int(&brightness_path)?;
-    let max = sysfs_file_to_int(&base_dir.join(MAX_BRIGHTNESS_BASENAME))?;
+    let current = sysfs_file_to_int(&brightness_path);
+    let max = sysfs_file_to_int(&base_dir.join(MAX_BRIGHTNESS_BASENAME));
 
     let new = get_target_brightness(current, max);
-    write_int(&brightness_path, new)
+    write_int(&brightness_path, new);
 }
