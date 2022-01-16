@@ -24,41 +24,42 @@ mod args {
         EnglishPasswordOptions, KanaPasswordOptions, PasswordOptions,
         DEFAULT_ENGLISH_DICTIONARY_PATH,
     };
-    use clap::{value_t, values_t};
 
     // Aborts this process on error.
     pub fn parse_args() -> PasswordOptions {
         let matches = clap::App::new("xkpw")
-            .version("0.1.0")
+            .version("0.1.1")
             .author("j39m")
             .about("Generates passwords")
             .subcommand(
-                clap::SubCommand::with_name("en")
+                clap::App::new("en")
                     .about("generates dictionary passwords in English")
-                    .arg(clap::Arg::with_name("num-words").required(true)),
+                    .arg(clap::Arg::new("num-words").required(true)),
             )
             .subcommand(
-                clap::SubCommand::with_name("jp")
+                clap::App::new("jp")
                     .about("generates random strings of Japanese syllables")
                     .arg(
-                        clap::Arg::with_name("syllable-counts")
+                        clap::Arg::new("syllable-counts")
                             .required(true)
-                            .multiple(true),
+                            .multiple_values(true),
                     ),
             )
             .get_matches();
 
         match matches.subcommand() {
-            ("en", Some(en_matches)) => {
+            Some(("en", en_matches)) => {
                 return PasswordOptions::English(EnglishPasswordOptions {
-                    num_words: clap::value_t!(en_matches, "num-words", u8)
+                    num_words: en_matches
+                        .value_of_t::<u8>("num-words")
                         .unwrap_or_else(|e| e.exit()),
                     dictionary_path: DEFAULT_ENGLISH_DICTIONARY_PATH.to_owned(),
                 })
             }
-            ("jp", Some(jp_matches)) => {
+            Some(("jp", jp_matches)) => {
                 return PasswordOptions::Japanese(KanaPasswordOptions {
-                    syllable_counts: clap::values_t!(jp_matches, "syllable-counts", u8)
+                    syllable_counts: jp_matches
+                        .values_of_t("syllable-counts")
                         .unwrap_or_else(|e| e.exit()),
                 })
             }
