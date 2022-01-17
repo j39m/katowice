@@ -11,3 +11,6 @@ ignore nou2f
 
 # I _do_ want to open links the easy way.
 ignore nodbus
+
+# https://github.com/netblue30/firejail/discussions/4860
+ignore private-dev
