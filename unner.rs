@@ -141,6 +141,18 @@ fn init_command() -> Option<Command> {
     let args: Vec<String> = args_less_the_first.collect();
 
     match target.as_str() {
+        "ef" => {
+            // edgy Firefox; Firejail disabled
+            return Some(
+                CgroupedFirejailedCommand::new()
+                    .memory_high(FIREFOX_MEMORY_HIGH)
+                    .memory_max(FIREFOX_MEMORY_MAX)
+                    .bin_path(FIREFOX)
+                    .implicit_extra_args(&["-P", FIREFOX_MOZILLA_SFW_PROFILE])
+                    .remaining_args(args)
+                    .command,
+            );
+        }
         "ff" => {
             return Some(
                 CgroupedFirejailedCommand::new()
