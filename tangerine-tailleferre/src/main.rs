@@ -1,9 +1,6 @@
 use std::os::unix::process::CommandExt;
 use std::process::Command;
 
-// clap exposes the macro value_t!
-use clap::value_t;
-
 // chrono needs this to call Local.datetime_from_str().
 use chrono::offset::TimeZone;
 
@@ -76,11 +73,11 @@ mod from_clap {
     }
 
     pub fn amount(matches: &clap::ArgMatches) -> f64 {
-        clap::value_t!(matches, CLAP_AMOUNT, f64).unwrap_or_else(|e| e.exit())
+        matches.value_of_t::<f64>(CLAP_AMOUNT).unwrap_or_else(|e| e.exit())
     }
 
     pub fn description(matches: &clap::ArgMatches) -> String {
-        clap::value_t!(matches, CLAP_DESCRIPTION, String).unwrap_or_else(|e| e.exit())
+        matches.value_of_t::<String>(CLAP_DESCRIPTION).unwrap_or_else(|e| e.exit())
     }
 } // mod from_clap
 
@@ -115,52 +112,53 @@ fn build_insert_options(matches: &clap::ArgMatches) -> SqlOptions {
 
 fn parse_clap_matches(matches: clap::ArgMatches) -> SqlCommand {
     match matches.subcommand() {
-        ("edit", _) => return SqlCommand::Edit,
-        ("show", Some(show_matches)) => return SqlCommand::Show(build_show_options(show_matches)),
-        ("insert", Some(insert_matches)) => {
+        Some(("edit", _)) => return SqlCommand::Edit,
+        Some(("show", show_matches)) => return SqlCommand::Show(build_show_options(show_matches)),
+        Some(("insert", insert_matches)) => {
             return SqlCommand::Insert(build_insert_options(insert_matches))
         }
-        (&_, _) => panic!("no subcommand"),
+        Some((&_, _)) | None => panic!("no subcommand")
     }
 }
 
 fn parse_command_line() -> SqlCommand {
     let matches = clap::App::new("tangerine-tailleferre")
-        .version("0.1.0")
+        .version("0.1.1")
         .author("j39m")
         .about("manipulates expenditures")
+        .setting(clap::AppSettings::SubcommandRequired)
         .subcommand(clap::App::new("edit").about("opens sqlite3 directly"))
         .subcommand(
             clap::App::new("show")
                 .about("shows expenditures")
                 .arg(
-                    clap::Arg::with_name(CLAP_TARGET_DATE)
+                    clap::Arg::new(CLAP_TARGET_DATE)
                         .takes_value(true)
-                        .short("t"),
+                        .short('t'),
                 )
-                .arg(clap::Arg::with_name(CLAP_EXPENDITURE_TYPE).required(true)),
+                .arg(clap::Arg::new(CLAP_EXPENDITURE_TYPE).required(true)),
         )
         .subcommand(
             clap::App::new("insert")
                 .about("inserts an expenditure")
                 .arg(
-                    clap::Arg::with_name(CLAP_AMOUNT)
+                    clap::Arg::new(CLAP_AMOUNT)
                         .takes_value(true)
                         .required(true)
-                        .short("a"),
+                        .short('a'),
                 )
                 .arg(
-                    clap::Arg::with_name(CLAP_DESCRIPTION)
+                    clap::Arg::new(CLAP_DESCRIPTION)
                         .takes_value(true)
                         .required(true)
-                        .short("d"),
+                        .short('d'),
                 )
                 .arg(
-                    clap::Arg::with_name(CLAP_TARGET_DATE)
+                    clap::Arg::new(CLAP_TARGET_DATE)
                         .takes_value(true)
-                        .short("t"),
+                        .short('t'),
                 )
-                .arg(clap::Arg::with_name(CLAP_EXPENDITURE_TYPE).required(true)),
+                .arg(clap::Arg::new(CLAP_EXPENDITURE_TYPE).required(true)),
         )
         .get_matches();
 
