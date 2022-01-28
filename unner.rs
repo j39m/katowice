@@ -182,7 +182,6 @@ fn init_command() -> Option<Command> {
                 CgroupedFirejailedCommand::new()
                     .firejail_profile(MPV_PROFILE)
                     .bin_path(MPV)
-                    .implicit_extra_args(&["--pulse-buffer=13"])
                     .remaining_args(args)
                     .command,
             );
