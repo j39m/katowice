@@ -3,29 +3,11 @@ use std::option::Option;
 use std::os::unix::process::CommandExt;
 use std::process::Command;
 
-const SYSTEMD_RUN: &'static str = "/usr/bin/systemd-run";
-const FIREJAIL: &'static str = "/usr/bin/firejail";
-
 const FIREFOX: &'static str = "/usr/bin/firefox";
-const FIREFOX_PROFILE: &'static str = "/etc/firejail/firefox.profile";
 const FIREFOX_MOZILLA_SFW_PROFILE: &'static str = "default-1473025815439";
 
-const FIREFOX_MEMORY_HIGH: i32 = 4420;
-const FIREFOX_MEMORY_MAX: i32 = 5200;
-
-const KEIRA: &'static str = "/home/kalvin/Downloads/.firefox-nightly/firefox";
-const KEIRA_PROFILE: &'static str = "/etc/firejail/firefox-nightly.profile";
-
-const MPV: &'static str = "/usr/bin/mpv";
-const MPV_PROFILE: &'static str = "/etc/firejail/mpv.profile";
-
-const TERM: &'static str = "/usr/bin/alacritty";
-const TERM_PROFILE: &'static str = "/etc/firejail/x-terminal-emulator.profile";
-
-const THUNDERBIRD: &'static str = "/home/kalvin/Downloads/.thunderbird-beta/thunderbird";
-const THUNDERBIRD_PROFILE: &'static str = "/etc/firejail/thunderbird-beta.profile";
-
-const QUODLIBET_FIFO: &'static str = "/home/kalvin/.config/quodlibet/control";
+const FIREFOX_MEMORY_HIGH: i32 = 6500;
+const FIREFOX_MEMORY_MAX: i32 = 7800;
 
 // Partial ordering on enums are ordered by their declaration order:
 // https://users.rust-lang.org/t/how-to-sort-enum-variants/52291/2
@@ -48,7 +30,7 @@ struct CgroupedFirejailedCommand {
 impl CgroupedFirejailedCommand {
     pub fn new() -> Self {
         let mut result = Self {
-            command: std::process::Command::new(SYSTEMD_RUN),
+            command: std::process::Command::new("/usr/bin/systemd-run"),
             watermark: BuilderWatermark::Unset,
         };
         result
@@ -76,8 +58,10 @@ impl CgroupedFirejailedCommand {
     pub fn firejail_profile(mut self, path: &str) -> Self {
         assert!(self.watermark < BuilderWatermark::FirejailProfile);
         self.watermark = BuilderWatermark::FirejailProfile;
-        self.command.args(&[FIREJAIL, "--ignore=seccomp"]);
-        self.command.arg(format!("--profile={}", path));
+        self.command
+            .args(&["/usr/bin/firejail", "--ignore=seccomp"]);
+        self.command
+            .arg(format!("--profile=/etc/firejail/{}.profile", path));
         self
     }
 
@@ -104,7 +88,7 @@ impl CgroupedFirejailedCommand {
 }
 
 fn simple_firejail_command(target: &str, args: Vec<String>) -> Command {
-    let mut command = Command::new(FIREJAIL);
+    let mut command = Command::new("/usr/bin/firejail");
 
     command.arg(format!("--profile=/etc/firejail/{}.profile", target));
     command.arg(format!("/usr/bin/{}", target));
@@ -116,7 +100,7 @@ fn simple_firejail_command(target: &str, args: Vec<String>) -> Command {
 fn quodlibet_command(args: Vec<String>) {
     let mut file = std::fs::OpenOptions::new()
         .append(true)
-        .open(QUODLIBET_FIFO)
+        .open("/home/kalvin/.config/quodlibet/control")
         .unwrap();
     file.write_all(match args[0].as_str() {
         "pp" => "play-pause".as_bytes(),
@@ -158,7 +142,7 @@ fn init_command() -> Option<Command> {
                 CgroupedFirejailedCommand::new()
                     .memory_high(FIREFOX_MEMORY_HIGH)
                     .memory_max(FIREFOX_MEMORY_MAX)
-                    .firejail_profile(FIREFOX_PROFILE)
+                    .firejail_profile("firefox")
                     .bin_path(FIREFOX)
                     .implicit_extra_args(&["-P", FIREFOX_MOZILLA_SFW_PROFILE])
                     .remaining_args(args)
@@ -170,8 +154,8 @@ fn init_command() -> Option<Command> {
                 CgroupedFirejailedCommand::new()
                     .memory_high(FIREFOX_MEMORY_HIGH)
                     .memory_max(FIREFOX_MEMORY_MAX)
-                    .firejail_profile(KEIRA_PROFILE)
-                    .bin_path(KEIRA)
+                    .firejail_profile("firefox-nightly")
+                    .bin_path("/home/kalvin/Downloads/.firefox-nightly/firefox")
                     .implicit_extra_args(&["-P", "nightly"])
                     .remaining_args(args)
                     .command,
@@ -180,8 +164,8 @@ fn init_command() -> Option<Command> {
         "npv" => {
             return Some(
                 CgroupedFirejailedCommand::new()
-                    .firejail_profile(MPV_PROFILE)
-                    .bin_path(MPV)
+                    .firejail_profile("mpv")
+                    .bin_path("/usr/bin/mpv")
                     .remaining_args(args)
                     .command,
             );
@@ -196,7 +180,7 @@ fn init_command() -> Option<Command> {
                 CgroupedFirejailedCommand::new()
                     .memory_high(FIREFOX_MEMORY_HIGH)
                     .memory_max(FIREFOX_MEMORY_MAX)
-                    .firejail_profile(FIREFOX_PROFILE)
+                    .firejail_profile("firefox")
                     .bin_path(FIREFOX)
                     .implicit_extra_args(&["-P", FIREFOX_MOZILLA_SFW_PROFILE])
                     .remaining_args(formatted_args)
@@ -206,8 +190,8 @@ fn init_command() -> Option<Command> {
         "t" => {
             return Some(
                 CgroupedFirejailedCommand::new()
-                    .firejail_profile(TERM_PROFILE)
-                    .bin_path(TERM)
+                    .firejail_profile("x-terminal-emulator")
+                    .bin_path("/usr/bin/alacritty")
                     .remaining_args(args)
                     .command,
             );
@@ -215,8 +199,8 @@ fn init_command() -> Option<Command> {
         "tbb" => {
             return Some(
                 CgroupedFirejailedCommand::new()
-                    .firejail_profile(THUNDERBIRD_PROFILE)
-                    .bin_path(THUNDERBIRD)
+                    .firejail_profile("thunderbird-beta")
+                    .bin_path("/home/kalvin/Downloads/.thunderbird-beta/thunderbird")
                     .remaining_args(args)
                     .command,
             );
@@ -224,7 +208,7 @@ fn init_command() -> Option<Command> {
         "vlk" => {
             return Some(
                 CgroupedFirejailedCommand::new()
-                    .firejail_profile("/etc/firejail/vlc.profile")
+                    .firejail_profile("vlc")
                     .bin_path("/usr/bin/vlc")
                     .implicit_extra_args(&["--play-and-exit"])
                     .remaining_args(args)
