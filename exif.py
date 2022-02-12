@@ -27,13 +27,7 @@ def _exif_parse(command_output: str) -> dict:
         parsed[key] = val
     return parsed
 
-class Exif:
-    def __init__(self, path: str, exif: str):
-        self.path = path
-        self.raw_data = exif
-        self.data = _exif_parse(exif)
-
-def get_exif(path: str) -> None:
+def _run_exiv(path: str) -> str:
     assert os.path.isfile(path)
     exif = subprocess.Popen(
             args=("exiv2", path),
@@ -41,13 +35,25 @@ def get_exif(path: str) -> None:
             stderr=subprocess.PIPE,
     )
     (stdout, _) = exif.communicate()
-    klaus = Exif(path, stdout.decode("utf-8"))
-    pprint(klaus.data)
+    return stdout.decode()
+
+class Exif:
+    def __init__(self, path):
+        self.path = path
+        self.raw_data = _run_exiv(path)
+        self.data = _exif_parse(self.raw_data)
+
+def iter_exif_cb(exif: Exif) -> None:
+    model = exif.data.get("camera_model")
+    if not model or not model.startswith("Pixel 4"):
+        print("{}: {}".format(exif.path, model))
 
 def main():
     target = sys.argv[1]
-    for jpg in glob.glob(os.path.join(target, "*.jpg")):
-        get_exif(jpg)
+    exifs = [Exif(path) for path in
+                glob.glob(os.path.join(target, "*.jpg"))]
+    for exif in exifs:
+        iter_exif_cb(exif)
 
 if __name__ == "__main__":
     sys.exit(main())
