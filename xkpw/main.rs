@@ -12,6 +12,7 @@ pub struct EnglishPasswordOptions {
 #[derive(Debug)]
 pub struct KanaPasswordOptions {
     pub syllable_counts: Vec<u8>,
+    pub use_all_hiragana: bool,
 }
 
 pub enum PasswordOptions {
@@ -28,7 +29,7 @@ mod args {
     // Aborts this process on error.
     pub fn parse_args() -> PasswordOptions {
         let matches = clap::App::new("xkpw")
-            .version("0.1.1")
+            .version("0.2.1")
             .author("j39m")
             .about("Generates passwords")
             .subcommand(
@@ -39,9 +40,13 @@ mod args {
             .subcommand(
                 clap::App::new("jp")
                     .about("generates random strings of Japanese syllables")
+                    .arg(clap::Arg::new("use-all-hiragana").short('a').long("harder"))
                     .arg(
                         clap::Arg::new("syllable-counts")
                             .required(true)
+                            .short('c')
+                            .long("syllable-counts")
+                            .takes_value(true)
                             .multiple_values(true),
                     ),
             )
@@ -61,12 +66,14 @@ mod args {
                     syllable_counts: jp_matches
                         .values_of_t("syllable-counts")
                         .unwrap_or_else(|e| e.exit()),
+                    use_all_hiragana: jp_matches.is_present("use-all-hiragana"),
                 })
             }
             _ => (),
         }
         PasswordOptions::Japanese(KanaPasswordOptions {
             syllable_counts: vec![4, 3, 3, 3],
+            use_all_hiragana: true,
         })
     }
 } // mod args
@@ -130,10 +137,10 @@ mod kana {
         simple_kana
     }
 
-    pub fn get(use_simple: bool) -> Vec<&'static str> {
-        match use_simple {
-            true => simple(),
-            false => all(),
+    pub fn get(use_all_hiragana: bool) -> Vec<&'static str> {
+        match use_all_hiragana {
+            true => all(),
+            false => simple(),
         }
     }
 } // mod kana
@@ -212,7 +219,10 @@ mod helpers {
     // Builds a vector of owned kana words, maps these to a vector of
     // borrowed kana words, and then prints the same.
     fn print_kana_password(options: KanaPasswordOptions) {
-        print_words(build_kana_words(crate::kana::get(true), options));
+        print_words(build_kana_words(
+            crate::kana::get(options.use_all_hiragana),
+            options,
+        ));
     }
 
     pub fn main() -> i32 {
