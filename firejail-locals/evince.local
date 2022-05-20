@@ -12,6 +12,9 @@ noblacklist ${DOCUMENTS}
 whitelist ${DOCUMENTS}
 read-only ${DOCUMENTS}
 
+dbus-user.own org.gnome.evince.*
+dbus-user.talk org.freedesktop.*
+
 mkdir ${RUNUSER}/firejailed-evince/
 whitelist ${RUNUSER}/firejailed-evince/
 read-write ${RUNUSER}/firejailed-evince/
