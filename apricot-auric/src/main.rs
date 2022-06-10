@@ -21,6 +21,7 @@ enum AuricOperationMode {
     Mount,
     Unmount,
     Rsync,
+    RunAll,
 }
 
 impl From<subprocess::PopenError> for AuricError {
@@ -275,6 +276,7 @@ fn get_action() -> Result<AuricOperationMode, AuricError> {
             "mount" => return Ok(AuricOperationMode::Mount),
             "unmount" => return Ok(AuricOperationMode::Unmount),
             "rsync" => return Ok(AuricOperationMode::Rsync),
+            "push" => return Ok(AuricOperationMode::RunAll),
             _ => {
                 return Err(AuricError::Invocation(format!(
                     "unknown action: ``{}''",
@@ -352,11 +354,18 @@ impl AuricImpl {
         ])
     }
 
+    fn run_all(&self) -> Result<(), AuricError> {
+        self.mount()?;
+        self.rsync()?;
+        self.unmount()
+    }
+
     pub fn act(&self, mode: AuricOperationMode) -> Result<(), AuricError> {
         match mode {
             AuricOperationMode::Mount => return self.mount(),
             AuricOperationMode::Unmount => return self.unmount(),
             AuricOperationMode::Rsync => return self.rsync(),
+            AuricOperationMode::RunAll => return self.run_all(),
         }
     }
 }
