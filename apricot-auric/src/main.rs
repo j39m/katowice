@@ -21,7 +21,6 @@ enum AuricOperationMode {
     Mount,
     Unmount,
     Rsync,
-    LocalBackup,
 }
 
 impl From<subprocess::PopenError> for AuricError {
@@ -43,15 +42,10 @@ struct LuksManager {
     device: PathBuf,
 }
 
-struct LocalBackupManager {
-    target: Regex,
-}
-
 struct AuricImpl {
     sshfs_manager: SshfsManager,
     loop_manager: LoopManager,
     luks_manager: LuksManager,
-    local_backup_manager: LocalBackupManager,
 }
 
 fn exec_with_stdout(command: &str, args: &[&str], error_hint: &str) -> Result<String, AuricError> {
@@ -273,112 +267,6 @@ impl LuksManager {
     }
 }
 
-impl LocalBackupManager {
-    pub fn new() -> LocalBackupManager {
-        LocalBackupManager {
-            target: Regex::new(r"^\s+([\w-]+)\s+.+$").unwrap(),
-        }
-    }
-
-    fn find_vg(&self) -> Result<String, AuricError> {
-        exec(
-            "udisksctl",
-            &["unlock", "-b", "/dev/sda1"],
-            "unlocking sda1",
-        )?;
-
-        let vgs_stdout = exec_with_stdout("sudo", &["vgs"], "VG enumeration")?;
-        for line in vgs_stdout.lines() {
-            if let Some(captures) = self.target.captures(line) {
-                let vg_candidate = captures.get(1).unwrap().as_str();
-                match vg_candidate {
-                    "l-durey" | "g-tailleferre" => return Ok(String::from(vg_candidate)),
-                    _ => (),
-                }
-            }
-        }
-        Err(AuricError::NotFound)
-    }
-
-    fn ready_lv_and_rsync(&self, lv: &str, lv_path: &str) -> Result<(), AuricError> {
-        exec(
-            "sudo",
-            &["lvchange", "--monitor", "n", "-a", "y", lv],
-            format!("readying LV ``{}''", lv).as_str(),
-        )?;
-        exec(
-            "udisksctl",
-            &["mount", "-b", lv_path],
-            format!("mounting LV ``{}''", lv).as_str(),
-        )?;
-        if let Err(rsync_error) = exec_rsync(&[
-            "--delete",
-            "-avPS",
-            "/home/kalvin/",
-            format!("{}/j39m-home/", RUN_MEDIA_KALVIN).as_str(),
-        ]) {
-            eprintln!("rsync exited with error: {:#?}", rsync_error);
-        }
-        Ok(())
-    }
-
-    fn snapshot_lv(&self, lv: &str, lv_path: &str) -> Result<(), AuricError> {
-        exec(
-            "udisksctl",
-            &["unmount", "-b", lv_path],
-            format!("unmounting LV ``{}''", lv).as_str(),
-        )?;
-        if let Err(lvchange_error) = exec(
-            "sudo",
-            &["lvchange", "--monitor", "n", "-a", "n", lv],
-            format!("un-readying LV ``{}''", lv).as_str(),
-        ) {
-            eprintln!("lvchange exited with error: {:#?}", lvchange_error);
-        }
-        let lv_snapshot_name = chrono::Local::today()
-            .format("j39m-home-%Y-%m-%d")
-            .to_string();
-        exec(
-            "sudo",
-            &[
-                "lvcreate",
-                "--monitor",
-                "n",
-                "-s",
-                "-n",
-                lv_snapshot_name.as_str(),
-                lv,
-            ],
-            format!("snapshotting LV ``{}''", lv).as_str(),
-        )
-    }
-
-    fn teardown(&self, vg: &str) -> Result<(), AuricError> {
-        if let Err(lvchange_error) = exec(
-            "sudo",
-            &["lvchange", "--monitor", "n", "-a", "n", vg],
-            format!("un-readying VG ``{}''", vg).as_str(),
-        ) {
-            eprintln!("lvchange exited with error: {:#?}", lvchange_error);
-        }
-        exec("udisksctl", &["lock", "-b", "/dev/sda1"], "locking sda1")?;
-        exec(
-            "udisksctl",
-            &["power-off", "-b", "/dev/sda"],
-            "powering off sda",
-        )
-    }
-
-    pub fn go(&self) -> Result<(), AuricError> {
-        let vg = self.find_vg()?;
-        let lv = format!("{}/j39m-home", vg.as_str());
-        let lv_path = format!("/dev/{}", lv);
-        self.ready_lv_and_rsync(lv.as_str(), lv_path.as_str())?;
-        self.snapshot_lv(lv.as_str(), lv_path.as_str())?;
-        self.teardown(vg.as_str())
-    }
-}
-
 fn get_action() -> Result<AuricOperationMode, AuricError> {
     let mut args_iter = std::env::args();
     args_iter.next();
@@ -387,7 +275,6 @@ fn get_action() -> Result<AuricOperationMode, AuricError> {
             "mount" => return Ok(AuricOperationMode::Mount),
             "unmount" => return Ok(AuricOperationMode::Unmount),
             "rsync" => return Ok(AuricOperationMode::Rsync),
-            "lb" => return Ok(AuricOperationMode::LocalBackup),
             _ => {
                 return Err(AuricError::Invocation(format!(
                     "unknown action: ``{}''",
@@ -407,7 +294,6 @@ impl AuricImpl {
             sshfs_manager: sshfs_manager,
             loop_manager: LoopManager::new(&loop_backing_device_path),
             luks_manager: LuksManager::new(),
-            local_backup_manager: LocalBackupManager::new(),
         })
     }
 
@@ -466,16 +352,11 @@ impl AuricImpl {
         ])
     }
 
-    fn local_backup(&self) -> Result<(), AuricError> {
-        self.local_backup_manager.go()
-    }
-
     pub fn act(&self, mode: AuricOperationMode) -> Result<(), AuricError> {
         match mode {
             AuricOperationMode::Mount => return self.mount(),
             AuricOperationMode::Unmount => return self.unmount(),
             AuricOperationMode::Rsync => return self.rsync(),
-            AuricOperationMode::LocalBackup => return self.local_backup(),
         }
     }
 }
