@@ -7,6 +7,7 @@ use chrono::offset::TimeZone;
 const SQLITE3: &'static str = "/usr/bin/sqlite3";
 const DB_PATH: &'static str = "/home/kalvin/Documents/personal/expenditures.db";
 
+// Legacy names that don't indicate denomination. USD is the default.
 const PEREXP: &'static str = "perexp";
 const ESSEXP: &'static str = "essexp";
 
@@ -17,8 +18,8 @@ const CLAP_TARGET_DATE: &'static str = "target-date";
 
 #[derive(Debug)]
 pub enum ExpenditureType {
-    Personal,
-    Essential,
+    PersonalUSD,
+    EssentialUSD,
 }
 
 #[derive(Debug)]
@@ -49,8 +50,8 @@ mod from_clap {
         let symbolic_type = matches.value_of(CLAP_EXPENDITURE_TYPE).unwrap();
 
         match symbolic_type {
-            "p" => return ExpenditureType::Personal,
-            "e" => return ExpenditureType::Essential,
+            "up" => return ExpenditureType::PersonalUSD,
+            "ue" => return ExpenditureType::EssentialUSD,
             _ => (),
         };
         panic!("invalid {} ``{}''", CLAP_EXPENDITURE_TYPE, symbolic_type);
@@ -73,11 +74,15 @@ mod from_clap {
     }
 
     pub fn amount(matches: &clap::ArgMatches) -> f64 {
-        matches.value_of_t::<f64>(CLAP_AMOUNT).unwrap_or_else(|e| e.exit())
+        matches
+            .value_of_t::<f64>(CLAP_AMOUNT)
+            .unwrap_or_else(|e| e.exit())
     }
 
     pub fn description(matches: &clap::ArgMatches) -> String {
-        matches.value_of_t::<String>(CLAP_DESCRIPTION).unwrap_or_else(|e| e.exit())
+        matches
+            .value_of_t::<String>(CLAP_DESCRIPTION)
+            .unwrap_or_else(|e| e.exit())
     }
 } // mod from_clap
 
@@ -117,7 +122,7 @@ fn parse_clap_matches(matches: clap::ArgMatches) -> SqlCommand {
         Some(("insert", insert_matches)) => {
             return SqlCommand::Insert(build_insert_options(insert_matches))
         }
-        Some((&_, _)) | None => panic!("no subcommand")
+        Some((&_, _)) | None => panic!("no subcommand"),
     }
 }
 
@@ -167,8 +172,8 @@ fn parse_command_line() -> SqlCommand {
 
 fn expenditure_type_name_from_enum(type_: &ExpenditureType) -> &'static str {
     match type_ {
-        ExpenditureType::Personal => return PEREXP,
-        ExpenditureType::Essential => return ESSEXP,
+        ExpenditureType::PersonalUSD => return PEREXP,
+        ExpenditureType::EssentialUSD => return ESSEXP,
     }
 }
 
