@@ -11,6 +11,10 @@ const DB_PATH: &'static str = "/home/kalvin/Documents/personal/expenditures.db";
 const PEREXP: &'static str = "perexp";
 const ESSEXP: &'static str = "essexp";
 
+// Newer names that indicate denomination.
+const JP_PERSONAL: &'static str = "jp_personal";
+const JP_ESSENTIAL: &'static str = "jp_essential";
+
 const CLAP_AMOUNT: &'static str = "amount";
 const CLAP_DESCRIPTION: &'static str = "description";
 const CLAP_EXPENDITURE_TYPE: &'static str = "expenditure-type";
@@ -20,6 +24,8 @@ const CLAP_TARGET_DATE: &'static str = "target-date";
 pub enum ExpenditureType {
     PersonalUSD,
     EssentialUSD,
+    PersonalJPY,
+    EssentialJPY,
 }
 
 #[derive(Debug)]
@@ -52,6 +58,8 @@ mod from_clap {
         match symbolic_type {
             "up" => return ExpenditureType::PersonalUSD,
             "ue" => return ExpenditureType::EssentialUSD,
+            "jp" => return ExpenditureType::PersonalJPY,
+            "je" => return ExpenditureType::EssentialJPY,
             _ => (),
         };
         panic!("invalid {} ``{}''", CLAP_EXPENDITURE_TYPE, symbolic_type);
@@ -174,6 +182,8 @@ fn expenditure_type_name_from_enum(type_: &ExpenditureType) -> &'static str {
     match type_ {
         ExpenditureType::PersonalUSD => return PEREXP,
         ExpenditureType::EssentialUSD => return ESSEXP,
+        ExpenditureType::PersonalJPY => return JP_PERSONAL,
+        ExpenditureType::EssentialJPY => return JP_ESSENTIAL,
     }
 }
 
