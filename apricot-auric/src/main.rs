@@ -154,7 +154,7 @@ impl SshfsManager {
             &[
                 "-C",
                 "-o",
-                "allow_other,reconnect",
+                "allow_other,reconnect,ServerAliveInterval=26",
                 RSYNC_DOT_NET_REMOTE_DIR,
                 self.mountpoint.to_str().unwrap(),
             ],
