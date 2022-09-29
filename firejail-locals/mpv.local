@@ -1,4 +1,3 @@
-noblacklist ${DOCUMENTS}
-noblacklist ${HOME}/Documents/other_music
+whitelist-ro ${DOCUMENTS}
 noblacklist ${DOWNLOADS}
 noblacklist ${VIDEOS}
