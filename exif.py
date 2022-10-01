@@ -11,7 +11,8 @@ from pprint import pprint
 from zoneinfo import ZoneInfo
 
 def datetime_from_basename(name: str) -> datetime.datetime:
-    assert name.startswith("PXL_")
+    if not name.startswith("PXL_"):
+        raise ValueError("Can't use this with third-party photos")
     return datetime.datetime.strptime(name[4:19], "%Y%m%d_%H%M%S")
 
 def datetime_from_exif(exif_datetime: str) -> datetime.datetime:
@@ -54,11 +55,28 @@ class Exif:
         self.raw_data = _run_exiv(path)
         self.data = _exif_parse(self.raw_data)
 
-        self.basename_datetime = datetime_from_basename(
-                os.path.basename(path))
-        self.basename_utc_datetime = self.basename_datetime.astimezone(
-                datetime.timezone.utc)
+        self.__set_basename_datetimes()
+        self.__set_mtime_datetimes()
+        self.__set_exif_datetimes()
 
+    def __set_basename_datetimes(self):
+        try:
+            self.basename_datetime = datetime_from_basename(
+                    os.path.basename(self.path))
+            self.basename_utc_datetime = self.basename_datetime.astimezone(
+                    datetime.timezone.utc)
+        except ValueError:
+            self.basename_datetime = None
+            self.basename_utc_datetime = None
+
+    def __set_mtime_datetimes(self):
+        stat_result = os.stat(self.path)
+        self.mtime_datetime = datetime.datetime.fromtimestamp(
+                stat_result.st_mtime)
+        self.mtime_utc_datetime = datetime.datetime.utcfromtimestamp(
+                stat_result.st_mtime)
+
+    def __set_exif_datetimes(self):
         try:
             self.exif_datetime = datetime_from_exif(
                     self.data["image_timestamp"])
