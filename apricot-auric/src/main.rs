@@ -172,6 +172,30 @@ impl SshfsManager {
             "fusermount -u",
         )
     }
+
+    pub fn count_ssh_processes(&self) -> Result<usize, AuricError> {
+        let pgrep_stdout = exec_with_stdout("pgrep", &["-af", "ssh"], "pgrep ssh")?;
+        Ok(pgrep_stdout.lines().count())
+    }
+
+    pub fn wait_until_just_one_ssh_process(&self) -> Result<(), AuricError> {
+        let mut tries: i32 = 5;
+        let mut sleep_seconds: u64 = 1;
+        let mut ssh_processes: usize = 0;
+        while tries > 0 {
+            ssh_processes = self.count_ssh_processes()?;
+            if ssh_processes == 1 {
+                return Ok(());
+            }
+            std::thread::sleep(std::time::Duration::from_secs(sleep_seconds));
+            tries -= 1;
+            sleep_seconds *= 2;
+        }
+        Err(AuricError::Subprocess(format!(
+            "Timed out with {} ssh processes still present",
+            ssh_processes
+        )))
+    }
 }
 
 impl LoopManager {
@@ -322,7 +346,9 @@ impl AuricImpl {
         println!("{}", "Detaching loop device...");
         self.loop_manager.detach()?;
         println!("{}", "Unmounting sshfs...");
-        self.sshfs_manager.unmount()
+        self.sshfs_manager.unmount()?;
+        println!("{}", "Waiting for ssh processes to disappear...");
+        self.sshfs_manager.wait_until_just_one_ssh_process()
     }
 
     fn rsync(&self) -> Result<(), AuricError> {
