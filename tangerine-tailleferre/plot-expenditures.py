@@ -7,12 +7,43 @@ import matplotlib.pyplot as plt
 import numpy as np
 import datetime
 
-# Data-carrying struct.
+class PlottableData:
+    def __init__(self):
+        self.x = list()
+
+        # Expenditures binned by day.
+        self.daily_y = list()
+
+        # Monotonically increasing running total of expenditures.
+        self.cumulative_y = list()
+
+    def _update_most_recent_date(self,
+                                 date,
+                                 expenditure_value,
+                                 cumulative_total):
+        if (date != self.x[-1]):
+            raise IndexError
+        self.daily_y[-1] += expenditure_value
+        self.cumulative_y[-1] = cumulative_total
+
+    def _add_new_date(self,
+                      date,
+                      expenditure_value,
+                      cumulative_total):
+        self.x.append(date)
+        self.daily_y.append(expenditure_value)
+        self.cumulative_y.append(cumulative_total)
+
+    def add_data(self, date, expenditure_value, cumulative_total):
+        try:
+            self._update_most_recent_date(
+                    date, expenditure_value, cumulative_total)
+        except IndexError:
+            self._add_new_date(date, expenditure_value, cumulative_total)
+
 class IngestedData:
     def __init__(self):
-        # Plottable data.
-        self.plottable_x = list()
-        self.plottable_y = list()
+        self.plottable = PlottableData()
 
         # Raw data. The plottable data is folded (so multiple
         # expenditures with the same date are telescoped into a single
@@ -29,15 +60,7 @@ class IngestedData:
 
     def _update_plottable_data(self):
         last_date = self.raw_x[-1]
-
-        try:
-            if self.plottable_x[-1] == last_date:
-                self.plottable_y[-1] = self._running_total
-            else:
-                raise ValueError
-        except (IndexError, ValueError):
-            self.plottable_x.append(last_date)
-            self.plottable_y.append(self._running_total)
+        self.plottable.add_data(last_date, 0, self._running_total)
 
     def _process_line(self, line):
         (raw_date, _, raw_amount) = line.split(sep="|")
@@ -70,14 +93,14 @@ def ingest_data():
     for line in sys.stdin:
         data.ingest_line(line)
 
-    assert len(data.plottable_x) == len(data.plottable_y), \
+    assert len(data.plottable.x) == len(data.plottable.cumulative_y), \
             "BUG: unbalanced x- and y-axes"
     return data
 
 def main():
     data = ingest_data()
 
-    plt.plot(data.plottable_x, data.plottable_y)
+    plt.plot(data.plottable.x, data.plottable.cumulative_y)
     plt.gcf().autofmt_xdate()
     plt.show()
 
