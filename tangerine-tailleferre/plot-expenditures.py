@@ -101,10 +101,12 @@ def ingest_data():
 def main():
     data = ingest_data()
 
+    plt.style.use('fivethirtyeight')
     _, ax = plt.subplots()
 
-    ax.step(data.plottable.x, data.plottable.daily_y)
-    ax.step(data.plottable.x, data.plottable.cumulative_y)
+    ax.step(data.plottable.x, data.plottable.cumulative_y, where="post")
+    ax.stem(data.plottable.x, data.plottable.daily_y,
+            linefmt="C1:", markerfmt="C1o")
 
     plt.gcf().autofmt_xdate()
     plt.show()
