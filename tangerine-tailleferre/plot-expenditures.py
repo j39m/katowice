@@ -103,21 +103,9 @@ def main():
 
     _, ax = plt.subplots()
 
-    # For any day `x`, the stack plot already visually raises the
-    # cumulative curve by `x`'s daily value. But
-    # `data.plottable.daily_y` already includes the value from day `x`,
-    # resulting in a double-count for each day (causing visible downward
-    # runs on certain spiky values) - i.e. every height on the
-    # cumulative curve is actually
-    # <-- cumulative val -->    |daily|
-    # (y_0 + y_1 + ... + y_x   +  y_x).
-    #
-    # To handle this, we just need to trim off the contribution of day
-    # `x` from the cumulative value - i.e. use `x-1`'s cumulative value,
-    # i.e. shift the cumulative y array to the right by one.
-    ax.stackplot(data.plottable.x,
-                 (data.plottable.daily_y,
-                  [0, *data.plottable.cumulative_y[:-1]]))
+    ax.step(data.plottable.x, data.plottable.daily_y)
+    ax.step(data.plottable.x, data.plottable.cumulative_y)
+
     plt.gcf().autofmt_xdate()
     plt.show()
 
