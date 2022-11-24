@@ -5,7 +5,13 @@ use subprocess::{Exec, ExitStatus, Redirection};
 
 const LOOP_BACKING_DEVICE_BASENAME: &'static str = "flaglock6-home";
 const LOOP_DEVICE_PARTITION_LABEL: &'static str = "fl6";
-const RSYNC_DOT_NET_REMOTE_DIR: &'static str = "de2237.rsync.net:./";
+const RSYNC_DOT_NET_REMOTE_DIR: &'static str = "d\
+                                                e\
+                                                2\
+                                                2\
+                                                3\
+                                                7\
+                                                .rsync.net:./";
 
 const RUN_MEDIA_KALVIN: &'static str = "/run/media/kalvin";
 
