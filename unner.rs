@@ -6,8 +6,8 @@ use std::process::Command;
 const FIREFOX: &'static str = "/usr/bin/firefox";
 const FIREFOX_MOZILLA_SFW_PROFILE: &'static str = "default-1473025815439";
 
-const FIREFOX_MEMORY_HIGH: i32 = 6500;
-const FIREFOX_MEMORY_MAX: i32 = 7800;
+const FIREFOX_MEMORY_HIGH: i32 = 9100;
+const FIREFOX_MEMORY_MAX: i32 = 10400;
 
 // Partial ordering on enums are ordered by their declaration order:
 // https://users.rust-lang.org/t/how-to-sort-enum-variants/52291/2
