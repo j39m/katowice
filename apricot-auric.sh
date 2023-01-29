@@ -5,7 +5,7 @@ set -u
 LOGFILE="${XDG_RUNTIME_DIR}/rclone.log"
 
 rclone sync \
-    -v -M -l \
+    -v -x -M -l \
     --log-file="${LOGFILE}" \
     --filter '- ' \
     --filter '- /.cache/' \
