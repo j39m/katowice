@@ -49,5 +49,5 @@ Bubblewrap-based sandboxing for desktop applications
 
 
 %changelog
-* Mon Feb 20 2023 Kalvin Lee <hikaph+oss@gmail.com> - 0.7.0-1
+* Mon Feb 20 2023 j39m - 0.7.0-1
 - Initial scratch work
