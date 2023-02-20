@@ -37,11 +37,6 @@ firejail usage.
 
 ... generates nonrandom passwords.
 
-## nanisore.sh:
-
-... is a shell script that quickly spits out a screenful of processes
-ordered by top memory usage, CPU consumption, or process state.
-
 ## unskipper.py
 
 ... is a Python script that prunes skipcounts from your Quod Libet
