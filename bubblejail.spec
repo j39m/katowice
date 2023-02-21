@@ -3,22 +3,26 @@ Version:    0.7.0
 Release:    1%{?dist}
 Summary:    bubblewrap-based sandboxing utility
 
-License:    GPL-3.0
+License:    GPL-3.0-only
 URL:        https://github.com/igo95862/%{name}
 Source0:    https://github.com/igo95862/%{name}/releases/download/%{version}/%{name}-%{version}.tar.gz
 
 %global     min_python_version 3.9
 %global     min_bubblewrap_version 0.5.0
 
+%global     common_requires python3 >= %{min_python_version}, python3-tomli, python3-tomli-w, python3-pyxdg, libseccomp
+
 BuildArch:  noarch
 
-BuildRequires:  python3 >= %{min_python_version}
-BuildRequires:  python3-jinja2 meson scdoc
+BuildRequires:  %{common_requires}
+BuildRequires:  meson
+BuildRequires:  python3-jinja2
+BuildRequires:  scdoc
 
-Requires:   python3 >= %{min_python_version}
-Requires:   python3-pyxdg python3-tomli python3-tomli-w
+Requires:   %{common_requires}
 Requires:   bubblewrap >= %{min_bubblewrap_version}
-Requires:   xdg-dbus-proxy python3-pyqt6 libseccomp
+Requires:   python3-pyqt6
+Requires:   xdg-dbus-proxy
 
 %description
 Bubblewrap-based sandboxing for desktop applications
@@ -34,7 +38,7 @@ Bubblewrap-based sandboxing for desktop applications
 %meson_install
 
 %files
-# rpmlint warns that `%{_libdir}` ought not be used in a noarch package.
+# rpmlint warns that `_libdir` ought not be used in a noarch package.
 %{_libdir}/%{name}/
 %{_datadir}/bash-completion/completions/%{name}
 %{_datadir}/icons/hicolor/48x48/apps/%{name}-config.png
