@@ -3,7 +3,7 @@ Version:    0.7.0
 Release:    1%{?dist}
 Summary:    bubblewrap-based sandboxing utility
 
-License:    GPL-3.0-only
+License:    GPL-3.0-or-later
 URL:        https://github.com/igo95862/%{name}
 Source0:    https://github.com/igo95862/%{name}/releases/download/%{version}/%{name}-%{version}.tar.gz
 
@@ -52,6 +52,10 @@ Bubblewrap-based sandboxing for desktop applications
 %doc %{_mandir}/man5/%{name}.services.5.gz
 
 
+# TODO: When picking up the next release,
+# * Deal with lack of `/etc/bubblejail/` - seems to be unconditionally
+#   expected
+# * Re-isolate build dependencies, as underlying issues are patched
 %changelog
 * Mon Feb 20 2023 j39m - 0.7.0-1
 - Initial scratch work
