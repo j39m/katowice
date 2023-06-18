@@ -49,9 +49,9 @@ pub struct BwrapParams {
 #[derive(Deserialize)]
 pub struct BwrapBinds {
     // List of binds mapped into the mount namespace as themselves.
-    pub list: Option<toml::value::Array>,
+    pub list: Option<Vec<String>>,
 
     // Map of binds whose destination mappings may be named differently
     // than their true names.
-    pub map: Option<toml::value::Table>,
+    pub map: Option<std::collections::HashMap<String, String>>,
 }
