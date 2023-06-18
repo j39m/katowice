@@ -1,6 +1,5 @@
 *.class
 *.pyc
 *.swp
-Cargo.lock
 target/
 ignore
