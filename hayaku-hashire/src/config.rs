@@ -42,7 +42,8 @@ pub struct BwrapParams {
     pub rw_binds: Option<BwrapBinds>,
 
     // These binds are all specified relative to `${HOME}`.
-    pub home_binds: Option<BwrapBinds>,
+    pub home_ro_binds: Option<BwrapBinds>,
+    pub home_rw_binds: Option<BwrapBinds>,
 }
 
 #[derive(Deserialize)]
