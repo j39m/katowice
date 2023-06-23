@@ -123,7 +123,6 @@ pub struct BwrapParams {
     // * `/usr`,
     // * `/etc`,
     // * `/sys`, and
-    // * `/run`.
     // Defaults to true.
     //
     // `/etc` is especially important for `/etc/ld.so.conf`.
@@ -158,7 +157,7 @@ fn default_true_bool(opt: Option<bool>) -> bool {
 
 impl CommandLine for BwrapParams {
     fn as_args(&self) -> Option<Vec<String>> {
-        let mut ret: Vec<String> = Vec::new();
+        let mut ret: Vec<String> = vec![String::from("/usr/bin/bwrap")];
 
         ret.extend([String::from("--dev"), String::from("/dev")]);
         ret.extend([String::from("--proc"), String::from("/proc")]);
@@ -166,11 +165,10 @@ impl CommandLine for BwrapParams {
             ret.extend(arg_set_from("--ro-bind", None, "/usr", "/usr"));
             ret.extend(arg_set_from("--ro-bind", None, "/etc", "/etc"));
             ret.extend(arg_set_from("--ro-bind", None, "/sys", "/sys"));
-            ret.extend(arg_set_from("--ro-bind", None, "/run", "/run"));
         }
         if default_true_bool(self.use_default_symlinks) {
-            ret.extend(arg_set_from("--symlink", None, "/bin", "usr/bin"));
-            ret.extend(arg_set_from("--symlink", None, "/lib64", "usr/lib64"));
+            ret.extend(arg_set_from("--symlink", None, "usr/bin", "/bin"));
+            ret.extend(arg_set_from("--symlink", None, "usr/lib64", "/lib64"));
         }
         if default_true_bool(self.use_xdg_runtime_dir) {
             let xdg_dirs = xdg::BaseDirectories::new().unwrap();

@@ -37,6 +37,7 @@ fn get_command() -> Command {
 }
 
 fn main() {
-    let command = get_command();
+    let mut command = get_command();
     println!("{:#?}", command);
+    command.exec();
 }
