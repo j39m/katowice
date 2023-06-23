@@ -122,6 +122,42 @@ pub struct BwrapParams {
     pub home_rw_binds: Option<BwrapBinds>,
 }
 
+fn default_true_bool(opt: Option<bool>) -> bool {
+    if let Some(false) = opt {
+        return false;
+    }
+    true
+}
+
+impl CommandLine for BwrapParams {
+    fn as_args(&self) -> Option<Vec<String>> {
+        let mut ret: Vec<String> = Vec::new();
+
+        if default_true_bool(self.use_default_ro_binds) {
+            ret.extend(arg_set_from("--ro-bind", None, "/usr", "/usr"));
+            ret.extend(arg_set_from("--ro-bind", None, "/etc", "/etc"));
+            ret.extend(arg_set_from("--ro-bind", None, "/sys", "/sys"));
+            ret.extend(arg_set_from("--ro-bind", None, "/run", "/run"));
+        }
+
+        if default_true_bool(self.use_default_symlinks) {
+            ret.extend(arg_set_from("--symlink", None, "/bin", "usr/bin"));
+            ret.extend(arg_set_from("--symlink", None, "/lib64", "usr/lib64"));
+        }
+
+        if default_true_bool(self.use_xdg_runtime_dir) {
+            let xdg_dirs = xdg::BaseDirectories::new().unwrap();
+            let xrd = xdg_dirs.get_runtime_directory().unwrap().to_str().unwrap();
+            ret.extend(arg_set_from("--bind", None, xrd, xrd));
+        }
+
+        if ret.is_empty() {
+            return None;
+        }
+        Some(ret)
+    }
+}
+
 #[derive(Deserialize)]
 pub struct BwrapBinds {
     // List of binds mapped into the mount namespace as themselves.
