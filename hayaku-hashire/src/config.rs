@@ -139,16 +139,36 @@ impl CommandLine for BwrapParams {
             ret.extend(arg_set_from("--ro-bind", None, "/sys", "/sys"));
             ret.extend(arg_set_from("--ro-bind", None, "/run", "/run"));
         }
-
         if default_true_bool(self.use_default_symlinks) {
             ret.extend(arg_set_from("--symlink", None, "/bin", "usr/bin"));
             ret.extend(arg_set_from("--symlink", None, "/lib64", "usr/lib64"));
         }
-
         if default_true_bool(self.use_xdg_runtime_dir) {
             let xdg_dirs = xdg::BaseDirectories::new().unwrap();
             let xrd = xdg_dirs.get_runtime_directory().unwrap().to_str().unwrap();
             ret.extend(arg_set_from("--bind", None, xrd, xrd));
+        }
+
+        if let Some(ro_binds) = &self.ro_binds {
+            if let Some(args) = ro_binds.as_args_with_details("--ro-bind", None) {
+                ret.extend(args);
+            }
+        }
+        if let Some(rw_binds) = &self.rw_binds {
+            if let Some(args) = rw_binds.as_args_with_details("--bind", None) {
+                ret.extend(args);
+            }
+        }
+        let home_dir = home::home_dir().unwrap().to_str().unwrap().to_string();
+        if let Some(home_ro_binds) = &self.home_ro_binds {
+            if let Some(args) = home_ro_binds.as_args_with_details("--ro-bind", Some(&home_dir)) {
+                ret.extend(args);
+            }
+        }
+        if let Some(home_rw_binds) = &self.home_rw_binds {
+            if let Some(args) = home_rw_binds.as_args_with_details("--bind", Some(&home_dir)) {
+                ret.extend(args);
+            }
         }
 
         if ret.is_empty() {
