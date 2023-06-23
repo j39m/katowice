@@ -4,7 +4,7 @@ use std::option::Option;
 #[derive(Deserialize)]
 pub struct Config {
     pub executable: std::path::PathBuf,
-    pub default_args: Option<toml::value::Array>,
+    pub default_args: Option<Vec<String>>,
 
     pub cgroup_params: Option<CgroupParams>,
     pub bwrap_params: Option<BwrapParams>,
@@ -30,6 +30,31 @@ pub trait CommandLine {
         _join_prefix: Option<&str>,
     ) -> Option<Vec<String>> {
         return None;
+    }
+}
+
+impl CommandLine for Config {
+    // Does not read args fed from invocation of this program. That
+    // task is delegated to caller.
+    fn as_args(&self) -> Option<Vec<String>> {
+        let mut ret: Vec<String> = Vec::new();
+
+        if let Some(cgroup_params) = &self.cgroup_params {
+            if let Some(params) = cgroup_params.as_args() {
+                ret.extend(params);
+            }
+        }
+        if let Some(bwrap_params) = &self.bwrap_params {
+            if let Some(params) = bwrap_params.as_args() {
+                ret.extend(params);
+            }
+        }
+        ret.push(self.executable.to_str().unwrap().to_string());
+        if let Some(default_args) = &self.default_args {
+            ret.extend(default_args.clone());
+        }
+
+        Some(ret)
     }
 }
 
