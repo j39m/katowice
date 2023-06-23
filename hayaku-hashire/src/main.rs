@@ -1,55 +1,42 @@
+use std::os::unix::process::CommandExt;
+use std::process::Command;
+
 mod config;
 use crate::config::Config;
+use crate::config::CommandLine;
+
+fn get_config(target: &str) -> Config {
+    let dirs = xdg::BaseDirectories::with_prefix("hayaku-hashire").unwrap();
+
+    let mut toml_target = std::path::PathBuf::from(target);
+    toml_target.set_extension("toml");
+
+    let target_path = dirs.find_config_file(toml_target).unwrap();
+    let utf8 = std::fs::read(target_path).unwrap();
+    let contents = String::from_utf8_lossy(&utf8);
+
+    toml::from_str(&contents).unwrap()
+}
+
+fn get_command() -> Command {
+    let mut args_less_the_first = std::env::args();
+    // Pops the name of this executable.
+    args_less_the_first.next();
+    // Pops the name of the hh target.
+    let target = args_less_the_first.next().unwrap();
+    // Copies and collects the remaining argv.
+    let args: Vec<String> = args_less_the_first.collect();
+
+    let mut config = get_config(&target).as_args().unwrap();
+    config.extend(args);
+
+    let mut command: Command = Command::new(&config[0]);
+    command.args(&config[1..]);
+
+    command
+}
 
 fn main() {
-    println!("Hello, world!");
-    let config: Config = toml::from_str(
-        r#"
-        executable = "klaus/tama"
-        default_args = [
-            "Hello",
-            "there!",
-        ]
-
-        [cgroup_params]
-        memory_high = 65
-        memory_max = 0
-
-        [bwrap_params.ro_binds]
-        list = [
-            "Good",
-            "god!",
-        ]
-
-        [bwrap_params.ro_binds.map]
-        hello = "there"
-    "#,
-    )
-    .unwrap();
-    assert_eq!(config.cgroup_params.unwrap().memory_max, 0);
-    for item in config
-        .bwrap_params
-        .as_ref()
-        .unwrap()
-        .ro_binds
-        .as_ref()
-        .unwrap()
-        .list
-        .as_ref()
-        .unwrap()
-        .iter()
-    {
-        println!("{}", item);
-    }
-    for (key, val) in config
-        .bwrap_params
-        .unwrap()
-        .ro_binds
-        .unwrap()
-        .map
-        .unwrap()
-        .iter()
-    {
-        println!("{}: {}", key, val);
-    }
+    let command = get_command();
+    println!("{:#?}", command);
 }
