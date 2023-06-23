@@ -61,6 +61,37 @@ impl CommandLine for CgroupParams {
     // accept user-provided details for this struct.
 }
 
+// Helper function that returns a `Vec` like
+// ```
+// [ "--flag-name", "join_prefix/src", "join_prefix/dst" ]
+// ```
+fn arg_set_from(flag_name: &str, join_prefix: Option<&str>, src: &str, dst: &str) -> Vec<String> {
+    let mut ret: Vec<String> = Vec::new();
+    ret.push(flag_name.to_string());
+
+    let maybe_prefixed_src = match join_prefix {
+        None => src.to_string(),
+        Some(j) => std::path::PathBuf::from(j)
+            .join(src)
+            .to_str()
+            .unwrap()
+            .to_string(),
+    };
+    ret.push(maybe_prefixed_src);
+
+    let maybe_prefixed_dst = match join_prefix {
+        None => dst.to_string(),
+        Some(j) => std::path::PathBuf::from(j)
+            .join(dst)
+            .to_str()
+            .unwrap()
+            .to_string(),
+    };
+    ret.push(maybe_prefixed_dst);
+
+    return ret;
+}
+
 #[derive(Deserialize)]
 pub struct BwrapParams {
     // Whether to implicitly RO-bind
@@ -118,30 +149,13 @@ impl CommandLine for BwrapBinds {
 
         if let Some(list) = &self.list {
             for entry in list.iter() {
-                args.push(String::from(flag_name));
-                let mutated_entry: String = match join_prefix {
-                    None => entry.to_string(),
-                    Some(j) => {
-                        String::from(std::path::PathBuf::from(j).join(entry).to_str().unwrap())
-                    }
-                };
-                args.push(mutated_entry.clone());
-                args.push(mutated_entry);
+                args.extend(arg_set_from(flag_name, join_prefix, entry, entry));
             }
         }
 
         if let Some(map) = &self.map {
             for (key, val) in map.iter() {
-                args.push(String::from(flag_name));
-                let (mutated_key, mutated_val): (String, String) = match join_prefix {
-                    None => (key.to_string(), val.to_string()),
-                    Some(j) => (
-                        String::from(std::path::PathBuf::from(j).join(key).to_str().unwrap()),
-                        String::from(std::path::PathBuf::from(j).join(val).to_str().unwrap()),
-                    ),
-                };
-                args.push(mutated_key);
-                args.push(mutated_val);
+                args.extend(arg_set_from(flag_name, join_prefix, key, val));
             }
         }
 
