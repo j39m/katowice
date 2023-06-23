@@ -145,6 +145,8 @@ pub struct BwrapParams {
     // These binds are all specified relative to `${HOME}`.
     pub home_ro_binds: Option<BwrapBinds>,
     pub home_rw_binds: Option<BwrapBinds>,
+
+    pub dev_binds: Option<BwrapBinds>,
 }
 
 fn default_true_bool(opt: Option<bool>) -> bool {
@@ -158,6 +160,8 @@ impl CommandLine for BwrapParams {
     fn as_args(&self) -> Option<Vec<String>> {
         let mut ret: Vec<String> = Vec::new();
 
+        ret.extend([String::from("--dev"), String::from("/dev")]);
+        ret.extend([String::from("--proc"), String::from("/proc")]);
         if default_true_bool(self.use_default_ro_binds) {
             ret.extend(arg_set_from("--ro-bind", None, "/usr", "/usr"));
             ret.extend(arg_set_from("--ro-bind", None, "/etc", "/etc"));
@@ -195,9 +199,14 @@ impl CommandLine for BwrapParams {
                 ret.extend(args);
             }
         }
+        if let Some(dev_binds) = &self.dev_binds {
+            if let Some(args) = dev_binds.as_args_with_details("--dev-bind", None) {
+                ret.extend(args);
+            }
+        }
 
         if ret.is_empty() {
-            return None;
+            panic!("BUG: empty `BwrapParams`");
         }
         Some(ret)
     }

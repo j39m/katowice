@@ -2,8 +2,8 @@ use std::os::unix::process::CommandExt;
 use std::process::Command;
 
 mod config;
-use crate::config::Config;
 use crate::config::CommandLine;
+use crate::config::Config;
 
 fn get_config(target: &str) -> Config {
     let dirs = xdg::BaseDirectories::with_prefix("hayaku-hashire").unwrap();
