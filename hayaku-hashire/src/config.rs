@@ -146,6 +146,9 @@ pub struct BwrapParams {
     pub home_rw_binds: Option<BwrapBinds>,
 
     pub dev_binds: Option<BwrapBinds>,
+
+    pub setenv: Option<std::collections::HashMap<String, String>>,
+    pub unsetenv: Option<Vec<String>>,
 }
 
 fn default_true_bool(opt: Option<bool>) -> bool {
@@ -200,6 +203,17 @@ impl CommandLine for BwrapParams {
         if let Some(dev_binds) = &self.dev_binds {
             if let Some(args) = dev_binds.as_args_with_details("--dev-bind", None) {
                 ret.extend(args);
+            }
+        }
+
+        if let Some(setenv) = &self.setenv {
+            for (var, val) in setenv.iter() {
+                ret.extend([String::from("--setenv"), var.to_string(), val.to_string()]);
+            }
+        }
+        if let Some(unsetenv) = &self.unsetenv {
+            for var in unsetenv.iter() {
+                ret.extend([String::from("--unsetenv"), var.to_string()]);
             }
         }
 
