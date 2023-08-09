@@ -33,6 +33,14 @@ pub trait CommandLine {
     }
 }
 
+fn executable_path(from_toml: &std::path::PathBuf) -> String {
+    if from_toml.is_absolute() {
+        return from_toml.to_str().unwrap().to_string();
+    }
+    let joined = home::home_dir().unwrap();
+    joined.join(from_toml).to_str().unwrap().to_string()
+}
+
 impl CommandLine for Config {
     // Does not read args fed from invocation of this program. That
     // task is delegated to caller.
@@ -49,7 +57,7 @@ impl CommandLine for Config {
                 ret.extend(params);
             }
         }
-        ret.push(self.executable.to_str().unwrap().to_string());
+        ret.push(executable_path(&self.executable));
         if let Some(default_args) = &self.default_args {
             ret.extend(default_args.clone());
         }
