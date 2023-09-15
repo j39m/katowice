@@ -26,8 +26,10 @@ BKUP_PATH = os.path.join(
 
 
 def load_library():
-    songs = quodlibet.library.init()
-    songs.load(SONGS_PATH)
+    sys.modules.pop("gi.repository.Gtk")
+    quodlibet.init()
+
+    songs = quodlibet.library.init(SONGS_PATH)
     return songs
 
 
