@@ -53,9 +53,9 @@ mod from_clap {
     use super::*;
 
     pub fn expenditure_type(matches: &clap::ArgMatches) -> ExpenditureType {
-        let symbolic_type = matches.value_of(CLAP_EXPENDITURE_TYPE).unwrap();
+        let symbolic_type = matches.get_one::<String>(CLAP_EXPENDITURE_TYPE).unwrap();
 
-        match symbolic_type {
+        match symbolic_type.as_str() {
             "up" => return ExpenditureType::PersonalUSD,
             "ue" => return ExpenditureType::EssentialUSD,
             "jp" => return ExpenditureType::PersonalJPY,
@@ -66,7 +66,7 @@ mod from_clap {
     }
 
     pub fn target_date(matches: &clap::ArgMatches) -> Option<chrono::Date<chrono::Local>> {
-        if let Some(cli_target_date) = matches.value_of(CLAP_TARGET_DATE) {
+        if let Some(cli_target_date) = matches.get_one::<String>(CLAP_TARGET_DATE) {
             if let Ok(datetime) = chrono::Local.datetime_from_str(
                 &format!("{} 00:00:00", cli_target_date).to_string(),
                 "%Y-%m-%d %H:%M:%S",
@@ -82,15 +82,14 @@ mod from_clap {
     }
 
     pub fn amount(matches: &clap::ArgMatches) -> f64 {
-        matches
-            .value_of_t::<f64>(CLAP_AMOUNT)
-            .unwrap_or_else(|e| e.exit())
+        matches.get_one::<f64>(CLAP_AMOUNT).unwrap().to_owned()
     }
 
     pub fn description(matches: &clap::ArgMatches) -> String {
         matches
-            .value_of_t::<String>(CLAP_DESCRIPTION)
-            .unwrap_or_else(|e| e.exit())
+            .get_one::<String>(CLAP_DESCRIPTION)
+            .unwrap()
+            .to_owned()
     }
 } // mod from_clap
 
@@ -135,42 +134,23 @@ fn parse_clap_matches(matches: clap::ArgMatches) -> SqlCommand {
 }
 
 fn parse_command_line() -> SqlCommand {
-    let matches = clap::App::new("tangerine-tailleferre")
+    let matches = clap::command!()
         .version("0.1.1")
         .author("j39m")
         .about("manipulates expenditures")
-        .setting(clap::AppSettings::SubcommandRequired)
-        .subcommand(clap::App::new("edit").about("opens sqlite3 directly"))
+        .subcommand(clap::Command::new("edit").about("opens sqlite3 directly"))
         .subcommand(
-            clap::App::new("show")
+            clap::Command::new("show")
                 .about("shows expenditures")
-                .arg(
-                    clap::Arg::new(CLAP_TARGET_DATE)
-                        .takes_value(true)
-                        .short('t'),
-                )
+                .arg(clap::Arg::new(CLAP_TARGET_DATE).short('t'))
                 .arg(clap::Arg::new(CLAP_EXPENDITURE_TYPE).required(true)),
         )
         .subcommand(
-            clap::App::new("insert")
+            clap::Command::new("insert")
                 .about("inserts an expenditure")
-                .arg(
-                    clap::Arg::new(CLAP_AMOUNT)
-                        .takes_value(true)
-                        .required(true)
-                        .short('a'),
-                )
-                .arg(
-                    clap::Arg::new(CLAP_DESCRIPTION)
-                        .takes_value(true)
-                        .required(true)
-                        .short('d'),
-                )
-                .arg(
-                    clap::Arg::new(CLAP_TARGET_DATE)
-                        .takes_value(true)
-                        .short('t'),
-                )
+                .arg(clap::Arg::new(CLAP_AMOUNT).required(true).short('a'))
+                .arg(clap::Arg::new(CLAP_DESCRIPTION).required(true).short('d'))
+                .arg(clap::Arg::new(CLAP_TARGET_DATE).short('t'))
                 .arg(clap::Arg::new(CLAP_EXPENDITURE_TYPE).required(true)),
         )
         .get_matches();
