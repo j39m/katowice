@@ -148,7 +148,12 @@ fn parse_command_line() -> SqlCommand {
         .subcommand(
             clap::Command::new("insert")
                 .about("inserts an expenditure")
-                .arg(clap::Arg::new(CLAP_AMOUNT).required(true).short('a'))
+                .arg(
+                    clap::Arg::new(CLAP_AMOUNT)
+                        .required(true)
+                        .short('a')
+                        .value_parser(clap::value_parser!(f64)),
+                )
                 .arg(clap::Arg::new(CLAP_DESCRIPTION).required(true).short('d'))
                 .arg(clap::Arg::new(CLAP_TARGET_DATE).short('t'))
                 .arg(clap::Arg::new(CLAP_EXPENDITURE_TYPE).required(true)),
