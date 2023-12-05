@@ -18,6 +18,8 @@ class Splitter:
 
     def __parse_single(self, dollar_amount: str) -> Fraction:
         (dollars, cents) = dollar_amount.split(".")
+        if len(cents) < 2:
+            cents = f"{cents}0"
         return Fraction((int(dollars) * 100) + int(cents), 100)
 
     def __parse(self, *args):
