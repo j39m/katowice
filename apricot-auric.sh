@@ -4,9 +4,11 @@ set -u
 
 LOGFILE="${XDG_RUNTIME_DIR}/rclone.log"
 
+systemd-inhibit --what=sleep \
 rclone sync \
     -v -x -M -l \
     --log-file="${LOGFILE}" \
+    --bwlimit=520K \
     --filter '- ' \
     --filter '- /.cache/' \
     --filter '- /.cargo/' \
