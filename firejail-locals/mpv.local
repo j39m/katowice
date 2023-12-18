@@ -1,3 +1,0 @@
-whitelist-ro ${DOCUMENTS}
-noblacklist ${DOWNLOADS}
-noblacklist ${VIDEOS}
