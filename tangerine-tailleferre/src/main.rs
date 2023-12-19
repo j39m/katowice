@@ -34,7 +34,7 @@ pub struct SqlOptions {
     expenditure_type: ExpenditureType,
 
     // Target date is always required in transacting expenditures.
-    target_date: chrono::Date<chrono::Local>,
+    target_date: chrono::NaiveDate,
 
     // Amount and description are required for insertion.
     // They are meaningless for read-only queries.
@@ -65,16 +65,18 @@ mod from_clap {
         panic!("invalid {} ``{}''", CLAP_EXPENDITURE_TYPE, symbolic_type);
     }
 
-    pub fn target_date(matches: &clap::ArgMatches) -> Option<chrono::Date<chrono::Local>> {
+    pub fn target_date(matches: &clap::ArgMatches) -> Option<chrono::NaiveDate> {
         if let Some(cli_target_date) = matches.get_one::<String>(CLAP_TARGET_DATE) {
             if let Ok(datetime) = chrono::Local.datetime_from_str(
                 &format!("{} 00:00:00", cli_target_date).to_string(),
                 "%Y-%m-%d %H:%M:%S",
             ) {
-                return Some(datetime.date());
+                return Some(datetime.date_naive());
             }
             if let Ok(date_delta) = cli_target_date.parse::<i64>() {
-                return Some((chrono::Local::now() - chrono::Duration::days(date_delta)).date());
+                return Some(
+                    (chrono::Local::now() - chrono::Duration::days(date_delta)).date_naive(),
+                );
             }
             panic!("bad target date: ``{}''", cli_target_date);
         }
@@ -97,7 +99,7 @@ fn build_show_options(matches: &clap::ArgMatches) -> SqlOptions {
     let target_date = match from_clap::target_date(matches) {
         Some(date) => date,
         // Aribtrary choice: peeks back 6 months.
-        None => (chrono::Local::now() - chrono::Duration::days(183)).date(),
+        None => (chrono::Local::now() - chrono::Duration::days(183)).date_naive(),
     };
 
     SqlOptions {
@@ -111,7 +113,7 @@ fn build_show_options(matches: &clap::ArgMatches) -> SqlOptions {
 fn build_insert_options(matches: &clap::ArgMatches) -> SqlOptions {
     let target_date = match from_clap::target_date(matches) {
         Some(date) => date,
-        None => chrono::Local::now().date(),
+        None => chrono::Local::now().date_naive(),
     };
 
     SqlOptions {
