@@ -38,6 +38,8 @@ fn get_command() -> Command {
 
 fn main() {
     let mut command = get_command();
-    println!("{:#?}", command);
+    if cfg!(debug_assertions) {
+        eprintln!("{:#?}", command);
+    }
     command.exec();
 }
