@@ -8,7 +8,6 @@ systemd-inhibit --what=sleep \
 rclone sync \
     -v -x -M -l \
     --log-file="${LOGFILE}" \
-    --bwlimit=520K \
     --filter '- ' \
     --filter '- /.cache/' \
     --filter '- /.cargo/' \
