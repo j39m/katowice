@@ -10,6 +10,7 @@ It would seem (from the diagnostic print at the end of
 all possible 5-digit numbers. We're only good to 4 digits.
 """
 
+
 class PiNumber:
     default_digit_len = 5
     noisy = True
@@ -77,6 +78,14 @@ class PiNumber:
             self.pistr = pfp.read().strip()
         self.__init_table()
         self.__build_table()
+
+
+def print_missing_five_digit_numbers(pinum):
+    for num in range(int(1e5)):
+        try:
+            pinum.get(num)
+        except KeyError:
+            print(num)
 
 
 if __name__ == "__main__":
