@@ -6,7 +6,7 @@ pub struct Config {
     pub executable: std::path::PathBuf,
     pub default_args: Option<Vec<String>>,
 
-    pub cgroup_params: Option<CgroupParams>,
+    pub systemd_run_params: Option<SystemdRunParams>,
     pub bwrap_params: Option<BwrapParams>,
 }
 
@@ -47,8 +47,8 @@ impl CommandLine for Config {
     fn as_args(&self) -> Option<Vec<String>> {
         let mut ret: Vec<String> = Vec::new();
 
-        if let Some(cgroup_params) = &self.cgroup_params {
-            if let Some(params) = cgroup_params.as_args() {
+        if let Some(systemd_run_params) = &self.systemd_run_params {
+            if let Some(params) = systemd_run_params.as_args() {
                 ret.extend(params);
             }
         }
@@ -67,17 +67,18 @@ impl CommandLine for Config {
 }
 
 #[derive(Deserialize)]
-pub struct CgroupParams {
+pub struct SystemdRunParams {
     pub memory_high: u64,
     pub memory_max: u64,
+    pub scope_name: Option<String>,
 }
 
-impl CommandLine for CgroupParams {
+impl CommandLine for SystemdRunParams {
     fn as_args(&self) -> Option<Vec<String>> {
         // Both fields are required, so presence of this TOML block
         // means that we are definitely being cgroup'd, so there's no
         // case in which this returns `None`.
-        Some(vec![
+        let mut result = vec![
             String::from("/usr/bin/systemd-run"),
             String::from("--user"),
             String::from("--scope"),
@@ -87,7 +88,12 @@ impl CommandLine for CgroupParams {
             format!("MemoryHigh={}M", self.memory_high),
             String::from("-p"),
             format!("MemoryMax={}M", self.memory_max),
-        ])
+        ];
+        if let Some(scope_name) = &self.scope_name {
+            result.push(String::from("-u"));
+            result.push(String::from(scope_name));
+        }
+        Some(result)
     }
 
     // Fall through to default for `as_args_for_details()`, as we don't
