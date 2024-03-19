@@ -1,9 +1,6 @@
 use std::os::unix::process::CommandExt;
 use std::process::Command;
 
-// chrono needs this to call Local.datetime_from_str().
-use chrono::offset::TimeZone;
-
 const SQLITE3: &'static str = "/usr/bin/sqlite3";
 const DB_PATH: &'static str = "/home/kalvin/Documents/personal/expenditures.db";
 
@@ -67,15 +64,13 @@ mod from_clap {
 
     pub fn target_date(matches: &clap::ArgMatches) -> Option<chrono::NaiveDate> {
         if let Some(cli_target_date) = matches.get_one::<String>(CLAP_TARGET_DATE) {
-            if let Ok(datetime) = chrono::Local.datetime_from_str(
-                &format!("{} 00:00:00", cli_target_date).to_string(),
-                "%Y-%m-%d %H:%M:%S",
-            ) {
-                return Some(datetime.date_naive());
+            if let Ok(date) = chrono::NaiveDate::parse_from_str(cli_target_date, "%Y-%m-%d") {
+                return Some(date);
             }
             if let Ok(date_delta) = cli_target_date.parse::<i64>() {
                 return Some(
-                    (chrono::Local::now() - chrono::Duration::days(date_delta)).date_naive(),
+                    (chrono::Local::now() - chrono::TimeDelta::try_days(date_delta).unwrap())
+                        .date_naive(),
                 );
             }
             panic!("bad target date: ``{}''", cli_target_date);
@@ -99,7 +94,7 @@ fn build_show_options(matches: &clap::ArgMatches) -> SqlOptions {
     let target_date = match from_clap::target_date(matches) {
         Some(date) => date,
         // Aribtrary choice: peeks back 6 months.
-        None => (chrono::Local::now() - chrono::Duration::days(183)).date_naive(),
+        None => (chrono::Local::now() - chrono::TimeDelta::try_days(183).unwrap()).date_naive(),
     };
 
     SqlOptions {
