@@ -148,8 +148,8 @@ mod from_clap {
     fn build_show_options(args: ShowArgs) -> super::SqlCoreValues {
         let target_date = match target_date(args.target_date) {
             Some(date) => date,
-            // Aribtrary choice: peeks back 6 months.
-            None => (chrono::Local::now() - chrono::TimeDelta::try_days(183).unwrap()).date_naive(),
+            // Aribtrary choice: peeks back 26 days.
+            None => (chrono::Local::now() - chrono::TimeDelta::try_days(26).unwrap()).date_naive(),
         };
 
         super::SqlCoreValues {
