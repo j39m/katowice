@@ -52,7 +52,7 @@ mod from_clap {
     #[command(about = "manipulates expenditures")]
     struct Cli {
         #[command(subcommand)]
-        subcommand: Subcommand
+        subcommand: Subcommand,
     }
 
     #[derive(clap::Subcommand)]
