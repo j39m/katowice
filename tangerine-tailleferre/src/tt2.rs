@@ -63,7 +63,7 @@ mod from_clap {
 
     #[derive(clap::Args)]
     struct ShowArgs {
-        #[arg(short)]
+        #[arg(short, help = "(optional) date or past-facing offset")]
         target_date: Option<String>,
         #[command(flatten)]
         currency: Currency,
@@ -73,37 +73,37 @@ mod from_clap {
 
     #[derive(clap::Args)]
     struct InsertArgs {
-        #[arg(short)]
+        #[arg(short, help = "(optional) date or past-facing offset")]
         target_date: Option<String>,
         #[command(flatten)]
         currency: Currency,
         #[command(flatten)]
         etype: Type,
-        #[arg(short)]
+        #[arg(short, help = super::SCHEMA_AMOUNT)]
         amount: f64,
-        #[arg(short)]
+        #[arg(short, help = super::SCHEMA_DESCRIPTION)]
         description: String,
     }
 
     #[derive(clap::Args)]
     #[group(required = true, multiple = false)]
     struct Currency {
-        #[arg(short)]
+        #[arg(short, help = "currency = USD")]
         usd: bool,
-        #[arg(short)]
+        #[arg(short, help = "currency = JPY")]
         jpy: bool,
     }
 
     #[derive(clap::Args)]
     #[group(required = true, multiple = false)]
     struct Type {
-        #[arg(short)]
+        #[arg(short, help = "type = essential")]
         essential: bool,
-        #[arg(short)]
+        #[arg(short, help = "type = personal")]
         personal: bool,
-        #[arg(short)]
+        #[arg(short, help = "type = general informational")]
         general_informational: bool,
-        #[arg(short)]
+        #[arg(short, help = "type = 2024Q1 bonus")]
         miracleptr_bonus: bool,
     }
 
@@ -189,4 +189,5 @@ mod from_clap {
 
 fn main() {
     let command = from_clap::parse();
+    eprintln!("{:#?}", command);
 }
