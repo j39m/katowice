@@ -5,10 +5,6 @@ authors = ["j39m"]
 edition = "2021"
 
 [[bin]]
-name = "tangerine-tailleferre"
-path = "src/main.rs"
-
-[[bin]]
 name = "tt2"
 path = "src/tt2.rs"
 
