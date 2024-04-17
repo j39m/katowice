@@ -33,4 +33,8 @@ sqlite3 "./${DB_BASENAME}" \
         select date, description, amount, 1, 0 from jp_essential;
      insert into expenditures (date, description, amount, currency, type)
         select date, description, amount, 1, 1 from jp_personal;
+     drop table essexp;
+     drop table perexp;
+     drop table jp_essential;
+     drop table jp_personal;
      "
