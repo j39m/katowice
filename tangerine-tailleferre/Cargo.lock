@@ -221,6 +221,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3fdb12b2476b595f9358c5161aa467c2438859caa136dec86c26fdd2efe17b92"
 
 [[package]]
+name = "pkg-config"
+version = "0.3.30"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d231b230927b5e4ad203db57bbcbee2802f6bce620b1e4a9024a07d94e2907ec"
+
+[[package]]
 name = "proc-macro2"
 version = "1.0.80"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -236,6 +242,36 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0fa76aaf39101c457836aec0ce2316dbdc3ab723cdda1c6bd4e6ad4208acaca7"
 dependencies = [
  "proc-macro2",
+]
+
+[[package]]
+name = "sqlite"
+version = "0.34.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1bf42adadeba1af33e2778aa22a6e9c487d8a0e3170fe65e6cb8775b3c59eb99"
+dependencies = [
+ "libc",
+ "sqlite3-sys",
+]
+
+[[package]]
+name = "sqlite3-src"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9448d45899495acd1a46b0b888ae9747c13551fb0d8f4a60ab485da52b040503"
+dependencies = [
+ "cc",
+ "pkg-config",
+]
+
+[[package]]
+name = "sqlite3-sys"
+version = "0.16.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "aed0b61828382e1103930d2d5df1972d493173319730b481192e63d929097321"
+dependencies = [
+ "libc",
+ "sqlite3-src",
 ]
 
 [[package]]
@@ -261,6 +297,7 @@ version = "0.1.1"
 dependencies = [
  "chrono",
  "clap",
+ "sqlite",
 ]
 
 [[package]]

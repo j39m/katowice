@@ -1,5 +1,6 @@
 const DB_PATH: &'static str = "./expenditures.db";
 
+const TABLE_NAME: &'static str = "expenditures";
 const SCHEMA_AMOUNT: &'static str = "amount";
 const SCHEMA_CURRENCY: &'static str = "currency";
 const SCHEMA_DESCRIPTION: &'static str = "description";
@@ -187,7 +188,54 @@ mod from_clap {
 
 //options.target_date.format("%Y-%m-%d").to_string()
 
+fn show(connection: sqlite::Connection, values: SqlCoreValues) {
+    let prepared = format!(
+        "select * from {} where {} >= ? and {} = ? and {} = ?",
+        TABLE_NAME, SCHEMA_TARGET_DATE, SCHEMA_CURRENCY, SCHEMA_TYPE
+    );
+    let mut statement = connection.prepare(prepared).unwrap();
+    statement
+        .bind((
+            1,
+            values.target_date.format("%Y-%m-%d").to_string().as_str(),
+        ))
+        .unwrap();
+    statement.bind((2, values.currency as i64)).unwrap();
+    statement.bind((3, values.etype as i64)).unwrap();
+
+    let mut sum: f64 = 0.0;
+    while let Ok(sqlite::State::Row) = statement.next() {
+        let date = statement.read::<String, _>(SCHEMA_TARGET_DATE).unwrap();
+        let description = statement.read::<String, _>(SCHEMA_DESCRIPTION).unwrap();
+        let amount = statement.read::<f64, _>(SCHEMA_AMOUNT).unwrap();
+        sum += amount;
+        println!("{}|{}|{}", date, description, amount);
+    }
+    println!("{}", sum);
+}
+
+fn insert(connection: sqlite::Connection, values: SqlInsertValues) {
+    let statement = format!(
+        "insert into {} values('{}', '{}', {}, {}, {})",
+        TABLE_NAME,
+        values.core.target_date,
+        values.description,
+        values.amount,
+        values.core.currency as u8,
+        values.core.etype as u8
+    );
+    connection.execute(statement).unwrap();
+}
+
 fn main() {
     let command = from_clap::parse();
     eprintln!("{:#?}", command);
+
+    let connection = sqlite::open(DB_PATH).unwrap();
+    connection.execute("pragma foreign_keys = on").unwrap();
+    match command {
+        SqlCommand::Edit => unimplemented!(),
+        SqlCommand::Show(values) => show(connection, values),
+        SqlCommand::Insert(values) => insert(connection, values),
+    }
 }
