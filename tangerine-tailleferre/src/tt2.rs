@@ -1,4 +1,4 @@
-const DB_PATH: &'static str = "./expenditures.db";
+const DB_PATH: &'static str = "/home/kalvin/Documents/personal/expenditures.db";
 
 const TABLE_NAME: &'static str = "expenditures";
 const SCHEMA_AMOUNT: &'static str = "amount";
