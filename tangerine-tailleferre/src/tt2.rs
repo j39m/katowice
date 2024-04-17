@@ -39,7 +39,6 @@ pub struct SqlInsertValues {
 
 #[derive(Debug)]
 pub enum SqlCommand {
-    Edit,
     Show(SqlCoreValues),
     Insert(SqlInsertValues),
 }
@@ -234,7 +233,6 @@ fn main() {
     let connection = sqlite::open(DB_PATH).unwrap();
     connection.execute("pragma foreign_keys = on").unwrap();
     match command {
-        SqlCommand::Edit => unimplemented!(),
         SqlCommand::Show(values) => show(connection, values),
         SqlCommand::Insert(values) => insert(connection, values),
     }
