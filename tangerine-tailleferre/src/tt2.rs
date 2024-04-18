@@ -7,6 +7,8 @@ const SCHEMA_DESCRIPTION: &'static str = "description";
 const SCHEMA_TYPE: &'static str = "type";
 const SCHEMA_TARGET_DATE: &'static str = "date";
 
+const YMD_FORMAT: &'static str = "%Y-%m-%d";
+
 #[derive(Debug)]
 #[repr(u8)]
 pub enum Currency {
@@ -131,7 +133,7 @@ mod from_clap {
 
     fn target_date(from_clap: Option<String>) -> Option<chrono::NaiveDate> {
         if let Some(ymd) = from_clap {
-            if let Ok(date) = chrono::NaiveDate::parse_from_str(ymd.as_str(), "%Y-%m-%d") {
+            if let Ok(date) = chrono::NaiveDate::parse_from_str(ymd.as_str(), super::YMD_FORMAT) {
                 return Some(date);
             }
             if let Ok(date_delta) = ymd.parse::<i64>() {
@@ -185,18 +187,16 @@ mod from_clap {
     }
 } // mod from_clap
 
-//options.target_date.format("%Y-%m-%d").to_string()
-
 fn show(connection: sqlite::Connection, values: SqlCoreValues) {
     let prepared = format!(
-        "select * from {} where {} >= ? and {} = ? and {} = ?",
-        TABLE_NAME, SCHEMA_TARGET_DATE, SCHEMA_CURRENCY, SCHEMA_TYPE
+        "select * from {} where {} >= {}(?) and {} = ? and {} = ?",
+        TABLE_NAME, SCHEMA_TARGET_DATE, SCHEMA_TARGET_DATE, SCHEMA_CURRENCY, SCHEMA_TYPE
     );
     let mut statement = connection.prepare(prepared).unwrap();
     statement
         .bind((
             1,
-            values.target_date.format("%Y-%m-%d").to_string().as_str(),
+            values.target_date.format(YMD_FORMAT).to_string().as_str(),
         ))
         .unwrap();
     statement.bind((2, values.currency as i64)).unwrap();
@@ -215,9 +215,9 @@ fn show(connection: sqlite::Connection, values: SqlCoreValues) {
 
 fn insert(connection: sqlite::Connection, values: SqlInsertValues) {
     let statement = format!(
-        "insert into {} values('{}', '{}', {}, {}, {})",
+        "insert into {} values(date('{}'), '{}', {}, {}, {})",
         TABLE_NAME,
-        values.core.target_date,
+        values.core.target_date.format(YMD_FORMAT),
         values.description,
         values.amount,
         values.core.currency as u8,
