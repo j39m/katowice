@@ -131,7 +131,7 @@ mod from_clap {
         panic!("BUG: type")
     }
 
-    fn target_date(from_clap: Option<String>) -> Option<chrono::NaiveDate> {
+    fn parse_date(from_clap: Option<String>) -> Option<chrono::NaiveDate> {
         if let Some(ymd) = from_clap {
             if let Ok(date) = chrono::NaiveDate::parse_from_str(ymd.as_str(), super::YMD_FORMAT) {
                 return Some(date);
@@ -148,7 +148,7 @@ mod from_clap {
     }
 
     fn build_show_options(args: ShowArgs) -> super::SqlCoreValues {
-        let target_date = match target_date(args.target_date) {
+        let target_date = match parse_date(args.target_date) {
             Some(date) => date,
             // Aribtrary choice: peeks back 26 days.
             None => (chrono::Local::now() - chrono::TimeDelta::try_days(26).unwrap()).date_naive(),
@@ -162,7 +162,7 @@ mod from_clap {
     }
 
     fn build_insert_options(args: InsertArgs) -> super::SqlInsertValues {
-        let target_date = match target_date(args.target_date) {
+        let target_date = match parse_date(args.target_date) {
             Some(date) => date,
             None => chrono::Local::now().date_naive(),
         };
