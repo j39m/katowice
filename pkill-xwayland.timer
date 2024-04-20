@@ -1,0 +1,9 @@
+[Unit]
+Description=Kill Xwayland now and again
+
+[Timer]
+OnBootSec=91s
+OnUnitActiveSec=91s
+
+[Install]
+WantedBy=timers.target

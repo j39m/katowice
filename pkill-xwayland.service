@@ -1,0 +1,6 @@
+[Unit]
+Description=Kill Xwayland
+
+[Service]
+Type=oneshot
+ExecStart=-/usr/bin/pkill -ex -HUP Xwayland
