@@ -2,5 +2,7 @@
 Description=Kill Xwayland
 
 [Service]
-Type=oneshot
-ExecStart=-/usr/bin/pkill -ex -HUP Xwayland
+ExecStart=/bin/bash -c 'while sleep 65; do /usr/bin/pkill -ex -HUP Xwayland; done'
+
+[Install]
+WantedBy=default.target
