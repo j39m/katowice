@@ -208,9 +208,9 @@ fn show(connection: sqlite::Connection, values: SqlCoreValues) {
         let description = statement.read::<String, _>(SCHEMA_DESCRIPTION).unwrap();
         let amount = statement.read::<f64, _>(SCHEMA_AMOUNT).unwrap();
         sum += amount;
-        println!("{}|{}|{}", date, description, amount);
+        println!("{}|{}|{:.2}", date, description, amount);
     }
-    println!("{}", sum);
+    println!("{:.2}", sum);
 }
 
 fn insert(connection: sqlite::Connection, values: SqlInsertValues) {
