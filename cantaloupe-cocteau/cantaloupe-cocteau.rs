@@ -84,7 +84,7 @@ fn get_sink_indices(context: &mut PulseContext) -> CacoResult<Vec<u32>> {
     }
     Ok(sink_infos
         .into_iter()
-        .filter_map(|info| Some(info.index))
+        .map(|info| info.index)
         .collect())
 }
 
