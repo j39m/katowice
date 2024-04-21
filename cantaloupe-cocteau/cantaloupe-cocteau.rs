@@ -82,7 +82,6 @@ fn get_sink_indices(context: &mut PulseContext) -> CacoResult<Vec<u32>> {
     for info in &sink_infos {
         println!("     {:>3}: {}", info.index, info.name.to_str().unwrap());
     }
-    println!("{}", "");
     Ok(sink_infos
         .into_iter()
         .filter_map(|info| Some(info.index))
@@ -169,9 +168,9 @@ pub fn main() -> CacoResult<()> {
         .interact_text()
         .unwrap();
     if let Ok(index) = selection.parse::<u32>() {
-        move_sink_input(&mut context, index, sink_indices, sink_inputs);
+        move_sink_input(&mut context, index, sink_indices, sink_inputs)?;
     } else if let Some(index) = sink_inputs.quodlibet_index {
-        move_sink_input(&mut context, index, sink_indices, sink_inputs);
+        move_sink_input(&mut context, index, sink_indices, sink_inputs)?;
     } else {
         println!("{}", "bye");
     }
