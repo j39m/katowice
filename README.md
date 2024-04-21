@@ -20,18 +20,9 @@ jukebox.
 Rust is not at all suited for this "scripting" work, but the original
 GNU Make recipes have grown brambly and difficult to maintain.
 
-## unner.rs
-
-... is a small executable that removes some boilerplate from my `$PATH`.
-
 ## avocado-attenborough.rs
 
 ... is a small executable that sets my screen brightness.
-
-## firejail-locals
-
-... contains all the local customizations I wish to retain for my
-firejail usage.
 
 ## xkpw
 
