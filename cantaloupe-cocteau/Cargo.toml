@@ -1,0 +1,12 @@
+[package]
+name = "cantaloupe-cocteau"
+version = "0.1.0"
+authors = ["j39m"]
+edition = "2021"
+
+[[bin]]
+name = "cantaloupe-cocteau"
+path = "cantaloupe-cocteau.rs"
+
+[dependencies]
+pulseaudio = "0"
