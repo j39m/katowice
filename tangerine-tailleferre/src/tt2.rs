@@ -50,7 +50,7 @@ mod from_clap {
 
     #[derive(clap::Parser)]
     #[command(name = "tt2")]
-    #[command(version = "2.0.0")]
+    #[command(version = clap::crate_version!())]
     #[command(about = "manipulates expenditures")]
     struct Cli {
         #[command(subcommand)]
