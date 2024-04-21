@@ -10,3 +10,4 @@ path = "cantaloupe-cocteau.rs"
 
 [dependencies]
 pulseaudio = "0"
+dialoguer = "0"
