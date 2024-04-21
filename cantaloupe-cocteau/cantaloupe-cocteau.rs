@@ -72,10 +72,40 @@ fn get_sink_indices(context: &mut PulseContext) -> CacoResult<Vec<u32>> {
     let (_, mut sink_infos) =
         protocol::read_reply_message::<protocol::SinkInfoList>(&mut context.sock, context.version)?;
     sink_infos.sort_by_key(|info| info.index);
+
+    println!("{}:", "sink infos");
     for info in &sink_infos {
-        println!("{}: {}", info.index, info.name.to_str().unwrap());
+        println!("     {:>3}: {}", info.index, info.name.to_str().unwrap());
     }
+    println!("{}", "");
     Ok(sink_infos
+        .into_iter()
+        .filter_map(|info| Some(info.index))
+        .collect())
+}
+
+fn get_sink_input_indices(context: &mut PulseContext) -> CacoResult<Vec<u32>> {
+    context.write_command_message(protocol::Command::GetSinkInputInfoList)?;
+    let (_, mut sink_input_infos) = protocol::read_reply_message::<protocol::SinkInputInfoList>(
+        &mut context.sock,
+        context.version,
+    )?;
+    sink_input_infos.sort_by_key(|info| info.index);
+
+    println!("{}:", "sink input infos");
+    for info in &sink_input_infos {
+        let application_name = match info.props.get(protocol::Prop::ApplicationName) {
+            Some(u8s) => String::from_utf8(u8s.to_vec()).unwrap_or(String::from("[bad UTF-8]")),
+            None => String::from("[no name]"),
+        };
+        println!(
+            "  {:>6} (sink {:>3}): {application_name}\n          {}",
+            info.index,
+            info.sink_index,
+            info.name.to_str().unwrap()
+        );
+    }
+    Ok(sink_input_infos
         .into_iter()
         .filter_map(|info| Some(info.index))
         .collect())
@@ -84,6 +114,7 @@ fn get_sink_indices(context: &mut PulseContext) -> CacoResult<Vec<u32>> {
 pub fn main() -> CacoResult<()> {
     let mut context = make_context()?;
     set_client_name(&mut context)?;
-    get_sink_indices(&mut context)?;
+    let sink_indices = get_sink_indices(&mut context)?;
+    let sink_input_indices = get_sink_input_indices(&mut context)?;
     Ok(())
 }
