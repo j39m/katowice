@@ -152,6 +152,10 @@ pub struct BwrapParams {
     // Defaults to true.
     pub use_xdg_runtime_dir: Option<bool>,
 
+    // Whether to share the network namespace.
+    // Defaults to false.
+    pub share_net: Option<bool>,
+
     pub ro_binds: Option<BwrapBinds>,
     pub rw_binds: Option<BwrapBinds>,
 
@@ -192,6 +196,11 @@ impl CommandLine for BwrapParams {
             let xrd = xdg_dirs.get_runtime_directory().unwrap().to_str().unwrap();
             ret.extend(arg_set_from("--bind", None, xrd, xrd));
         }
+
+        match &self.share_net {
+            Some(true) => ret.push("--share-net".to_string()),
+            _ => ret.push("--unshare-net".to_string()),
+        };
 
         if let Some(ro_binds) = &self.ro_binds {
             if let Some(args) = ro_binds.as_args_with_details("--ro-bind", None) {
