@@ -80,7 +80,7 @@ fn get_sink_indices(context: &mut PulseContext) -> CacoResult<Vec<u32>> {
 
     println!("{}:", "sink infos");
     for info in &sink_infos {
-        println!("     {:>3}: {}", info.index, info.name.to_str().unwrap());
+        println!("     {:>4}: {}", info.index, info.name.to_str().unwrap());
     }
     Ok(sink_infos
         .into_iter()
@@ -108,7 +108,7 @@ fn get_sink_inputs(context: &mut PulseContext) -> CacoResult<SinkInputs> {
         }
 
         println!(
-            "  {:>6} (sink {:>3}): {application_name}\n          {}",
+            "  {:>6} (sink {:>4}): {application_name}\n          {}",
             info.index,
             info.sink_index,
             info.name.to_str().unwrap()
