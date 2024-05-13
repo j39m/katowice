@@ -1,6 +1,3 @@
-extern crate clap;
-extern crate rand;
-
 const DEFAULT_ENGLISH_DICTIONARY_PATH: &'static str = "/usr/share/dict/words";
 
 use clap::Parser;
