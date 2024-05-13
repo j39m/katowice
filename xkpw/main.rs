@@ -29,8 +29,8 @@ struct EnglishArgs {
 
 #[derive(clap::Args)]
 struct JapaneseArgs {
-    #[arg(short, default_value_t = false, help = "also use harder kana")]
-    all_kana: bool,
+    #[arg(short, default_value_t = false, help = "also use digraphs")]
+    all_phonemes: bool,
     #[arg(default_values_t = vec![4, 3, 3, 3], help = "syllable counts")]
     counts: Vec<usize>,
 }
@@ -79,12 +79,12 @@ mod kana {
     ];
 
     fn all() -> Vec<&'static str> {
-        let mut all_kana: Vec<&'static str> = Vec::new();
-        all_kana.extend(BASE);
-        all_kana.extend(DIGRAPHS);
-        all_kana.extend(DIACRITICS);
-        all_kana.extend(DIGRAPHS_WITH_DIACRITICS);
-        all_kana
+        let mut all: Vec<&'static str> = Vec::new();
+        all.extend(BASE);
+        all.extend(DIGRAPHS);
+        all.extend(DIACRITICS);
+        all.extend(DIGRAPHS_WITH_DIACRITICS);
+        all
     }
 
     fn simple() -> Vec<&'static str> {
@@ -160,7 +160,7 @@ fn build_kana_word(kana_set: &Vec<&'static str>, syllable_count: usize) -> Strin
 // Builds a vector of owned kana words, maps these to a vector of
 // borrowed kana words, and then prints the same.
 fn print_kana_password(args: JapaneseArgs) {
-    let syllable_set = crate::kana::get(args.all_kana);
+    let syllable_set = crate::kana::get(args.all_phonemes);
     let words = args
         .counts
         .into_iter()
@@ -175,7 +175,7 @@ fn main() {
         Some(Subcommand::En(args)) => print_english_password(args),
         Some(Subcommand::Jp(args)) => print_kana_password(args),
         None => print_kana_password(JapaneseArgs {
-            all_kana: true,
+            all_phonemes: true,
             counts: vec![4, 3, 3, 3],
         }),
     };
