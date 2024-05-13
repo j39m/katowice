@@ -1,12 +1,15 @@
 [package]
 name = "xkpw"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["j39m"]
 edition = "2021"
 
 [dependencies]
-clap = "3"
 rand = "0"
+
+[dependencies.clap]
+version = "4"
+features = [ "cargo", "derive" ]
 
 [[bin]]
 name = "xkpw"
