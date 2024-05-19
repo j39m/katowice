@@ -225,7 +225,7 @@ impl CommandLine for BwrapParams {
             }
         }
         if let Some(dev_binds) = &self.dev_binds {
-            if let Some(args) = dev_binds.as_args_with_details("--dev-bind", None) {
+            if let Some(args) = dev_binds.as_args_with_details("--dev-bind-try", None) {
                 ret.extend(args);
             }
         }
