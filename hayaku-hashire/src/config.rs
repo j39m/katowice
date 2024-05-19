@@ -201,6 +201,7 @@ impl CommandLine for BwrapParams {
             Some(true) => ret.push("--share-net".to_string()),
             _ => ret.push("--unshare-net".to_string()),
         };
+        ret.push("--unshare-pid".to_string());
 
         if let Some(ro_binds) = &self.ro_binds {
             if let Some(args) = ro_binds.as_args_with_details("--ro-bind", None) {
