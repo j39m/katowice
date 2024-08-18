@@ -8,6 +8,7 @@
 import os
 import sys
 import shutil
+import random
 
 import gi
 gi.require_version("PangoCairo", "1.0")
@@ -112,6 +113,11 @@ def _print_skips(skiplist):
 
 def main():
     """The main entry point."""
+    roll_d20 = random.randint(1, 20)
+    if roll_d20 < 15:
+        print(f"Roll {roll_d20} < 15: doing nothing.")
+        return 0
+
     backup_library()
     songs = load_library()
 
