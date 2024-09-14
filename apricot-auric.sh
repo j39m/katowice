@@ -18,3 +18,4 @@ rclone sync \
     --filter '- /Downloads/.firefox-nightly/' \
     --filter '- /Downloads/.thunderbird-beta/' \
     ~/ rsync.net-crypt:
+echo
