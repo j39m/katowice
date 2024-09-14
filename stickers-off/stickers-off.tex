@@ -1,0 +1,62 @@
+\documentclass[11pt,b5paper]{article}
+
+\usepackage[margin=13mm]{geometry}
+\usepackage{graphicx}
+
+\newcommand{\named}[1]{\subsection*{#1}}
+\newcommand{\alg}[1]{
+    \begin{center}
+    \Huge \textbf{#1}
+    \end{center}
+}
+\newcommand{\illust}[1]{
+    \begin{center}
+        \includegraphics[scale=0.91]{#1.png}
+    \end{center}
+}
+
+\begin{document}
+
+\title{Stickers Off}
+\author{}
+\maketitle
+
+\section*{OLL}
+
+\named{Cockeye}
+\illust{oll-00-cockeye}
+\alg{[R' F R B'] [R' F' R B]}
+
+\named{Flatfish}
+\illust{oll-01-flatfish}
+\alg{R2 D [R' U2 R] D' [R' U2 R']}
+
+\named{Fish}
+\illust{oll-02-fish}
+\alg{l' U' L U R U' [r' F]}
+
+\named{Doublefish}
+\illust{oll-03-doublefish}
+\alg{R U2 R' U' R U R' U' R U' R'}
+
+\named{Vah Medoh}
+\illust{oll-05-vah-medoh}
+\alg{R U2' [R2 U'] [R2 U'] R2 U2' R}
+
+\newpage{}
+
+\section*{PLL}
+
+\named{Nasty}
+\alg{x' [R U' R' D] [R U R' D'] [R U R' D] [R U' R' D]}
+
+\named{Clockwise}
+\alg{R2 U R U R' U' R' U' R' U R'}
+
+\named{Counter-clockwise}
+\alg{[R U' R] U R U R U' R' U' R2}
+
+\named{Z-perm}
+\alg{M2 U M2 U M' U2 M2 U2 M' U2}
+
+\end{document}
