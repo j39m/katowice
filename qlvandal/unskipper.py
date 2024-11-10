@@ -134,8 +134,3 @@ def main():
 
     save_library(songs)
     return 0
-
-
-if __name__ == "__main__":
-    ret = main()
-    sys.exit(ret)
