@@ -8,13 +8,10 @@ def prune_skips(songs):
     Prune all ``~#skipcount'' tags from the song library.
     Return a list of tuples (song_dict, skips) on all pruned songs.
     """
-    ret = []
-    for sdict in songs.values():
-        try:
-            ret.append((sdict, sdict.pop("~#skipcount")))
-        except KeyError:
-            continue
-    return ret
+    SKIP_COUNT = "~#skipcount"
+    have_skips = util.query(songs, SKIP_COUNT,
+                            val_callable=lambda _: True).values()
+    return [(song, song.pop(SKIP_COUNT)) for song in have_skips]
 
 
 def _print_skips(skiplist):
@@ -24,7 +21,7 @@ def _print_skips(skiplist):
     """
     for (sdict, skips) in skiplist:
         print(
-            f"Prune {skips} skip{"s" if skips > 1 else ""} on ``{sdict["title"]}''"
+            f'Prune {skips} skip{"s" if skips > 1 else ""} on ``{sdict["title"]}\'\''
         )
 
 
