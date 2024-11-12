@@ -1,13 +1,12 @@
-import gi
-gi.require_version("PangoCairo", "1.0")
-
-import quodlibet
-import quodlibet.cli
-import quodlibet.library
 import pathlib
 import shutil
 import sys
 
+import gi
+gi.require_version("PangoCairo", "1.0")
+import quodlibet
+import quodlibet.cli
+import quodlibet.library
 
 SONGS_PATH = pathlib.Path(quodlibet.get_user_dir()) / "songs"
 BKUP_PATH = SONGS_PATH.with_suffix(".bk")
@@ -68,6 +67,6 @@ def query(songs, tag, val=None, val_callable=None):
     """
     if val is not None:
         return _query_simple(songs, tag, val)
-    elif val_callable is not None:
+    if val_callable is not None:
         return _query_callable(songs, tag, val_callable)
     return None
