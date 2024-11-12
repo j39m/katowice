@@ -2,6 +2,7 @@ import random
 
 from . import util
 
+
 def prune_skips(songs):
     """
     Prune all ``~#skipcount'' tags from the song library.
@@ -22,7 +23,9 @@ def _print_skips(skiplist):
     were impacted.
     """
     for (sdict, skips) in skiplist:
-        print(f"Prune {skips} skip{"s" if skips > 1 else ""} on ``{sdict["title"]}''")
+        print(
+            f"Prune {skips} skip{"s" if skips > 1 else ""} on ``{sdict["title"]}''"
+        )
 
 
 def main():
