@@ -1,14 +1,76 @@
 import sys
 
+import re
 import tomli
 from pprint import pprint
 from . import util
 
 POISON_CONFIG = util.QL_USER_DIR / "qlpoison.toml"
+POISON_LIBRARY_KEY = "qlvandal_poison"
+
+
+def _swallow_keyerror(func):
+
+    def inner(song, tag, val):
+        try:
+            return func(song, tag, val)
+        except KeyError:
+            return False
+
+    return inner
+
+
+@_swallow_keyerror
+def _match_regex(song, tag, regex):
+    return re.match(regex, song[tag])
+
+
+@_swallow_keyerror
+def _match_fixed_value(song, tag, val):
+    return song[tag] == val
+
+
+class Poison:
+
+    @staticmethod
+    def _parse_criterion(key, val):
+        assert key != "reason", "BUG: didn't preprocess `reason` key"
+        if key.endswith("_regex"):
+            key = key.removesuffix("_regex")
+            return lambda song: _match_regex(song, key, val)
+        return lambda song: _match_fixed_value(song, key, val)
+
+    def _get_applicable(self, songs):
+        view = songs
+        for criterion in self.criteria:
+            view = util.query(view, criterion)
+        self.applicable_songs = [
+            song for song in view.values()
+            if (POISON_LIBRARY_KEY not in song
+                or song[POISON_LIBRARY_KEY] != self.reason)
+        ]
+
+    def __init__(self, poison_entry, songs):
+        self.reason = poison_entry.pop("reason")
+        self.criteria = [
+            self._parse_criterion(key, val)
+            for key, val in poison_entry.items()
+        ]
+        self._get_applicable(songs)
+
+    def __str__(self):
+        result = [f"## {self.reason}\n"]
+        for song in self.applicable_songs:
+            result.append(f"*   {song['title']}")
+        result.append("")
+        return "\n".join(result)
 
 
 def main():
     with open(POISON_CONFIG, "rb") as pfp, util.SongsContextManager() as songs:
-        poison = tomli.load(pfp)
-        pprint(poison)
+        poison_top = tomli.load(pfp)
+        for (_, entry) in poison_top["poison"].items():
+            poison = Poison(entry, songs)
+            print(poison)
+        raise NotImplementedError("XXX j39m")
     return 0
