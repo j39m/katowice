@@ -36,6 +36,9 @@ class Poison:
         ]
         self._get_applicable(songs)
 
+    def __bool__(self):
+        return bool(self.applicable_songs)
+
     def __str__(self):
         result = [f"## {self.reason}\n"]
         for song in self.applicable_songs:
@@ -43,13 +46,19 @@ class Poison:
         result.append("")
         return "\n".join(result)
 
+    def enact(self):
+        for song in self.applicable_songs:
+            song[POISON_LIBRARY_KEY] = self.reason
+
 
 def main():
     with open(POISON_CONFIG, "rb") as pfp, util.SongsContextManager() as songs:
         poison_top = tomli.load(pfp)
         for (_, entry) in poison_top["poison"].items():
             poison = Poison(entry, songs)
-            print(poison)
+            if poison:
+                print(poison)
+                poison.enact()
         if len(sys.argv) < 2 or sys.argv[1] != "DEWIT":
             raise util.DontSaveLibrary("not DEWIT")
     return 0
