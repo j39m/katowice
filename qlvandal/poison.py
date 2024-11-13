@@ -10,31 +10,14 @@ POISON_LIBRARY_KEY = "qlvandal_poison"
 
 class Poison:
 
-    @staticmethod
-    def _parse_criterion(key, val):
-        assert key != "reason", "BUG: didn't preprocess `reason` key"
-        if key.endswith("_regex"):
-            key = key.removesuffix("_regex")
-            return lambda song: util.match_regex(song, key, val)
-        return lambda song: util.match_fixed_value(song, key, val)
-
-    def _get_applicable(self, songs):
-        view = songs
-        for criterion in self.criteria:
-            view = util.query(view, criterion)
-        self.applicable_songs = [
-            song for song in view.values()
-            if (POISON_LIBRARY_KEY not in song
-                or song[POISON_LIBRARY_KEY] != self.reason)
-        ]
-
     def __init__(self, poison_entry, songs):
-        self.reason = poison_entry.pop("reason")
-        self.criteria = [
-            self._parse_criterion(key, val)
-            for key, val in poison_entry.items()
+        self.reason = poison_entry["reason"]
+        self.query = poison_entry["query"]
+        self.base_view = songs.query(self.query)
+        self.applicable_songs = [
+            song for song in self.base_view
+            if song.get(POISON_LIBRARY_KEY, None) != self.reason
         ]
-        self._get_applicable(songs)
 
     def __bool__(self):
         return bool(self.applicable_songs)
