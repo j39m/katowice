@@ -13,11 +13,12 @@ class Poison:
     def __init__(self, poison_entry, songs):
         self.reason = poison_entry["reason"]
         self.query = poison_entry["query"]
-        self.base_view = songs.query(self.query)
+        self._base_view = songs.query(self.query)
         self.applicable_songs = [
-            song for song in self.base_view
+            song for song in self._base_view
             if song.get(POISON_LIBRARY_KEY, None) != self.reason
         ]
+        self._enact()
 
     def __bool__(self):
         return bool(self.applicable_songs)
@@ -29,7 +30,7 @@ class Poison:
         result.append("")
         return "\n".join(result)
 
-    def enact(self):
+    def _enact(self):
         for song in self.applicable_songs:
             song[POISON_LIBRARY_KEY] = self.reason
 
@@ -40,10 +41,9 @@ def main():
         poisons = [
             Poison(entry, songs) for entry in poison_top["poison"].values()
         ]
-        for poison in poisons:
-            if poison:
-                print(poison)
-                poison.enact()
+        applied = [print(p) for p in poisons if p]
+        if not applied:
+            raise util.DontSaveLibrary("no poisons to apply")
         if len(sys.argv) < 2 or sys.argv[1] != "DEWIT":
             raise util.DontSaveLibrary("not DEWIT")
     return 0
