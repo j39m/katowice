@@ -1,6 +1,7 @@
-import pathlib
-import shutil
 import sys
+import shutil
+import pathlib
+import traceback
 
 import gi
 
@@ -39,20 +40,23 @@ class SongsContextManager:
     def __enter__(self):
         return self.songs
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(self, exc_type, exc_value, _stack_trace):
         if exc_type == DontSaveLibrary:
             print(f"Not saving library: {exc_value.reason}")
             return True
+        if not (exc_type == exc_value == _stack_trace == None):
+            print(traceback.format_exc())
+            return False
         if quodlibet_is_running():
             raise ConnectionError("Quod Libet is running")
-        if exc_type == exc_value == traceback == None:
-            shutil.copy2(SONGS_PATH, BKUP_PATH)
-            # Actually reading `save()`, this whole dance appears to be
-            # redundant (ノ°益°)ノ
-            tmppath = SONGS_PATH.with_suffix(".qlvandal")
-            # Hmm. `atomic.py` seems to demand a string-like argument.
-            self.songs.save(str(tmppath))
-            tmppath.rename(SONGS_PATH)
+
+        shutil.copy2(SONGS_PATH, BKUP_PATH)
+        # Actually reading `save()`, this whole dance appears to be
+        # redundant (ノ°益°)ノ
+        tmppath = SONGS_PATH.with_suffix(".qlvandal")
+        # Hmm. `atomic.py` seems to demand a string-like argument.
+        self.songs.save(str(tmppath))
+        tmppath.rename(SONGS_PATH)
 
 
 def query(songs, func):
