@@ -55,41 +55,8 @@ class SongsContextManager:
             tmppath.rename(SONGS_PATH)
 
 
-def _query_callable(songs, tag, val_callable):
+def query(songs, func):
     """
-    Helper function for queries passing a callable truth.
-    Called by query().
+    Fully generic query that calls `func` to determine matching.
     """
-    ret = {}
-    for (spath, sdict) in songs.iteritems():
-        try:
-            if val_callable(sdict[tag]):
-                ret[spath] = sdict
-        except KeyError:
-            continue
-    return ret
-
-
-def _query_simple(songs, tag, val):
-    """Helper function for simple queries. Called by query()."""
-    return _query_callable(songs, tag, lambda x: x == val)
-
-
-def query(songs, tag, val=None, val_callable=None):
-    """
-    Given a Quod Libet library, return the sub-dict of songs that contain
-    tags with the prescribed values.
-
-    You can call query() with either some simple value passed in for ``val''
-    or a more complex function for ``val_callable.''
-
-    @param songs        the Quod Libet library to search
-    @param tag          the tag to query for
-    @param val          a simple comparable s.t. we can eval ``blah == val.''
-    @param val_callable a callable s.t. we can eval ``val_callable(blah).''
-    """
-    if val is not None:
-        return _query_simple(songs, tag, val)
-    if val_callable is not None:
-        return _query_callable(songs, tag, val_callable)
-    return None
+    return {spath: sdict for spath, sdict in songs.iteritems() if func(sdict)}

@@ -9,8 +9,7 @@ def prune_skips(songs):
     Return a list of tuples (song_dict, skips) on all pruned songs.
     """
     SKIP_COUNT = "~#skipcount"
-    have_skips = util.query(songs, SKIP_COUNT,
-                            val_callable=lambda _: True).values()
+    have_skips = util.query(songs, lambda song: SKIP_COUNT in song).values()
     return [(song, song.pop(SKIP_COUNT)) for song in have_skips]
 
 
