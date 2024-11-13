@@ -59,4 +59,4 @@ def query(songs, func):
     """
     Fully generic query that calls `func` to determine matching.
     """
-    return {spath: sdict for spath, sdict in songs.iteritems() if func(sdict)}
+    return {spath: sdict for spath, sdict in songs.items() if func(sdict)}
