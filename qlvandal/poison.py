@@ -72,5 +72,6 @@ def main():
         for (_, entry) in poison_top["poison"].items():
             poison = Poison(entry, songs)
             print(poison)
-        raise NotImplementedError("XXX j39m")
+        if len(sys.argv) < 2 or sys.argv[1] != "DEWIT":
+            raise util.DontSaveLibrary("not DEWIT")
     return 0
