@@ -9,7 +9,8 @@ import quodlibet
 import quodlibet.cli
 import quodlibet.library
 
-SONGS_PATH = pathlib.Path(quodlibet.get_user_dir()) / "songs"
+QL_USER_DIR = pathlib.Path(quodlibet.get_user_dir())
+SONGS_PATH = QL_USER_DIR / "songs"
 BKUP_PATH = SONGS_PATH.with_suffix(".bk")
 
 
