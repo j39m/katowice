@@ -1,33 +1,11 @@
 import sys
 
-import re
 import tomli
 from pprint import pprint
 from . import util
 
 POISON_CONFIG = util.QL_USER_DIR / "qlpoison.toml"
 POISON_LIBRARY_KEY = "qlvandal_poison"
-
-
-def _swallow_keyerror(func):
-
-    def inner(song, tag, val):
-        try:
-            return func(song, tag, val)
-        except KeyError:
-            return False
-
-    return inner
-
-
-@_swallow_keyerror
-def _match_regex(song, tag, regex):
-    return re.match(regex, song[tag])
-
-
-@_swallow_keyerror
-def _match_fixed_value(song, tag, val):
-    return song[tag] == val
 
 
 class Poison:
@@ -37,8 +15,8 @@ class Poison:
         assert key != "reason", "BUG: didn't preprocess `reason` key"
         if key.endswith("_regex"):
             key = key.removesuffix("_regex")
-            return lambda song: _match_regex(song, key, val)
-        return lambda song: _match_fixed_value(song, key, val)
+            return lambda song: util.match_regex(song, key, val)
+        return lambda song: util.match_fixed_value(song, key, val)
 
     def _get_applicable(self, songs):
         view = songs

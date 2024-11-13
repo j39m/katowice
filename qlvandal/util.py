@@ -1,6 +1,7 @@
 import sys
-import shutil
 import pathlib
+import re
+import shutil
 import traceback
 
 import gi
@@ -57,6 +58,43 @@ class SongsContextManager:
         # Hmm. `atomic.py` seems to demand a string-like argument.
         self.songs.save(str(tmppath))
         tmppath.rename(SONGS_PATH)
+
+
+def _swallow_keyerror(func):
+
+    def inner(song, tag, val):
+        try:
+            return func(song, tag, val)
+        except KeyError:
+            return False
+
+    return inner
+
+
+def _split_value_lines(func):
+    """
+    Quod Libet stores multi-value tags as newline-separated strings.
+    """
+
+    def inner(song, tag, user_supplied_val):
+        for val_line in song[tag].splitlines():
+            if func(val_line, user_supplied_val):
+                return True
+        return False
+
+    return inner
+
+
+@_swallow_keyerror
+@_split_value_lines
+def match_regex(val, regex):
+    return re.match(regex, val)
+
+
+@_swallow_keyerror
+@_split_value_lines
+def match_fixed_value(val, user_supplied_val):
+    return val == user_supplied_val
 
 
 def query(songs, func):
