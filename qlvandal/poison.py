@@ -37,8 +37,10 @@ class Poison:
 def main():
     with open(POISON_CONFIG, "rb") as pfp, util.SongsContextManager() as songs:
         poison_top = tomli.load(pfp)
-        for (_, entry) in poison_top["poison"].items():
-            poison = Poison(entry, songs)
+        poisons = [
+            Poison(entry, songs) for entry in poison_top["poison"].values()
+        ]
+        for poison in poisons:
             if poison:
                 print(poison)
                 poison.enact()
