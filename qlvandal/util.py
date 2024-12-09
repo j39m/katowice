@@ -4,6 +4,7 @@ import shutil
 import traceback
 
 import gi
+
 gi.require_version("PangoCairo", "1.0")
 import quodlibet
 import quodlibet.cli
@@ -12,10 +13,6 @@ import quodlibet.library
 QL_USER_DIR = pathlib.Path(quodlibet.get_user_dir())
 SONGS_PATH = QL_USER_DIR / "songs"
 BKUP_PATH = SONGS_PATH.with_suffix(".bk")
-
-
-def quodlibet_is_running():
-    return quodlibet.cli.is_running()
 
 
 class DontSaveLibrary(Exception):
@@ -46,7 +43,7 @@ class SongsContextManager:
         if not (exc_type == exc_value == _stack_trace == None):
             print(traceback.format_exc())
             return False
-        if quodlibet_is_running():
+        if quodlibet.cli.is_running():
             raise ConnectionError("Quod Libet is running")
 
         shutil.copy2(SONGS_PATH, BKUP_PATH)
