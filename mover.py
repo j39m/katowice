@@ -33,13 +33,16 @@ def _get_dewit():
 def main():
     with qlvandal.util.SongsContextManager() as songs:
         selection = songs.query(_get_query())
+        dewit = _get_dewit()
         for song in selection:
             (current_path, new_path) = get_new_path(song)
             assert current_path.is_file()
             assert current_path.parent == new_path.parent
             print(f"{new_path} <- {current_path}")
-            if _get_dewit():
+            if dewit:
                 songs.rename(song, new_path)
+        if not dewit:
+            raise qlvandal.util.DontSaveLibrary("not DEWIT")
     return 0
 
 
