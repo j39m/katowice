@@ -4,10 +4,7 @@
 
 import sys
 import pathlib
-import unskipper
-import quodlibet.cli
-
-DEWIT = sys.argv[1] == "dewit"
+import qlvandal.util
 
 
 def get_new_path(song_info):
@@ -15,28 +12,34 @@ def get_new_path(song_info):
     tracknumber = int(song_info.get("tracknumber").split("/", 1)[0])
 
     path = pathlib.Path(song_info["~filename"])
-    return path.parent / f"{discnumber:03d}-{tracknumber:03d}{path.suffix}"
+    return (path,
+            path.parent / f"{discnumber:03d}-{tracknumber:03d}{path.suffix}")
+
+
+def _get_query():
+    try:
+        return sys.argv[1]
+    except IndexError:
+        return "album=/^Rachmaninov - Piano Concertos 1-4/"
+
+
+def _get_dewit():
+    try:
+        return sys.argv[2] == "DEWIT"
+    except IndexError:
+        return False
 
 
 def main():
-    assert not (DEWIT and quodlibet.cli.is_running())
-    songs = unskipper.load_library()
-    selection = unskipper.query(songs, "album",
-                                val="Rachmaninov - Piano Concertos 1-4")
-
-    for (_path, song_info) in selection.items():
-        path = pathlib.Path(_path)
-        assert str(path) == song_info["~filename"]
-        assert path.is_file()
-        new_path = get_new_path(song_info)
-
-        assert path.parent == new_path.parent
-        print(f"{new_path} <- {path}")
-        if DEWIT:
-            songs.rename(song_info, new_path)
-
-    if DEWIT:
-        unskipper.save_library(songs)
+    with qlvandal.util.SongsContextManager() as songs:
+        selection = songs.query(_get_query())
+        for song in selection:
+            (current_path, new_path) = get_new_path(song)
+            assert current_path.is_file()
+            assert current_path.parent == new_path.parent
+            print(f"{new_path} <- {current_path}")
+            if _get_dewit():
+                songs.rename(song, new_path)
     return 0
 
 
