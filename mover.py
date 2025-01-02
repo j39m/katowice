@@ -12,15 +12,17 @@ def get_new_path(song_info):
     tracknumber = int(song_info.get("tracknumber").split("/", 1)[0])
 
     path = pathlib.Path(song_info["~filename"])
-    return (path,
-            path.parent / f"{discnumber:03d}-{tracknumber:03d}{path.suffix}")
+    return (
+        path,
+        #path.parent / f"{discnumber:03d}-{tracknumber:03d}{path.suffix}")
+        path.parent / f"{tracknumber:02d}{path.suffix}")
 
 
 def _get_query():
     try:
         return sys.argv[1]
     except IndexError:
-        return "album=/^Rachmaninov - Piano Concertos 1-4/"
+        return "album=/^Ponyo on the Cliff by the Sea$/"
 
 
 def _get_dewit():
