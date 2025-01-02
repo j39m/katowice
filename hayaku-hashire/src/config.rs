@@ -152,6 +152,10 @@ pub struct BwrapParams {
     // Defaults to true.
     pub use_xdg_runtime_dir: Option<bool>,
 
+    // Whether to provide a (default-sized) tmpfs at `/tmp`.
+    // Defaults to true.
+    pub create_tmpfs: Option<bool>,
+
     // Whether to share the network namespace.
     // Defaults to false.
     pub share_net: Option<bool>,
@@ -195,6 +199,9 @@ impl CommandLine for BwrapParams {
             let xdg_dirs = xdg::BaseDirectories::new().unwrap();
             let xrd = xdg_dirs.get_runtime_directory().unwrap().to_str().unwrap();
             ret.extend(arg_set_from("--bind", None, xrd, xrd));
+        }
+        if default_true_bool(self.create_tmpfs) {
+            ret.extend([String::from("--tmpfs"), String::from("/tmp")]);
         }
 
         match &self.share_net {
