@@ -55,7 +55,7 @@ class TrackSet:
 
     def _track_params_generator(self):
         for (index, track_params) in enumerate(self.track_params_list):
-            track_basename = f"{index+1:02d}.flac"
+            track_basename = f"{index+1:02d}.opus"
             yield track_params.as_args(self.src, track_basename)
 
     def do_cut(self, dewit=False):
