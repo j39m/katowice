@@ -15,6 +15,12 @@ logger = logging.getLogger("war")
 CWD = "./"
 
 
+def expect_nonempty_file(path):
+    assert path.is_file()
+    if not path.stat().st_size:
+        logger.warning(f"Ruh-roh! “{path}” is empty.")
+
+
 class EventHandler(pyinotify.ProcessEvent):
     # The defaults are actually set by `parse_args()`, but are retained
     # here to illustrate good defaults.
@@ -30,9 +36,10 @@ class EventHandler(pyinotify.ProcessEvent):
 
     def process_IN_CLOSE_WRITE(self, event):
         name = pathlib.Path(event.name)
-        assert name.is_file()
+        expect_nonempty_file(name)
         target = self.target_filename(name.suffix)
         name.rename(target)
+        expect_nonempty_file(target)
         logger.info(f"{target} <- {name}")
 
 
