@@ -21,7 +21,7 @@ class EventHandler(pyinotify.ProcessEvent):
         self.index += 1
         return target
 
-    def process_IN_CREATE(self, event):
+    def process_IN_CLOSE_WRITE(self, event):
         name = pathlib.Path(event.name)
         assert name.is_file()
         target = self.target_filename(name.suffix)
@@ -51,7 +51,8 @@ def main():
     watch_manager = pyinotify.WatchManager()
 
     notifier = pyinotify.Notifier(watch_manager, event_handler)
-    watch_manager.add_watch(CWD, pyinotify.IN_CREATE)
+    watch_manager.add_watch(CWD, pyinotify.IN_CLOSE_WRITE)
+    print(f"initial index is {event_handler.index}")
 
     notifier.loop()
     return 0
