@@ -5,6 +5,13 @@ import argparse
 import pathlib
 import pyinotify
 
+import logging
+
+logging.basicConfig(stream=sys.stdout,
+                    level=logging.INFO,
+                    format='%(name)s: %(message)s')
+logger = logging.getLogger("war")
+
 CWD = "./"
 
 
@@ -26,7 +33,7 @@ class EventHandler(pyinotify.ProcessEvent):
         assert name.is_file()
         target = self.target_filename(name.suffix)
         name.rename(target)
-        print(f"{target} <- {name}")
+        logger.info(f"{target} <- {name}")
 
 
 def _deduce_initial_index():
@@ -52,7 +59,7 @@ def main():
 
     notifier = pyinotify.Notifier(watch_manager, event_handler)
     watch_manager.add_watch(CWD, pyinotify.IN_CLOSE_WRITE)
-    print(f"initial index is {event_handler.index}")
+    logger.info(f"initial index is {event_handler.index}")
 
     notifier.loop()
     return 0
