@@ -1,27 +1,25 @@
 #!/usr/bin/python3
 
 import sys
-
-import matplotlib
-import matplotlib.pyplot as plt
-import numpy as np
 import datetime
+
+import matplotlib.pyplot as plt
 
 class PlottableData:
     def __init__(self):
-        self.x = list()
+        self.x = []
 
         # Expenditures binned by day.
-        self.daily_y = list()
+        self.daily_y = []
 
         # Monotonically increasing running total of expenditures.
-        self.cumulative_y = list()
+        self.cumulative_y = []
 
     def _update_most_recent_date(self,
                                  date,
                                  expenditure_value,
                                  cumulative_total):
-        if (date != self.x[-1]):
+        if date != self.x[-1]:
             raise IndexError
         self.daily_y[-1] += expenditure_value
         self.cumulative_y[-1] = cumulative_total
@@ -49,8 +47,8 @@ class IngestedData:
         # expenditures with the same date are telescoped into a single
         # point), but these are not. These are _at least_ as long as
         # self.x and self.y.
-        self.raw_x = list()
-        self.raw_y = list()
+        self.raw_x = []
+        self.raw_y = []
 
         # Stateful Exception carrier.
         self._prior_value_error = None
@@ -82,7 +80,7 @@ class IngestedData:
         # Raises a previous ValueError iff it took place on a line not
         # the last.
         if self._prior_value_error is not None:
-            raise _self.prior_value_error
+            raise self._prior_value_error
 
         try:
             self._process_line(line)
