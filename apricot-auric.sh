@@ -15,6 +15,7 @@ rclone sync \
     --filter '- /.mozilla/' \
     --filter '- /.thunderbird/' \
     --filter '- /.var/app/org.signal.Signal/' \
+    --filter '- /.var/app/org.jellyfin.JellyfinServer/' \
     --filter '- /Downloads/.firefox-nightly/' \
     --filter '- /Downloads/.thunderbird-beta/' \
     ~/ rsync.net-crypt:
