@@ -1,6 +1,7 @@
 const DEFAULT_ENGLISH_DICTIONARY_PATH: &'static str = "/usr/share/dict/words";
 
 use clap::Parser;
+use rand::prelude::IndexedRandom;
 
 #[derive(clap::Parser)]
 #[command(name = clap::crate_name!(), version = clap::crate_version!())]
@@ -102,7 +103,6 @@ mod kana {
     }
 } // mod kana
 
-use rand::seq::SliceRandom;
 use std::io::Read;
 
 // Reads the dictionary at |path| and returns a linewise vector of
