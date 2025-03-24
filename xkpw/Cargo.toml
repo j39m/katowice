@@ -2,7 +2,7 @@
 name = "xkpw"
 version = "0.1.2"
 authors = ["j39m"]
-edition = "2021"
+edition = "2024"
 
 [dependencies]
 rand = "0"
