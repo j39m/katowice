@@ -138,7 +138,7 @@ fn print_english_password(args: EnglishArgs) {
             panic!("Error reading dictionary: {}", error);
         }
     };
-    let mut rng = &mut rand::thread_rng();
+    let mut rng = &mut rand::rng();
     let selection: Vec<String> = all_words
         .choose_multiple(&mut rng, args.count)
         .map(|borrowed| borrowed.to_owned())
@@ -150,7 +150,7 @@ fn print_english_password(args: EnglishArgs) {
 // Builds a single random pseudo-Japanese word from |kana_set|.
 fn build_kana_word(kana_set: &Vec<&'static str>, syllable_count: usize) -> String {
     let mut collected_kana: Vec<&'static str> = Vec::new();
-    let mut rng = &mut rand::thread_rng();
+    let mut rng = &mut rand::rng();
     for _ in 0..syllable_count {
         collected_kana.push(kana_set.choose(&mut rng).unwrap());
     }
