@@ -61,6 +61,16 @@ fn make_context() -> CacoResult<PulseContext> {
     })
 }
 
+fn get_sink_circle(index: u32) -> String {
+    let capped_index = index % 3;
+    match capped_index {
+        0 => "🟢".to_owned(),
+        1 => "🟠".to_owned(),
+        2 => "🟣".to_owned(),
+        _ => panic!("???"),
+    }
+}
+
 fn set_client_name(context: &mut PulseContext) -> CacoResult<()> {
     let mut props = protocol::Props::new();
     props.set(protocol::Prop::ApplicationName, CString::new(CACO).unwrap());
@@ -80,12 +90,14 @@ fn get_sink_indices(context: &mut PulseContext) -> CacoResult<Vec<u32>> {
 
     println!("{}:", "sink infos");
     for info in &sink_infos {
-        println!("     {:>4}: {}", info.index, info.name.to_str().unwrap());
+        println!(
+            "     {:>4} {}: {}",
+            info.index,
+            get_sink_circle(info.index),
+            info.name.to_str().unwrap()
+        );
     }
-    Ok(sink_infos
-        .into_iter()
-        .map(|info| info.index)
-        .collect())
+    Ok(sink_infos.into_iter().map(|info| info.index).collect())
 }
 
 fn get_sink_inputs(context: &mut PulseContext) -> CacoResult<SinkInputs> {
@@ -108,9 +120,10 @@ fn get_sink_inputs(context: &mut PulseContext) -> CacoResult<SinkInputs> {
         }
 
         println!(
-            "  {:>6} (sink {:>4}): {application_name}\n          {}",
+            "  {:>6} (sink {:>4} {}): {application_name}\n          {}",
             info.index,
             info.sink_index,
+            get_sink_circle(info.sink_index),
             info.name.to_str().unwrap()
         );
     }
