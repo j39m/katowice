@@ -1,9 +1,7 @@
 use std::os::unix::process::CommandExt;
 use std::process::Command;
 
-mod config;
-use crate::config::CommandLine;
-use crate::config::Config;
+use hayaku_hashire::config::{CommandLine, Config};
 
 fn get_config(target: &str) -> Config {
     let dirs = xdg::BaseDirectories::with_prefix("hayaku-hashire").unwrap();
@@ -41,5 +39,5 @@ fn main() {
     if cfg!(debug_assertions) {
         eprintln!("{:#?}", command);
     }
-    command.exec();
+    let _ = command.exec();
 }
