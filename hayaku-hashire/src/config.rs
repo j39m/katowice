@@ -182,10 +182,15 @@ fn default_true_bool(opt: Option<bool>) -> bool {
 
 impl CommandLine for BwrapParams {
     fn as_args(&self) -> Option<Vec<String>> {
-        let mut ret: Vec<String> = vec![String::from("/usr/bin/bwrap")];
-
-        ret.extend([String::from("--dev"), String::from("/dev")]);
-        ret.extend([String::from("--proc"), String::from("/proc")]);
+        let mut ret: Vec<String> = vec![
+            String::from("/usr/bin/bwrap"),
+            String::from("--new-session"),
+            String::from("--dev"),
+            String::from("/dev"),
+            String::from("--proc"),
+            String::from("/proc"),
+            String::from("--unshare-pid"),
+        ];
         if default_true_bool(self.use_default_ro_binds) {
             ret.extend(arg_set_from("--ro-bind", None, "/usr", "/usr"));
             ret.extend(arg_set_from("--ro-bind", None, "/etc", "/etc"));
@@ -208,7 +213,6 @@ impl CommandLine for BwrapParams {
             Some(true) => ret.push("--share-net".to_string()),
             _ => ret.push("--unshare-net".to_string()),
         };
-        ret.push("--unshare-pid".to_string());
 
         if let Some(ro_binds) = &self.ro_binds {
             if let Some(args) = ro_binds.as_args_with_details("--ro-bind", None) {
@@ -220,6 +224,7 @@ impl CommandLine for BwrapParams {
                 ret.extend(args);
             }
         }
+
         let home_dir = home::home_dir().unwrap().to_str().unwrap().to_string();
         if let Some(home_ro_binds) = &self.home_ro_binds {
             if let Some(args) = home_ro_binds.as_args_with_details("--ro-bind", Some(&home_dir)) {
@@ -248,9 +253,6 @@ impl CommandLine for BwrapParams {
             }
         }
 
-        if ret.is_empty() {
-            panic!("BUG: empty `BwrapParams`");
-        }
         Some(ret)
     }
 }
