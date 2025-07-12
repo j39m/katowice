@@ -156,6 +156,9 @@ pub struct BwrapParams {
     // Defaults to true.
     pub create_tmpfs: Option<bool>,
 
+    // Whether to create a new session.
+    pub new_session: Option<bool>,
+
     // Whether to share the network namespace.
     // Defaults to false.
     pub share_net: Option<bool>,
@@ -184,7 +187,6 @@ impl CommandLine for BwrapParams {
     fn as_args(&self) -> Option<Vec<String>> {
         let mut ret: Vec<String> = vec![
             String::from("/usr/bin/bwrap"),
-            String::from("--new-session"),
             String::from("--dev"),
             String::from("/dev"),
             String::from("--proc"),
@@ -207,6 +209,9 @@ impl CommandLine for BwrapParams {
         }
         if default_true_bool(self.create_tmpfs) {
             ret.extend([String::from("--tmpfs"), String::from("/tmp")]);
+        }
+        if default_true_bool(self.new_session) {
+            ret.push(String::from("--new-session"));
         }
 
         match &self.share_net {
