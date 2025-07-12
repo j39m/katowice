@@ -131,33 +131,27 @@ fn arg_set_from(flag_name: &str, join_prefix: Option<&str>, src: &str, dst: &str
     return ret;
 }
 
+// For ease of readability only. Still vulnerable to me error.
+type DefaultTrue = Option<bool>;
+
 #[derive(Deserialize)]
 pub struct BwrapParams {
     // Whether to implicitly RO-bind
     // * `/usr`,
     // * `/etc`,
     // * `/sys`, and
-    // Defaults to true.
     //
     // `/etc` is especially important for `/etc/ld.so.conf`.
-    pub use_default_ro_binds: Option<bool>,
+    pub use_default_ro_binds: DefaultTrue,
 
     // Whether to implicitly symlink
     // * `/bin` to `usr/bin` and
     // * `/lib64` to `usr/lib64`.
-    // Defaults to true.
-    pub use_default_symlinks: Option<bool>,
+    pub use_default_symlinks: DefaultTrue,
 
-    // Whether to RW-bind `${XDG_RUNTIME_DIR}`.
-    // Defaults to true.
-    pub use_xdg_runtime_dir: Option<bool>,
-
-    // Whether to provide a (default-sized) tmpfs at `/tmp`.
-    // Defaults to true.
-    pub create_tmpfs: Option<bool>,
-
-    // Whether to create a new session.
-    pub new_session: Option<bool>,
+    pub use_xdg_runtime_dir: DefaultTrue,
+    pub create_tmpfs: DefaultTrue,
+    pub new_session: DefaultTrue,
 
     // Whether to share the network namespace.
     // Defaults to false.
