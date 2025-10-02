@@ -22,7 +22,7 @@ impl PulseContext {
         command: protocol::Command,
     ) -> Result<(), protocol::ProtocolError> {
         let seq = self.get_seq();
-        protocol::write_command_message(self.sock.get_mut(), seq, command, self.version)
+        protocol::write_command_message(self.sock.get_mut(), seq, &command, self.version)
     }
 
     fn get_seq(&mut self) -> u32 {
@@ -47,7 +47,7 @@ fn make_context() -> CacoResult<PulseContext> {
     protocol::write_command_message(
         sock.get_mut(),
         0,
-        protocol::Command::Auth(auth),
+        &protocol::Command::Auth(auth),
         protocol::MAX_VERSION,
     )?;
     let (_, auth_info) =
@@ -62,11 +62,13 @@ fn make_context() -> CacoResult<PulseContext> {
 }
 
 fn get_sink_circle(index: u32) -> String {
-    let capped_index = index % 3;
+    let capped_index = index % 5;
     match capped_index {
-        0 => "🟢".to_owned(),
-        1 => "🟠".to_owned(),
-        2 => "🟣".to_owned(),
+        0 => "💢".to_owned(),
+        1 => "💦".to_owned(),
+        2 => "💚".to_owned(),
+        3 => "🤖".to_owned(),
+        4 => "🤔".to_owned(),
         _ => panic!("???"),
     }
 }
