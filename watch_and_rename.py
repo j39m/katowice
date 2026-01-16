@@ -47,6 +47,11 @@ class EventHandler(pyinotify.ProcessEvent):
     def _process_queue(self) -> None:
         """Processes one or two elements."""
         element = self.queue.popleft()
+        if not element.exists():
+            if len(self.queue):
+                # Recurse, thereby dropping this element.
+                return self._process_queue()
+            return
         if file_is_empty(element):
             # We just got this element. Return it to the queue and see
             # what happens when the next file comes.
