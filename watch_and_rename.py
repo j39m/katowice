@@ -5,20 +5,24 @@ import argparse
 import pathlib
 import pyinotify
 
+from collections import deque
+
 import logging
 
-logging.basicConfig(stream=sys.stdout,
-                    level=logging.INFO,
-                    format='%(name)s: %(message)s')
+logging.basicConfig(
+    stream=sys.stdout, level=logging.INFO, format="%(name)s: %(message)s"
+)
 logger = logging.getLogger("war")
 
 CWD = "./"
 
 
-def expect_nonempty_file(path):
-    assert path.is_file()
+def file_is_empty(path):
+    assert path.is_file(), f"{path} is not a file"
     if not path.stat().st_size:
         logger.warning(f"Ruh-roh! “{path}” is empty.")
+        return True
+    return False
 
 
 class EventHandler(pyinotify.ProcessEvent):
@@ -27,6 +31,12 @@ class EventHandler(pyinotify.ProcessEvent):
     def __init__(self, initial_index=1, prefix=""):
         self.index = initial_index
         self.prefix = prefix
+        # The deque is used to hold up to two elements: the current
+        # element and (if it was empty) the previous element, whose
+        # processing was deferred. This specifically addresses the
+        # stutter-step observed in Firefox downloads, so we don't ever
+        # expect two consecutive empty elements.
+        self.queue = deque(maxlen=2)
 
     def target_filename(self, suffix):
         target = pathlib.Path(f"{self.prefix}{self.index:03d}{suffix}")
@@ -34,13 +44,25 @@ class EventHandler(pyinotify.ProcessEvent):
         self.index += 1
         return target
 
+    def _process_queue(self) -> None:
+        """Processes one or two elements."""
+        element = self.queue.popleft()
+        if file_is_empty(element):
+            # We just got this element. Return it to the queue and see
+            # what happens when the next file comes.
+            if not len(self.queue):
+                self.queue.append(element)
+                return
+            # Recurse, thereby dropping this element.
+            return self._process_queue()
+
+        target = self.target_filename(element.suffix)
+        element.rename(target)
+        logger.info(f"{target} <- {element}")
+
     def process_IN_CLOSE_WRITE(self, event):
-        name = pathlib.Path(event.name)
-        expect_nonempty_file(name)
-        target = self.target_filename(name.suffix)
-        name.rename(target)
-        expect_nonempty_file(target)
-        logger.info(f"{target} <- {name}")
+        self.queue.append(pathlib.Path(event.name))
+        self._process_queue()
 
 
 def _deduce_initial_index():
@@ -50,10 +72,9 @@ def _deduce_initial_index():
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-i",
-                        "--initial-index",
-                        default=_deduce_initial_index(),
-                        type=int)
+    parser.add_argument(
+        "-i", "--initial-index", default=_deduce_initial_index(), type=int
+    )
     parser.add_argument("-p", "--prefix", default="")
     args = parser.parse_args()
 
