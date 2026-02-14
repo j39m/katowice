@@ -197,8 +197,8 @@ impl CommandLine for BwrapParams {
             ret.extend(arg_set_from("--symlink", None, "usr/lib64", "/lib64"));
         }
         if default_true_bool(self.use_xdg_runtime_dir) {
-            let xdg_dirs = xdg::BaseDirectories::new().unwrap();
-            let xrd = xdg_dirs.get_runtime_directory().unwrap().to_str().unwrap();
+            let xrd_pathbuf = xdg::BaseDirectories::new().runtime_dir.unwrap();
+            let xrd = xrd_pathbuf.to_str().unwrap();
             ret.extend(arg_set_from("--bind", None, xrd, xrd));
         }
         if default_true_bool(self.create_tmpfs) {

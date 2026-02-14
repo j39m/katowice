@@ -4,7 +4,7 @@ use std::process::Command;
 use hayaku_hashire::config::{CommandLine, Config};
 
 fn get_config(target: &str) -> Config {
-    let dirs = xdg::BaseDirectories::with_prefix("hayaku-hashire").unwrap();
+    let dirs = xdg::BaseDirectories::with_prefix("hayaku-hashire");
 
     let mut toml_target = std::path::PathBuf::from(target);
     toml_target.set_extension("toml");
