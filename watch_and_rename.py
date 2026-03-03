@@ -28,9 +28,10 @@ def file_is_empty(path):
 class EventHandler(pyinotify.ProcessEvent):
     # The defaults are actually set by `parse_args()`, but are retained
     # here to illustrate good defaults.
-    def __init__(self, initial_index=1, prefix=""):
+    def __init__(self, initial_index=1, prefix="", abcd=False):
         self.index = initial_index
         self.prefix = prefix
+        self.abcd = abcd
         # The deque is used to hold up to two elements: the current
         # element and (if it was empty) the previous element, whose
         # processing was deferred. This specifically addresses the
@@ -39,9 +40,17 @@ class EventHandler(pyinotify.ProcessEvent):
         self.queue = deque(maxlen=2)
 
     def target_filename(self, suffix):
-        target = pathlib.Path(f"{self.prefix}{self.index:03d}{suffix}")
+        index = f"{self.index:03d}"
+        if self.abcd:
+            index = chr(self.index + 96)
+
+        target = pathlib.Path(f"{self.prefix}{index}{suffix}")
         assert not target.is_file()
+
         self.index += 1
+        if self.abcd:
+            self.index %= 26
+
         return target
 
     def _process_queue(self) -> None:
@@ -81,9 +90,10 @@ def parse_args():
         "-i", "--initial-index", default=_deduce_initial_index(), type=int
     )
     parser.add_argument("-p", "--prefix", default="")
+    parser.add_argument("--abcd", default=False, action="store_true")
     args = parser.parse_args()
 
-    return EventHandler(args.initial_index, args.prefix)
+    return EventHandler(args.initial_index, args.prefix, args.abcd)
 
 
 def main():
