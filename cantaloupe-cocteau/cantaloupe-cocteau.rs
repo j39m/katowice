@@ -1,5 +1,5 @@
 use pulseaudio::protocol;
-use std::{ffi::CString, os::unix::net::UnixStream};
+use std::{ffi::CString, os::unix::net::UnixStream, io::IsTerminal};
 
 const CACO: &str = "cantaloupe-cocteau";
 
@@ -176,6 +176,14 @@ pub fn main() -> CacoResult<()> {
     set_client_name(&mut context)?;
     let sink_indices = get_sink_indices(&mut context)?;
     let sink_inputs = get_sink_inputs(&mut context)?;
+
+    if !std::io::stdout().is_terminal() {
+        if let Some(index) = sink_inputs.quodlibet_index {
+            move_sink_input(&mut context, index, sink_indices, sink_inputs)?;
+            return Ok(());
+        }
+        return Err("hmm, something's wrong".into());
+    }
 
     let selection = dialoguer::Input::<String>::new()
         .with_prompt(format!("sink input to move"))
