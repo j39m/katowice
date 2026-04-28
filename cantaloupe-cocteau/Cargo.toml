@@ -2,7 +2,7 @@
 name = "cantaloupe-cocteau"
 version = "0.1.0"
 authors = ["j39m"]
-edition = "2021"
+edition = "2024"
 
 [[bin]]
 name = "cantaloupe-cocteau"
