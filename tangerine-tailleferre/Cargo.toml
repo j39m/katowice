@@ -2,7 +2,7 @@
 name = "tangerine-tailleferre"
 version = "0.1.1"
 authors = ["j39m"]
-edition = "2021"
+edition = "2024"
 
 [[bin]]
 name = "tt2"
