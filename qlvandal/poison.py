@@ -9,13 +9,22 @@ POISON_LIBRARY_KEY = "qlvandal_poison"
 
 
 class Poison:
-
     def __init__(self, poison_entry, songs):
         self.reason = poison_entry["reason"]
-        self.query = poison_entry["query"]
-        self._base_view = songs.query(self.query)
+
+        try:
+            self.queries = poison_entry["queries"]
+        except KeyError:
+            self.queries = [
+                poison_entry["query"],
+            ]
+        self._base_view = []
+        for q in self.queries:
+            self._base_view.extend(songs.query(q))
+
         self.applicable_songs = [
-            song for song in self._base_view
+            song
+            for song in self._base_view
             if song.get(POISON_LIBRARY_KEY, None) != self.reason
         ]
         self._enact()
@@ -38,9 +47,7 @@ class Poison:
 def main():
     with open(POISON_CONFIG, "rb") as pfp, util.SongsContextManager() as songs:
         poison_top = tomli.load(pfp)
-        poisons = [
-            Poison(entry, songs) for entry in poison_top["poison"].values()
-        ]
+        poisons = [Poison(entry, songs) for entry in poison_top["poison"].values()]
         applied = [print(p) for p in poisons if p]
         if not applied:
             raise util.DontSaveLibrary("no poisons to apply")
