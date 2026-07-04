@@ -4,6 +4,7 @@ import sys
 import argparse
 import pathlib
 import pyinotify
+import time
 
 from collections import deque
 
@@ -18,11 +19,25 @@ CWD = "./"
 
 
 def file_is_empty(path):
-    assert path.is_file(), f"{path} is not a file"
+    if not path.is_file():
+        logger.warning(f"{path} is not a file.")
+        return True
     if not path.stat().st_size:
         logger.warning(f"Ruh-roh! “{path}” is empty.")
         return True
     return False
+
+
+def block_until_size_stabilizes(path):
+    if not path.is_file():
+        logger.warning(f"{path} is not a file.")
+        return
+    size = None
+    new_size = 0
+    while size != new_size:
+        time.sleep(0.52)
+        size = new_size
+        new_size = path.stat().st_size
 
 
 class EventHandler(pyinotify.ProcessEvent):
@@ -56,19 +71,19 @@ class EventHandler(pyinotify.ProcessEvent):
     def _process_queue(self) -> None:
         """Processes one or two elements."""
         element = self.queue.popleft()
-        if not element.exists():
+        try:
+            block_until_size_stabilizes(element)
+        except FileNotFoundError:
             if len(self.queue):
                 # Recurse, thereby dropping this element.
                 return self._process_queue()
             return
+
+        # There's no reason that I can think of that we would converge
+        # on a stable file size of 0. This should be a tempfile that
+        # ends up removed, raising `FileNotFoundError` above.
         if file_is_empty(element):
-            # We just got this element. Return it to the queue and see
-            # what happens when the next file comes.
-            if not len(self.queue):
-                self.queue.append(element)
-                return
-            # Recurse, thereby dropping this element.
-            return self._process_queue()
+            logger.warning("BUG BUG BUG")
 
         target = self.target_filename(element.suffix)
         element.rename(target)
