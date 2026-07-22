@@ -17,8 +17,8 @@ class TrackParams:
         self.start = seconds(yaml_dict["start"])
         self.end = seconds(yaml_dict["end"])
 
-        self.fade_out = yaml_dict.get("fade_out", False)
-        self.fade_in = yaml_dict.get("fade_in", False)
+        self.fade_out = yaml_dict.get("fade_out", True)
+        self.fade_in = yaml_dict.get("fade_in", True)
 
     def as_args(self, src, track_basename):
         result = [
