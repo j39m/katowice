@@ -13,7 +13,6 @@ def seconds(hms):
 
 
 class TrackParams:
-
     def __init__(self, yaml_dict):
         self.start = seconds(yaml_dict["start"])
         self.end = seconds(yaml_dict["end"])
@@ -44,18 +43,15 @@ class TrackParams:
 
 
 class TrackSet:
-
     def __init__(self, src, config_file_name):
         self.src = src
         with open(config_file_name, "r") as yfp:
             config_yaml = yaml.safe_load(yfp)
-            self.track_params_list = [
-                TrackParams(entry) for entry in config_yaml
-            ]
+            self.track_params_list = [TrackParams(entry) for entry in config_yaml]
 
     def _track_params_generator(self):
-        for (index, track_params) in enumerate(self.track_params_list):
-            track_basename = f"{index+1:02d}.opus"
+        for index, track_params in enumerate(self.track_params_list):
+            track_basename = f"{index + 1:02d}.opus"
             yield track_params.as_args(self.src, track_basename)
 
     def do_cut(self, dewit=False):
