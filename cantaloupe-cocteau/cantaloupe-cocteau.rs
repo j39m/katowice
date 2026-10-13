@@ -57,6 +57,16 @@ impl From<pulseaudio::protocol::command::SinkInputInfo> for SinkInput {
     }
 }
 
+impl std::fmt::Display for SinkInput {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "  {:>6}・{}:\n{:13}{}",
+            self.index, self.application_name, "", self.title
+        )
+    }
+}
+
 impl PulseContext {
     fn new() -> CacoResult<PulseContext> {
         let socket_path = pulseaudio::socket_path_from_env().ok_or("socket_path_from_env()")?;
@@ -138,20 +148,12 @@ impl PulseContext {
         .collect::<BTreeSet<SinkInput>>();
 
         let mut quodlibet_index: Option<u32> = None;
-        println!("{}:", "sink input infos");
         for info in &sink_inputs {
             if info.application_name.starts_with("Quod Libet") {
                 quodlibet_index = Some(info.index);
             }
 
-            println!(
-                "  {:>6} (sink {:>4} {}): {}\n          {}",
-                info.index,
-                info.sink_index,
-                get_sink_circle(info.sink_index),
-                info.application_name,
-                info.title,
-            );
+            println!("{info}");
         }
         Ok((sink_inputs, quodlibet_index))
     }
@@ -189,18 +191,6 @@ impl PulseContext {
         ))?;
         protocol::read_ack_message(&mut self.sock)?;
         Ok(())
-    }
-}
-
-fn get_sink_circle(index: u32) -> String {
-    let capped_index = index % 5;
-    match capped_index {
-        0 => "💢".to_owned(),
-        1 => "💦".to_owned(),
-        2 => "💚".to_owned(),
-        3 => "🤖".to_owned(),
-        4 => "🤔".to_owned(),
-        _ => panic!("???"),
     }
 }
 
