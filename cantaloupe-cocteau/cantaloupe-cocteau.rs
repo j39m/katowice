@@ -26,9 +26,35 @@ impl Ord for Sink {
     }
 }
 
-struct SinkInputs {
-    map: std::collections::HashMap<u32, protocol::SinkInputInfo>,
-    quodlibet_index: Option<u32>,
+#[derive(PartialOrd, PartialEq, Eq)]
+struct SinkInput {
+    sink_index: u32,
+    index: u32,
+    application_name: String,
+    title: String,
+}
+
+// The larger grouping is the sink index.
+impl Ord for SinkInput {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.sink_index
+            .cmp(&other.sink_index)
+            .then(self.index.cmp(&other.index))
+    }
+}
+
+impl From<pulseaudio::protocol::command::SinkInputInfo> for SinkInput {
+    fn from(sink_input_info: pulseaudio::protocol::command::SinkInputInfo) -> Self {
+        Self {
+            sink_index: sink_input_info.sink_index,
+            index: sink_input_info.index,
+            application_name: match sink_input_info.props.get(protocol::Prop::ApplicationName) {
+                Some(u8s) => String::from_utf8(u8s.to_vec()).unwrap_or(String::from("[bad UTF-8]")),
+                None => String::from("[no name]"),
+            },
+            title: String::from(sink_input_info.name.to_str().unwrap_or("[no name]")),
+        }
+    }
 }
 
 impl PulseContext {
@@ -100,50 +126,46 @@ impl PulseContext {
             .collect())
     }
 
-    fn get_sink_inputs(&mut self) -> CacoResult<SinkInputs> {
+    fn get_sink_inputs(&mut self) -> CacoResult<(BTreeSet<SinkInput>, Option<u32>)> {
         self.write_command_message(protocol::Command::GetSinkInputInfoList)?;
-        let (_, mut sink_input_infos) = protocol::read_reply_message::<protocol::SinkInputInfoList>(
+        let sink_inputs = protocol::read_reply_message::<protocol::SinkInputInfoList>(
             &mut self.sock,
             self.version,
-        )?;
-        sink_input_infos.sort_by_key(|info| info.index);
+        )?
+        .1
+        .into_iter()
+        .map(|p| SinkInput::from(p))
+        .collect::<BTreeSet<SinkInput>>();
 
-        let mut quodlibet_index: u32 = 0;
+        let mut quodlibet_index: Option<u32> = None;
         println!("{}:", "sink input infos");
-        for info in &sink_input_infos {
-            let application_name = match info.props.get(protocol::Prop::ApplicationName) {
-                Some(u8s) => String::from_utf8(u8s.to_vec()).unwrap_or(String::from("[bad UTF-8]")),
-                None => String::from("[no name]"),
-            };
-            if application_name.starts_with("Quod Libet") {
-                quodlibet_index = info.index;
+        for info in &sink_inputs {
+            if info.application_name.starts_with("Quod Libet") {
+                quodlibet_index = Some(info.index);
             }
 
             println!(
-                "  {:>6} (sink {:>4} {}): {application_name}\n          {}",
+                "  {:>6} (sink {:>4} {}): {}\n          {}",
                 info.index,
                 info.sink_index,
                 get_sink_circle(info.sink_index),
-                info.name.to_str().unwrap()
+                info.application_name,
+                info.title,
             );
         }
-        Ok(SinkInputs {
-            map: sink_input_infos
-                .into_iter()
-                .map(|info| (info.index, info))
-                .collect(),
-            quodlibet_index: match quodlibet_index {
-                0 => None,
-                _ => Some(quodlibet_index),
-            },
-        })
+        Ok((sink_inputs, quodlibet_index))
     }
 
-    fn move_sink_input(&mut self, index: u32, sink_inputs: SinkInputs) -> CacoResult<()> {
+    fn move_sink_input(&mut self, index: u32, sink_inputs: BTreeSet<SinkInput>) -> CacoResult<()> {
         if self.sinks.len() < 2 {
             panic!("PEBCAK: why did you run this?");
         }
-        let sink_input = sink_inputs.map.get(&index).expect("typo?");
+        let one_sink_input = sink_inputs
+            .into_iter()
+            .filter(|si| si.index == index)
+            .collect::<Vec<_>>();
+        assert!(one_sink_input.len() == 1usize);
+        let sink_input = &one_sink_input[0];
         let current_sink = sink_input.sink_index;
         // Bootleg modulo: if `current_sink` is the max, we have to
         // snap it around to the smallest sink. Otherwise, we can simply
@@ -184,10 +206,10 @@ fn get_sink_circle(index: u32) -> String {
 
 pub fn main() -> CacoResult<()> {
     let mut context = PulseContext::new()?;
-    let sink_inputs = context.get_sink_inputs()?;
+    let (sink_inputs, quodlibet_index) = context.get_sink_inputs()?;
 
     if !std::io::stdout().is_terminal() {
-        if let Some(index) = sink_inputs.quodlibet_index {
+        if let Some(index) = quodlibet_index {
             context.move_sink_input(index, sink_inputs)?;
             return Ok(());
         }
@@ -201,7 +223,7 @@ pub fn main() -> CacoResult<()> {
         .unwrap();
     if let Ok(index) = selection.parse::<u32>() {
         context.move_sink_input(index, sink_inputs)?;
-    } else if let Some(index) = sink_inputs.quodlibet_index {
+    } else if let Some(index) = quodlibet_index {
         context.move_sink_input(index, sink_inputs)?;
     } else {
         println!("{}", "bye");
