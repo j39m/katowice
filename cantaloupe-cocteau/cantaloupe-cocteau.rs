@@ -133,11 +133,19 @@ impl PulseContext {
         .collect::<BTreeSet<SinkInput>>();
 
         let mut quodlibet_index: Option<u32> = None;
+        let mut current_sink_index_for_printing: u32 = 0;
         for info in &sink_inputs {
             if info.application_name.starts_with("Quod Libet") {
                 quodlibet_index = Some(info.index);
             }
-
+            if info.sink_index != current_sink_index_for_printing {
+                println!(
+                    "sink {:<8} ({})",
+                    info.sink_index,
+                    self.sinks.get(&info.sink_index).unwrap()
+                );
+                current_sink_index_for_printing = info.sink_index;
+            }
             println!("{info}");
         }
         Ok((sink_inputs, quodlibet_index))
