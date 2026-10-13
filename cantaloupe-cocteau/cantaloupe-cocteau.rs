@@ -1,6 +1,6 @@
 use pulseaudio::protocol;
 use std::cmp::Ordering;
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 use std::{ffi::CString, io::IsTerminal, os::unix::net::UnixStream};
 
 const CACO: &str = "cantaloupe-cocteau";
@@ -11,19 +11,7 @@ struct PulseContext {
     sock: std::io::BufReader<UnixStream>,
     seq: u32,
     version: u16,
-    sinks: BTreeSet<Sink>,
-}
-
-#[derive(PartialOrd, PartialEq, Eq)]
-struct Sink {
-    index: u32,
-    name: String,
-}
-
-impl Ord for Sink {
-    fn cmp(&self, other: &Self) -> Ordering {
-        self.index.cmp(&other.index)
-    }
+    sinks: BTreeMap<u32, String>,
 }
 
 #[derive(PartialOrd, PartialEq, Eq)]
@@ -79,7 +67,7 @@ impl PulseContext {
             sock: sock,
             seq: 0,
             version: protocol::MAX_VERSION, // bogus for now
-            sinks: BTreeSet::new(),         // bogus for now
+            sinks: BTreeMap::new(),         // bogus for now
         };
 
         c.write_command_message(protocol::Command::Auth(protocol::AuthParams {
@@ -123,16 +111,13 @@ impl PulseContext {
         Ok(())
     }
 
-    fn get_sinks(&mut self) -> CacoResult<BTreeSet<Sink>> {
+    fn get_sinks(&mut self) -> CacoResult<BTreeMap<u32, String>> {
         self.write_command_message(protocol::Command::GetSinkInfoList)?;
         let (_, sink_infos) =
             protocol::read_reply_message::<protocol::SinkInfoList>(&mut self.sock, self.version)?;
         Ok(sink_infos
             .into_iter()
-            .map(|info| Sink {
-                index: info.index,
-                name: info.name.to_str().unwrap().to_string(),
-            })
+            .map(|info| (info.index, info.name.to_str().unwrap().to_string()))
             .collect())
     }
 
@@ -172,20 +157,20 @@ impl PulseContext {
         // Bootleg modulo: if `current_sink` is the max, we have to
         // snap it around to the smallest sink. Otherwise, we can simply
         // "advance" to the next available sink.
-        let target_sink = if current_sink == self.sinks.last().unwrap().index {
-            self.sinks.first().unwrap().index
+        let target_sink = if current_sink == *self.sinks.last_key_value().unwrap().0 {
+            self.sinks.first_key_value().unwrap().0
         } else {
             self.sinks
                 .iter()
-                .filter(|s| s.index > current_sink)
+                .filter(|e| *e.0 > current_sink)
                 .collect::<Vec<_>>()[0]
-                .index
+                .0
         };
         println!("{index}: [sink {current_sink}] --> [sink {target_sink}]");
         self.write_command_message(protocol::Command::MoveSinkInput(
             protocol::command::MoveStreamParams {
                 index: Some(index),
-                device_index: Some(target_sink),
+                device_index: Some(*target_sink),
                 device_name: None,
             },
         ))?;
