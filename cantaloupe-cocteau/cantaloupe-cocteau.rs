@@ -1,5 +1,5 @@
 use pulseaudio::protocol;
-use std::{ffi::CString, os::unix::net::UnixStream, io::IsTerminal};
+use std::{ffi::CString, io::IsTerminal, os::unix::net::UnixStream};
 
 const CACO: &str = "cantaloupe-cocteau";
 
@@ -17,6 +17,34 @@ struct SinkInputs {
 }
 
 impl PulseContext {
+    fn new() -> CacoResult<PulseContext> {
+        let socket_path = pulseaudio::socket_path_from_env().ok_or("socket_path_from_env()")?;
+        let sock = std::io::BufReader::new(UnixStream::connect(socket_path)?);
+        let cookie = pulseaudio::cookie_path_from_env()
+            .and_then(|path| std::fs::read(path).ok())
+            .unwrap_or_default();
+
+        let mut c = PulseContext {
+            sock: sock,
+            seq: 0,
+            version: protocol::MAX_VERSION, // bogus for now
+        };
+        c.write_command_message(protocol::Command::Auth(protocol::AuthParams {
+            version: protocol::MAX_VERSION,
+            supports_shm: false,
+            supports_memfd: false,
+            cookie,
+        }))?;
+        let (_, auth_info) = protocol::read_reply_message::<protocol::AuthReply>(
+            &mut c.sock,
+            protocol::MAX_VERSION,
+        )?;
+        c.version = std::cmp::min(protocol::MAX_VERSION, auth_info.version);
+
+        c.set_client_name()?;
+        Ok(c)
+    }
+
     fn write_command_message(
         &mut self,
         command: protocol::Command,
@@ -29,36 +57,104 @@ impl PulseContext {
         self.seq += 1;
         self.seq - 1
     }
-}
 
-fn make_context() -> CacoResult<PulseContext> {
-    let socket_path = pulseaudio::socket_path_from_env().ok_or("socket_path_from_env()")?;
-    let mut sock = std::io::BufReader::new(UnixStream::connect(socket_path)?);
-    let cookie = pulseaudio::cookie_path_from_env()
-        .and_then(|path| std::fs::read(path).ok())
-        .unwrap_or_default();
-    let auth = protocol::AuthParams {
-        version: protocol::MAX_VERSION,
-        supports_shm: false,
-        supports_memfd: false,
-        cookie,
-    };
+    fn set_client_name(&mut self) -> CacoResult<()> {
+        let mut props = protocol::Props::new();
+        props.set(protocol::Prop::ApplicationName, CString::new(CACO).unwrap());
+        self.write_command_message(protocol::Command::SetClientName(props))?;
+        let _ = protocol::read_reply_message::<protocol::SetClientNameReply>(
+            &mut self.sock,
+            self.version,
+        )?;
+        Ok(())
+    }
 
-    protocol::write_command_message(
-        sock.get_mut(),
-        0,
-        &protocol::Command::Auth(auth),
-        protocol::MAX_VERSION,
-    )?;
-    let (_, auth_info) =
-        protocol::read_reply_message::<protocol::AuthReply>(&mut sock, protocol::MAX_VERSION)?;
-    let version = std::cmp::min(protocol::MAX_VERSION, auth_info.version);
+    fn get_sink_indices(&mut self) -> CacoResult<Vec<u32>> {
+        self.write_command_message(protocol::Command::GetSinkInfoList)?;
+        let (_, mut sink_infos) =
+            protocol::read_reply_message::<protocol::SinkInfoList>(&mut self.sock, self.version)?;
+        sink_infos.sort_by_key(|info| info.index);
 
-    Ok(PulseContext {
-        sock: sock,
-        seq: 1,
-        version: version,
-    })
+        println!("{}:", "sink infos");
+        for info in &sink_infos {
+            println!(
+                "     {:>4} {}: {}",
+                info.index,
+                get_sink_circle(info.index),
+                info.name.to_str().unwrap()
+            );
+        }
+        Ok(sink_infos.into_iter().map(|info| info.index).collect())
+    }
+
+    fn get_sink_inputs(&mut self) -> CacoResult<SinkInputs> {
+        self.write_command_message(protocol::Command::GetSinkInputInfoList)?;
+        let (_, mut sink_input_infos) = protocol::read_reply_message::<protocol::SinkInputInfoList>(
+            &mut self.sock,
+            self.version,
+        )?;
+        sink_input_infos.sort_by_key(|info| info.index);
+
+        let mut quodlibet_index: u32 = 0;
+        println!("{}:", "sink input infos");
+        for info in &sink_input_infos {
+            let application_name = match info.props.get(protocol::Prop::ApplicationName) {
+                Some(u8s) => String::from_utf8(u8s.to_vec()).unwrap_or(String::from("[bad UTF-8]")),
+                None => String::from("[no name]"),
+            };
+            if application_name.starts_with("Quod Libet") {
+                quodlibet_index = info.index;
+            }
+
+            println!(
+                "  {:>6} (sink {:>4} {}): {application_name}\n          {}",
+                info.index,
+                info.sink_index,
+                get_sink_circle(info.sink_index),
+                info.name.to_str().unwrap()
+            );
+        }
+        Ok(SinkInputs {
+            map: sink_input_infos
+                .into_iter()
+                .map(|info| (info.index, info))
+                .collect(),
+            quodlibet_index: match quodlibet_index {
+                0 => None,
+                _ => Some(quodlibet_index),
+            },
+        })
+    }
+
+    fn move_sink_input(
+        &mut self,
+        index: u32,
+        sink_indices: Vec<u32>,
+        sink_inputs: SinkInputs,
+    ) -> CacoResult<()> {
+        if sink_indices.len() < 2 {
+            panic!("PEBCAK: why did you run this?");
+        }
+        let sink_input = sink_inputs.map.get(&index).expect("typo?");
+        let current_sink = sink_input.sink_index;
+        let mut target_sink: u32 = *sink_indices.get(0).unwrap();
+        for sink in sink_indices {
+            if sink > current_sink {
+                target_sink = sink;
+                break;
+            }
+        }
+        println!("{index}: [sink {current_sink}] --> [sink {target_sink}]");
+        self.write_command_message(protocol::Command::MoveSinkInput(
+            protocol::command::MoveStreamParams {
+                index: Some(index),
+                device_index: Some(target_sink),
+                device_name: None,
+            },
+        ))?;
+        protocol::read_ack_message(&mut self.sock)?;
+        Ok(())
+    }
 }
 
 fn get_sink_circle(index: u32) -> String {
@@ -73,113 +169,14 @@ fn get_sink_circle(index: u32) -> String {
     }
 }
 
-fn set_client_name(context: &mut PulseContext) -> CacoResult<()> {
-    let mut props = protocol::Props::new();
-    props.set(protocol::Prop::ApplicationName, CString::new(CACO).unwrap());
-    context.write_command_message(protocol::Command::SetClientName(props))?;
-    let _ = protocol::read_reply_message::<protocol::SetClientNameReply>(
-        &mut context.sock,
-        context.version,
-    )?;
-    Ok(())
-}
-
-fn get_sink_indices(context: &mut PulseContext) -> CacoResult<Vec<u32>> {
-    context.write_command_message(protocol::Command::GetSinkInfoList)?;
-    let (_, mut sink_infos) =
-        protocol::read_reply_message::<protocol::SinkInfoList>(&mut context.sock, context.version)?;
-    sink_infos.sort_by_key(|info| info.index);
-
-    println!("{}:", "sink infos");
-    for info in &sink_infos {
-        println!(
-            "     {:>4} {}: {}",
-            info.index,
-            get_sink_circle(info.index),
-            info.name.to_str().unwrap()
-        );
-    }
-    Ok(sink_infos.into_iter().map(|info| info.index).collect())
-}
-
-fn get_sink_inputs(context: &mut PulseContext) -> CacoResult<SinkInputs> {
-    context.write_command_message(protocol::Command::GetSinkInputInfoList)?;
-    let (_, mut sink_input_infos) = protocol::read_reply_message::<protocol::SinkInputInfoList>(
-        &mut context.sock,
-        context.version,
-    )?;
-    sink_input_infos.sort_by_key(|info| info.index);
-
-    let mut quodlibet_index: u32 = 0;
-    println!("{}:", "sink input infos");
-    for info in &sink_input_infos {
-        let application_name = match info.props.get(protocol::Prop::ApplicationName) {
-            Some(u8s) => String::from_utf8(u8s.to_vec()).unwrap_or(String::from("[bad UTF-8]")),
-            None => String::from("[no name]"),
-        };
-        if application_name.starts_with("Quod Libet") {
-            quodlibet_index = info.index;
-        }
-
-        println!(
-            "  {:>6} (sink {:>4} {}): {application_name}\n          {}",
-            info.index,
-            info.sink_index,
-            get_sink_circle(info.sink_index),
-            info.name.to_str().unwrap()
-        );
-    }
-    Ok(SinkInputs {
-        map: sink_input_infos
-            .into_iter()
-            .map(|info| (info.index, info))
-            .collect(),
-        quodlibet_index: match quodlibet_index {
-            0 => None,
-            _ => Some(quodlibet_index),
-        },
-    })
-}
-
-fn move_sink_input(
-    context: &mut PulseContext,
-    index: u32,
-    sink_indices: Vec<u32>,
-    sink_inputs: SinkInputs,
-) -> CacoResult<()> {
-    if sink_indices.len() < 2 {
-        panic!("PEBCAK: why did you run this?");
-    }
-    let sink_input = sink_inputs.map.get(&index).expect("typo?");
-    let current_sink = sink_input.sink_index;
-    let mut target_sink: u32 = *sink_indices.get(0).unwrap();
-    for sink in sink_indices {
-        if sink > current_sink {
-            target_sink = sink;
-            break;
-        }
-    }
-    println!("{index}: [sink {current_sink}] --> [sink {target_sink}]");
-    context.write_command_message(protocol::Command::MoveSinkInput(
-        protocol::command::MoveStreamParams {
-            index: Some(index),
-            device_index: Some(target_sink),
-            device_name: None,
-        },
-    ))?;
-    protocol::read_ack_message(&mut context.sock)?;
-    Ok(())
-}
-
 pub fn main() -> CacoResult<()> {
-    let mut context = make_context()?;
-    set_client_name(&mut context)?;
-    let sink_indices = get_sink_indices(&mut context)?;
-    let sink_inputs = get_sink_inputs(&mut context)?;
+    let mut context = PulseContext::new()?;
+    let sink_indices = context.get_sink_indices()?;
+    let sink_inputs = context.get_sink_inputs()?;
 
     if !std::io::stdout().is_terminal() {
         if let Some(index) = sink_inputs.quodlibet_index {
-            move_sink_input(&mut context, index, sink_indices, sink_inputs)?;
+            context.move_sink_input(index, sink_indices, sink_inputs)?;
             return Ok(());
         }
         return Err("hmm, something's wrong".into());
@@ -191,9 +188,9 @@ pub fn main() -> CacoResult<()> {
         .interact_text()
         .unwrap();
     if let Ok(index) = selection.parse::<u32>() {
-        move_sink_input(&mut context, index, sink_indices, sink_inputs)?;
+        context.move_sink_input(index, sink_indices, sink_inputs)?;
     } else if let Some(index) = sink_inputs.quodlibet_index {
-        move_sink_input(&mut context, index, sink_indices, sink_inputs)?;
+        context.move_sink_input(index, sink_indices, sink_inputs)?;
     } else {
         println!("{}", "bye");
     }
