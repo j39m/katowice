@@ -155,20 +155,18 @@ impl PulseContext {
         if self.sinks.len() < 2 {
             panic!("PEBCAK: why did you run this?");
         }
-        let one_sink_input = sink_inputs
+        let current_sink: u32 = sink_inputs
             .into_iter()
-            .filter(|si| si.index == index)
-            .collect::<Vec<_>>();
-        assert!(one_sink_input.len() == 1usize);
-        let sink_input = &one_sink_input[0];
-        let current_sink = sink_input.sink_index;
+            .filter_map(|si| (si.index == index).then(|| si.sink_index))
+            .sum();
         // Bootleg modulo: if `current_sink` is the max, we have to
         // snap it around to the smallest sink. Otherwise, we can simply
         // "advance" to the next available sink.
         let target_sink = if current_sink == *self.sinks.last_key_value().unwrap().0 {
-            self.sinks.first_key_value().unwrap().0
+            *self.sinks.first_key_value().unwrap().0
         } else {
-            self.sinks
+            *self
+                .sinks
                 .iter()
                 .filter(|e| *e.0 > current_sink)
                 .collect::<Vec<_>>()[0]
@@ -178,7 +176,7 @@ impl PulseContext {
         self.write_command_message(protocol::Command::MoveSinkInput(
             protocol::command::MoveStreamParams {
                 index: Some(index),
-                device_index: Some(*target_sink),
+                device_index: Some(target_sink),
                 device_name: None,
             },
         ))?;
