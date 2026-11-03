@@ -1,5 +1,4 @@
 use serde::Deserialize;
-use std::os::unix::process::CommandExt;
 
 #[derive(Deserialize)]
 struct Window {
@@ -9,7 +8,7 @@ struct Window {
     _other: serde_json::Map<String, serde_json::Value>,
 }
 
-fn main() {
+fn get_first_id_for(app_id: &str) -> u64 {
     let windows_utf8 = String::from_utf8(
         std::process::Command::new("niri")
             .args(["msg", "--json", "windows"])
@@ -19,24 +18,24 @@ fn main() {
     )
     .unwrap();
     let parsed_windows: Vec<Window> = serde_json::from_str(&windows_utf8).unwrap();
-    let foot_id: Vec<u64> = parsed_windows
+    let filtered: std::collections::BTreeSet<u64> = parsed_windows
         .into_iter()
-        .filter_map(|w| (w.app_id == "foot").then(|| w.id))
+        .filter_map(|w| (w.app_id == app_id).then(|| w.id))
         .collect();
-    assert_eq!(foot_id.len(), 1usize);
+    assert!(!filtered.is_empty());
+    *filtered.first().unwrap()
+}
 
+fn main() {
+    let app_id = get_first_id_for("foot");
+
+    use std::os::unix::process::CommandExt;
     // `exec()` does not usually return, so `eprintln!()` usually never
     // executes.
     eprintln!(
         "{}",
         std::process::Command::new("niri")
-            .args([
-                "msg",
-                "action",
-                "focus-window",
-                "--id",
-                &foot_id[0].to_string()
-            ])
+            .args(["msg", "action", "focus-window", "--id", &app_id.to_string()])
             .exec()
     );
 }
